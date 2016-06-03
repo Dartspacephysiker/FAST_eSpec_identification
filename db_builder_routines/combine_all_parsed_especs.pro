@@ -1,14 +1,10 @@
 ;;06/04/16
-PRO REPROCESS_ESPECS
+PRO COMBINE_ALL_PARSED_ESPECS
 
   COMPILE_OPT IDL2
 
-  PRINT,"STOP! I have so far decided that I don't need to reprocess everything (2016/06/03). Just use COMBINE_ALL_PARSED_ESPECS."
-  STOP
-
   ;;Running options
-  produce_failCodes         = 1
-  quiet                     = 1
+  loud                      = 0
 
   firstOrb                  = 500
   lastOrb                   = 16361
@@ -19,9 +15,10 @@ PRO REPROCESS_ESPECS
   Newell_DB_dir             = '/SPENCEdata/software/sdt/batch_jobs/Alfven_study/20160520--get_Newell_identification_for_Alfven_events--NOT_despun/Newell_batch_output/'
   Newell_filePref           = 'Newell_et_al_identification_of_electron_spectra--ions_included--Orbit_'
 
-  outDir                     = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
+  outDir                    = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
 
   orbChunk_save_interval    = 500
+  chunkNum                  = 0
   chunkDir                  = outDir+'fully_parsed/'
   chunk_saveFile_pref       = STRING(FORMAT='("eSpec_",A0,"_db--PARSED--Orbs_",I0,"-",I0)', $
                                      newFileDateStr, $
@@ -29,14 +26,22 @@ PRO REPROCESS_ESPECS
                                      lastOrb)
 
   ;;String together a chunk of orbits, reanalyze, and save
+  PRINT,FORMAT='("Start orb",T12,"Stop orb",T24,"N Predicted",T36,"N Actual",T48,"NT Predicted",T60,"NT Actual",T72,"N Orbs this chunk")'
+  orbCount                  = 0
+  nPredicted                = 0
+  nActual                   = 0
+  nTotPredicted             = 0
+  nTotActual                = 0
+  TIC
   FOR curOrb=firstOrb,lastOrb DO BEGIN
 
 
-     chunkTempFName  = STRING(FORMAT='(A0,"--CHUNK_",I0,"--eSpecs_",A0,I0,"-",I0,".sav")',chunk_saveFile_pref,chunkNum,failCodes_string, $
-                              totNChunksSaved+1,nTotPredicted)
      chunkStartOrb   = curOrb
-     orbCount        = 0
-     WHILE orbCount LT orbChunk_save_interval DO BEGIN
+     chunkEndOrb     = (curOrb + orbChunk_save_interval-1) < lastOrb
+     ;; tmp_interval    = chunkEndOrb-chunkStartOrb
+     clock           = TIC(STRING(FORMAT='("combine_all_parsed_especs--Orbs_",I0,"-",I0)',chunkStartOrb,chunkEndOrb))
+     WHILE curOrb LE chunkEndOrb DO BEGIN
+     ;; WHILE orbCount LE tmp_interval DO BEGIN
         ;;Get events in this orb
         doneski                           = 0
         curInterval                       = 0
@@ -45,7 +50,8 @@ PRO REPROCESS_ESPECS
         IF ~FILE_TEST(tempFile) THEN BEGIN
 
            doneski                        = 1
-           orbCount++
+           curOrb++
+           IF KEYWORD_SET(loud) THEN PRINT,"No data for orbit " + STRCOMPRESS(curOrb,/REMOVE_ALL)
            CONTINUE
         ENDIF
         WHILE ~doneski DO BEGIN
@@ -65,6 +71,9 @@ PRO REPROCESS_ESPECS
                                         tmpje_lc
            RESTORE,tempFile
 
+           ADD_EVENT_TO_SPECTRAL_STRUCT,eSpec,eSpecs_parsed
+           nPredicted                    += N_ELEMENTS(eSpecs_parsed.x)
+
            ;;Check for next interval
            curInterval++
            tempFile = STRING(FORMAT='(A0,A0,I0,"_",I0,".sav")',Newell_DB_dir,Newell_filePref,curOrb,curInterval)
@@ -72,27 +81,41 @@ PRO REPROCESS_ESPECS
         ENDWHILE
 
         orbCount++
+        curOrb++
      ENDWHILE
-     curOrb       += orbCount
-     chunkEndOrb   = curOrb
+     curOrb-- ;Fix the damage--trust me
+     TOC,clock
+     
+     chunkTempFName  = STRING(FORMAT='(A0,"--CHUNK_",I02,"--eSpecs_for_orbs_",I0,"-",I0,".sav")', $
+                              chunk_saveFile_pref, $
+                              chunkNum++, $
+                              chunkStartOrb, $
+                              chunkEndOrb)
+     PRINT,"Saving " + chunkTempFName + '...'
+     SAVE,eSpec,FILENAME=chunkDir+chunkTempFName
 
-     ;;Handle this batch
-     CHECK_DIFF_EFLUX_INPUTS_BEFORE_BEGINNING,eSpecs,jee,je,mlt,ilat
+     ;;Check: did we hose it?
+     nActual         = N_ELEMENTS(eSpec.x)
+     nTotActual     += nActual
+     nTotPredicted  += nPredicted
 
-     IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
-                                             mlt,ilat, $
-                                             events_final, $
-                                             SC_POT=sc_pot, $
-                                             IND_SC_POT=ind_sc_pot, $
-                                             ORBSTR=orbStr, $
-                                             PRODUCE_FAILCODE_OUTPUT=produce_failCodes, $
-                                             OUT_FAILCODES=failCodes, $
-                                             /GIVE_TIMESPLIT_INFO, $
-                                             QUIET=quiet, $
-                                             /BATCH_MODE, $
-                                             ERRORLOGFILE=errorLogFile
+     ;;Some output
+     PRINT,FORMAT='(I0,T12,I0,T24,I0,T36,I0,T48,I0,T60,I0,T72,I0)',chunkStartOrb,chunkEndOrb,nPredicted,nActual,nTotPredicted,nTotActual,orbCount
+
+     ;;Now reset loop vars
+     eSpec           = !NULL
+
+     nPredicted      = 0
+     nActual         = 0
+
+     orbCount        = 0
+
   ENDFOR
 
+  PRINT,'N total predicted: ' + STRCOMPRESS(nTotPredicted,/REMOVE_ALL)
+  PRINT,'N total actual   : ' + STRCOMPRESS(nTotActual,/REMOVE_ALL)
+
+  TOC
 
 END
 
