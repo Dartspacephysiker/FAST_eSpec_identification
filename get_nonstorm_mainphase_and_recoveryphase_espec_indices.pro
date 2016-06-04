@@ -79,6 +79,7 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
            DBSTRUCT=eSpec, $
            DBTIMES=dbTimes, $
            /FOR_ESPEC_DB, $
+           /DO_NOT_MAKE_ORB_INFO, $
            RESTRICT_W_THESEINDS=restrict, $
            OUT_INDS_LIST=inds_list, $
            UNIQ_ORBS_LIST=uniq_orbs_list,UNIQ_ORB_INDS_LIST=uniq_orb_inds_list, $
