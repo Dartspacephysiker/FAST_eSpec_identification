@@ -17,18 +17,28 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
    DO_DESPUN=do_despun, $
    PRODUCE_LOGFILE=produce_logFile, $
    GIVE_TIMESPLIT_INFO=give_timeSplit_info, $
+   USE_ALFDB_STARTSTOP=use_alfDB_startstop, $
    LUN=lun
 
   COMPILE_OPT idl2
 
   IF N_ELEMENTS(lun) EQ 0 THEN lun = -1 ;stdout
 
+  indFileSuff     = ''
+
+  IF KEYWORD_SET(use_alfDB_startstop) THEN BEGIN
+     PRINT,'Using AlfDB startstop...'
+     earliest_UTC = STR_TO_TIME('1996-10-06/16:00:00')
+     latest_UTC   = STR_TO_TIME('2000-10-07/00:00:00')
+     indFileSuff  = '--DartDB_startstop_times'
+  ENDIF
+
   LOAD_DST_AE_DBS,dst,ae,LUN=lun
   SET_TXTOUTPUT_DIR,txtOutputDir,/FOR_ESPEC_DB,/ADD_TODAY
   LOAD_NEWELL_ESPEC_DB,eSpec
 
   IF KEYWORD_SET(produce_logFile) THEN BEGIN
-     logFile   = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + 'eSpec_DB--nonstorm_mainphase_and_recoveryphase_inds.log'
+     logFile   = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + 'eSpec_DB' + indFileSuff + '--nonstorm_mainphase_and_recoveryphase_inds.log'
      OPENW,logLun,txtOutputDir+logFile,/GET_LUN
   ENDIF
 
@@ -41,18 +51,24 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
      N_STORM=n_s, $
      N_NONSTORM=n_ns, $
      N_MAINPHASE=n_mp, $
-     N_RECOVERYPHASE=n_rp,LUN=lun
+     N_RECOVERYPHASE=n_rp, $
+     EARLIEST_UTC=earliest_UTC, $
+     LATEST_UTC=latest_UTC, $
+     LUN=lun
 
   dst_i_list=LIST(ns_dst_i,mp_dst_i,rp_dst_i)
   strings=["nonstorm","mainphase","recoveryphase"]
 
-  todaysFile = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES(DSTCUTOFF=dstCutoff)
+  todaysFile = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES(SUFFIX=indFileSuff, $
+                                                                         DSTCUTOFF=dstCutoff)
 
   IF FILE_TEST(todaysFile) THEN BEGIN
      PRINTF,lun,"Already have nonstorm and storm eSpec inds! Restoring today's file..."
      RESTORE,todaysFile
   ENDIF ELSE BEGIN
      
+     PRINT,'Making todaysFile: ' + todaysFile
+
      IF KEYWORD_SET(give_timesplit_info) THEN BEGIN
         TIC
      ENDIF
