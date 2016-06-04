@@ -74,7 +74,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      ;;    restore,NewellDBDir+NewellDBFile
      ;;    eSpec         = eSpec_culled
      ;; ENDIF ELSE BEGIN
-        PRINTF,lun,'Loading eSpec DB: ' + NewellDBDir+NewellDBFile + '...'
+        PRINTF,lun,'Loading eSpec DB: ' + NewellDBFile + '...'
         restore,NewellDBDir+NewellDBFile
      ;; ENDELSE
   ENDIF ELSE BEGIN
