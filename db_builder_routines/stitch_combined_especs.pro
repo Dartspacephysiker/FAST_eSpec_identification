@@ -47,7 +47,7 @@ PRO STITCH_COMBINED_ESPECS
 
      RESTORE,chunkDir+chunkTempFName
 
-     ADD_EVENT_TO_SPECTRAL_STRUCT,eSpecs,eSpec
+     ADD_EVENT_TO_SPECTRAL_STRUCT,eSpec,eSpecs
 
      TOC,clock
 
@@ -58,7 +58,7 @@ PRO STITCH_COMBINED_ESPECS
   PRINT,"Saving to " + masterFile + '...'
   ;; eSpec = !NULL
   ;; eSpec = eSpecs
-  SAVE,eSpecs,FILENAME=chunkDir+masterFile
+  SAVE,eSpec,FILENAME=chunkDir+masterFile
   TOC
 
 END

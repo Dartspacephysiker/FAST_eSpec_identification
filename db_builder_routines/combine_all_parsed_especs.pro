@@ -27,6 +27,7 @@ PRO COMBINE_ALL_PARSED_ESPECS
 
   ;;String together a chunk of orbits, reanalyze, and save
   PRINT,FORMAT='("Start orb",T12,"Stop orb",T24,"N Predicted",T36,"N Actual",T48,"NT Predicted",T60,"NT Actual",T72,"N Orbs this chunk")'
+  cur_orbArr                = !NULL
   orbCount                  = 0
   nPredicted                = 0
   nActual                   = 0
@@ -71,8 +72,11 @@ PRO COMBINE_ALL_PARSED_ESPECS
                                         tmpje_lc
            RESTORE,tempFile
 
-           ADD_EVENT_TO_SPECTRAL_STRUCT,eSpec,eSpecs_parsed
-           nPredicted                    += N_ELEMENTS(eSpecs_parsed.x)
+           ADD_EVENT_TO_SPECTRAL_STRUCT,eSpecs,eSpecs_parsed
+           nEvents         = N_ELEMENTS(eSpecs_parsed.x)
+           cur_orbArr      = [cur_orbArr,MAKE_ARRAY(nEvents,VALUE=curOrb)]
+
+           nPredicted                    += nEvents
 
            ;;Check for next interval
            curInterval++
@@ -86,16 +90,29 @@ PRO COMBINE_ALL_PARSED_ESPECS
      curOrb-- ;Fix the damage--trust me
      TOC,clock
      
+     eSpecs           = {x:eSpecs.x, $
+                         orbit:cur_orbArr, $
+                         mlt:eSpecs.mlt, $
+                         ilat:eSpecs.ilat, $
+                         mono:eSpecs.mono, $
+                         broad:eSpecs.broad, $
+                         diffuse:eSpecs.diffuse, $
+                         je:eSpecs.je, $
+                         jee:eSpecs.jee, $
+                         nbad_espec:eSpecs.nbad_espec}
+
+CREATE_STRUCT(eSpecs,"orbit",cur_orbArr)
+
      chunkTempFName  = STRING(FORMAT='(A0,"--CHUNK_",I02,"--eSpecs_for_orbs_",I0,"-",I0,".sav")', $
                               chunk_saveFile_pref, $
                               chunkNum++, $
                               chunkStartOrb, $
                               chunkEndOrb)
      PRINT,"Saving " + chunkTempFName + '...'
-     SAVE,eSpec,FILENAME=chunkDir+chunkTempFName
+     SAVE,eSpecs,FILENAME=chunkDir+chunkTempFName
 
      ;;Check: did we hose it?
-     nActual         = N_ELEMENTS(eSpec.x)
+     nActual         = N_ELEMENTS(eSpecs.x)
      nTotActual     += nActual
      nTotPredicted  += nPredicted
 
@@ -103,7 +120,8 @@ PRO COMBINE_ALL_PARSED_ESPECS
      PRINT,FORMAT='(I0,T12,I0,T24,I0,T36,I0,T48,I0,T60,I0,T72,I0)',chunkStartOrb,chunkEndOrb,nPredicted,nActual,nTotPredicted,nTotActual,orbCount
 
      ;;Now reset loop vars
-     eSpec           = !NULL
+     eSpecs          = !NULL
+     cur_orbArr      = !NULL
 
      nPredicted      = 0
      nActual         = 0

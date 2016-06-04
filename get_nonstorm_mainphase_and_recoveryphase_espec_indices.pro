@@ -1,0 +1,114 @@
+;2016/06/04
+PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
+   NONSTORM_I=ns_i, $
+   MAINPHASE_I=mp_i, $
+   RECOVERYPHASE_I=rp_i, $
+   DSTCUTOFF=dstCutoff, $
+   STORM_DST_I=s_dst_i, $
+   NONSTORM_DST_I=ns_dst_i, $
+   MAINPHASE_DST_I=mp_dst_i, $
+   RECOVERYPHASE_DST_I=rp_dst_i, $
+   N_STORM=n_s, $
+   N_NONSTORM=n_ns, $
+   N_MAINPHASE=n_mp, $
+   N_RECOVERYPHASE=n_rp, $
+   NONSTORM_T1=ns_t1,MAINPHASE_T1=mp_t1,RECOVERYPHASE_T1=rp_t1, $
+   NONSTORM_T2=ns_t2,MAINPHASE_T2=mp_t2,RECOVERYPHASE_T2=rp_t2, $
+   DO_DESPUN=do_despun, $
+   PRODUCE_LOGFILE=produce_logFile, $
+   LUN=lun
+
+  COMPILE_OPT idl2
+
+  IF N_ELEMENTS(lun) EQ 0 THEN lun = -1 ;stdout
+
+  LOAD_DST_AE_DBS,dst,ae,LUN=lun
+  SET_TXTOUTPUT_DIR,txtOutputDir,/FOR_ESPEC_DB,/ADD_TODAY
+  LOAD_NEWELL_ESPEC_DB,eSpec
+
+  IF KEYWORD_SET(produce_logFile) THEN BEGIN
+     logFile   = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + 'eSpec_DB--nonstorm_mainphase_and_recoveryphase_inds.log'
+     OPENW,logLun,txtOutputDir+logFile,/GET_LUN
+  ENDIF
+
+  GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_PERIODS,dst, $
+     DSTCUTOFF=dstCutoff, $
+     STORM_DST_I=s_dst_i, $
+     NONSTORM_DST_I=ns_dst_i, $
+     MAINPHASE_DST_I=mp_dst_i, $
+     RECOVERYPHASE_DST_I=rp_dst_i, $
+     N_STORM=n_s, $
+     N_NONSTORM=n_ns, $
+     N_MAINPHASE=n_mp, $
+     N_RECOVERYPHASE=n_rp,LUN=lun
+
+  dst_i_list=LIST(ns_dst_i,mp_dst_i,rp_dst_i)
+  strings=["nonstorm","mainphase","recoveryphase"]
+
+  todaysFile = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES(DSTCUTOFF=dstCutoff)
+
+  IF FILE_TEST(todaysFile) THEN BEGIN
+     PRINTF,lun,"Already have nonstorm and storm eSpec inds! Restoring today's file..."
+     RESTORE,todaysFile
+  ENDIF ELSE BEGIN
+     
+     FOR i=0,2 DO BEGIN
+        inds=dst_i_list[i]
+        help,inds
+        GET_STREAKS,inds,START_I=start_dst_ii,STOP_I=stop_dst_ii,SINGLE_I=single_dst_ii
+        
+        ;; OPENW,this,'/SPENCEdata/Research/Satellites/FAST/storms_Alfvens/get_and_set_routines/startstop_'+strings[i],/GET_LUN
+        ;; FOR j=0,N_ELEMENTS(start_dst_ii)-1 DO BEGIN
+        ;;    printf,this,FORMAT='(I10,T15,I10)',inds[start_dst_ii[j]],inds[stop_dst_ii[j]]
+        ;; ENDFOR
+        ;; CLOSE,this
+        
+        GET_DATA_AVAILABILITY_FOR_ARRAY_OF_UTC_RANGES, $
+           T1_ARR=dst.time[inds[start_dst_ii]], $
+           T2_ARR=dst.time[inds[stop_dst_ii]], $
+           DBSTRUCT=eSpec, $
+           DBTIMES=dbTimes, $
+           /FOR_ESPEC_DB, $
+           RESTRICT_W_THESEINDS=restrict, $
+           OUT_INDS_LIST=inds_list, $
+           UNIQ_ORBS_LIST=uniq_orbs_list,UNIQ_ORB_INDS_LIST=uniq_orb_inds_list, $
+           INDS_ORBS_LIST=inds_orbs_list,TRANGES_ORBS_LIST=tranges_orbs_list,TSPANS_ORBS_LIST=tspans_orbs_list, $
+           PRINT_DATA_AVAILABILITY=0, $
+           VERBOSE=KEYWORD_SET(produce_logFile), $
+           /LIST_TO_ARR, $
+           LUN=logLun
+        
+        IF i EQ 0 THEN BEGIN
+           ns_i                = inds_list
+           ns_t1               = dst.time[inds[start_dst_ii]]
+           ns_t2               = dst.time[inds[stop_dst_ii]]
+        ENDIF ELSE BEGIN
+           IF i EQ 1 THEN BEGIN
+              mp_i             = inds_list 
+              mp_t1            = dst.time[inds[start_dst_ii]]
+              mp_t2            = dst.time[inds[stop_dst_ii]]
+           ENDIF ELSE BEGIN
+              IF i EQ 2 THEN BEGIN
+                 rp_i          = inds_list
+                 rp_t1         = dst.time[inds[start_dst_ii]]
+                 rp_t2         = dst.time[inds[stop_dst_ii]]
+              ENDIF
+           ENDELSE
+        ENDELSE
+        
+     ENDFOR
+
+     PRINTF,lun,"Saving FAST eSpec nonstorm/storm indices for today..."
+     save,ns_i,mp_i,rp_i,s_dst_i,ns_dst_i,mp_dst_i,rp_dst_i, $
+          n_s,n_ns,n_mp,n_rp, $
+          ns_t1,ns_t2,mp_t1,mp_t2,rp_t1,rp_t2, $
+          FILENAME=todaysFile
+
+  ENDELSE
+
+  IF KEYWORD_SET(produce_logFile) THEN BEGIN
+     CLOSE,logLun
+     FREE_LUN,logLun
+  ENDIF
+
+END
