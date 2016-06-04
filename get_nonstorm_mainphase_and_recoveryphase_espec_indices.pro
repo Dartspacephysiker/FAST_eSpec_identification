@@ -16,6 +16,7 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
    NONSTORM_T2=ns_t2,MAINPHASE_T2=mp_t2,RECOVERYPHASE_T2=rp_t2, $
    DO_DESPUN=do_despun, $
    PRODUCE_LOGFILE=produce_logFile, $
+   GIVE_TIMESPLIT_INFO=give_timeSplit_info, $
    LUN=lun
 
   COMPILE_OPT idl2
@@ -52,7 +53,16 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
      RESTORE,todaysFile
   ENDIF ELSE BEGIN
      
+     IF KEYWORD_SET(give_timesplit_info) THEN BEGIN
+        TIC
+     ENDIF
+
      FOR i=0,2 DO BEGIN
+
+        IF KEYWORD_SET(give_timesplit_info) THEN BEGIN
+           clock     = TIC(strings[i]+'_clock')
+        ENDIF
+
         inds=dst_i_list[i]
         help,inds
         GET_STREAKS,inds,START_I=start_dst_ii,STOP_I=stop_dst_ii,SINGLE_I=single_dst_ii
@@ -74,6 +84,7 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
            UNIQ_ORBS_LIST=uniq_orbs_list,UNIQ_ORB_INDS_LIST=uniq_orb_inds_list, $
            INDS_ORBS_LIST=inds_orbs_list,TRANGES_ORBS_LIST=tranges_orbs_list,TSPANS_ORBS_LIST=tspans_orbs_list, $
            PRINT_DATA_AVAILABILITY=0, $
+           GIVE_TIMESPLIT_INFO=give_timeSplit_info, $
            VERBOSE=KEYWORD_SET(produce_logFile), $
            /LIST_TO_ARR, $
            LUN=logLun
@@ -96,6 +107,10 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
            ENDELSE
         ENDELSE
         
+        IF KEYWORD_SET(give_timesplit_info) THEN BEGIN
+           TOC,clock
+        ENDIF
+
      ENDFOR
 
      PRINTF,lun,"Saving FAST eSpec nonstorm/storm indices for today..."
