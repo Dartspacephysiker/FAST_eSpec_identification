@@ -21,7 +21,8 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
   ;;    ON_ERROR, 2
   ;; ENDIF
 
-  IF KEYWORD_SET(give_timesplit_info) THEN split_interval     = 5000
+  ;; IF KEYWORD_SET(give_timesplit_info) THEN split_interval     = 5000
+  split_interval     = 5000
 
   IF SIZE(Jee,/TYPE) EQ 8 THEN jee_vars = Jee.y ELSE jee_vars = jee
   IF SIZE(Je,/TYPE)  EQ 8 THEN je_vars  = Je.y  ELSE je_vars  = je
