@@ -30,8 +30,9 @@ PRO JOURNAL__20160606__ALIGN_ALFVENDB_I_WITH_HUGE_ISPEC_TIME_SERIES
   RESTORE,dbDir + orbFile
 
   inDir                   = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
+  inTimeSeriesFDate         = '20160606'
   inTimeSeriesFile        = STRING(FORMAT='("iSpec_",A0,"_db--TIME_SERIES_AND_ORBITS--Orbs_",I0,"-",I0,".sav")', $
-                                   GET_TODAY_STRING(/DO_YYYYMMDD_FMT), $
+                                   inTimeSeriesFDate, $
                                    firstOrb, $
                                    lastOrb)
 

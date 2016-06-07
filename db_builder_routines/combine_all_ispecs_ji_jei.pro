@@ -143,6 +143,7 @@ PRO COMBINE_ALL_ISPECS_JI_JEI
      ;;Now reset loop vars
      ji_up_final     = !NULL
      jei_up_final    = !NULL
+     ions            = !NULL
      ;; cur_orbArr      = !NULL
 
      nPredicted      = 0

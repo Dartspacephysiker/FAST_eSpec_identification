@@ -1,5 +1,5 @@
-;;06/04/16
-PRO STITCH_COMBINED_ESPECS
+;;06/07/16
+PRO STITCH_COMBINED_ISPECS
 
   COMPILE_OPT IDL2
 
@@ -9,7 +9,6 @@ PRO STITCH_COMBINED_ESPECS
   firstOrb                  = 500
   lastOrb                   = 16361
 
-
   newFileDateStr            = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
 
   outDir                    = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
@@ -17,11 +16,11 @@ PRO STITCH_COMBINED_ESPECS
   orbChunk_save_interval    = 500
   chunkNum                  = 0
   chunkDir                  = outDir+'fully_parsed/'
-  chunk_saveFile_pref       = STRING(FORMAT='("eSpec_",A0,"_db--PARSED--Orbs_",I0,"-",I0)', $
+  chunk_saveFile_pref       = STRING(FORMAT='("iSpec_",A0,"_db--PARSED--Orbs_",I0,"-",I0)', $
                                      newFileDateStr, $
                                      firstOrb, $
                                      lastOrb)
-  masterFile                = STRING(FORMAT='("eSpec_",A0,"_db--PARSED--Orbs_",I0,"-",I0,".sav")', $
+  masterFile                = STRING(FORMAT='("iSpec_",A0,"_db--PARSED--Orbs_",I0,"-",I0,".sav")', $
                                      newFileDateStr, $
                                      firstOrb, $
                                      lastOrb)
@@ -34,17 +33,18 @@ PRO STITCH_COMBINED_ESPECS
      chunkStartOrb   = curOrb
      chunkEndOrb     = (curOrb + orbChunk_save_interval-1) < lastOrb
      tmp_interval    = chunkEndOrb-chunkStartOrb
-     clock           = TIC(STRING(FORMAT='("combine_all_parsed_especs--Orbs_",I0,"-",I0)',chunkStartOrb,chunkEndOrb))
+     clock           = TIC(STRING(FORMAT='("combine_all_iSpecs--Orbs_",I0,"-",I0)',chunkStartOrb,chunkEndOrb))
      
-     chunkTempFName  = STRING(FORMAT='(A0,"--CHUNK_",I02,"--eSpecs_for_orbs_",I0,"-",I0,".sav")', $
+     chunkTempFName  = STRING(FORMAT='(A0,"--CHUNK_",I02,"--iSpecs_for_orbs_",I0,"-",I0,".sav")', $
                               chunk_saveFile_pref, $
-                              chunkNum++, $
+                              (chunkNum > 0), $
                               chunkStartOrb, $
                               chunkEndOrb)
+     chunkNum++
 
      RESTORE,chunkDir+chunkTempFName
 
-     ADD_EVENT_TO_SPECTRAL_STRUCT,eSpec,eSpecs
+           CAT_ION_STRUCTS,ion,ions
 
      TOC,clock
 
@@ -55,7 +55,7 @@ PRO STITCH_COMBINED_ESPECS
   PRINT,"Saving to " + masterFile + '...'
   ;; eSpec = !NULL
   ;; eSpec = eSpecs
-  SAVE,eSpec,FILENAME=chunkDir+masterFile
+  SAVE,ion,FILENAME=chunkDir+masterFile
   TOC
 
 END

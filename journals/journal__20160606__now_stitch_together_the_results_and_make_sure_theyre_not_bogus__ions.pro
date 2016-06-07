@@ -36,8 +36,9 @@ PRO JOURNAL__20160606__NOW_STITCH_TOGETHER_THE_RESULTS_AND_MAKE_SURE_THEYRE_NOT_
   RESTORE,dbDir + orbFile
 
   inDir                     = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
+  inTimeSeriesFDate         = '20160606'
   inTimeSeriesFile        = STRING(FORMAT='("iSpec_",A0,"_db--TIME_SERIES_AND_ORBITS--Orbs_",I0,"-",I0,".sav")', $
-                                   GET_TODAY_STRING(/DO_YYYYMMDD_FMT), $
+                                   inTimeSeriesFDate, $
                                    firstOrb, $
                                    lastOrb)
   RESTORE,inDir+inTimeSeriesFile
@@ -53,7 +54,8 @@ PRO JOURNAL__20160606__NOW_STITCH_TOGETHER_THE_RESULTS_AND_MAKE_SURE_THEYRE_NOT_
   closest_iSpec_t_final     = !NULL
   closest_diffs_final       = !NULL
   alf_i_final               = !NULL
-
+  totBad                    = 0
+  totGood                   = 0
   PRINT,FORMAT='("nBad",T15,"nGood",T30,"nTot")'
   FOR iChunk=0,nChunks DO BEGIN
 
@@ -70,7 +72,8 @@ PRO JOURNAL__20160606__NOW_STITCH_TOGETHER_THE_RESULTS_AND_MAKE_SURE_THEYRE_NOT_
      IF N_ELEMENTS(closest_iSpec_i) EQ 0 OR N_ELEMENTS(temp_alf_i) EQ 0 OR N_ELEMENTS(closest_diffs) EQ 0 THEN STOP
      tempDiff               = cdbtime[temp_alf_i]-iSpec_times_final[closest_iSpec_i]
      bad                    = WHERE(ABS(tempDiff) GT 5,nBad,NCOMPLEMENT=nGood)
-
+     totBad                += nBad
+     totGood               += nGood
      ;; IF nBad GT 100 THEN STOP
 
      PRINT,FORMAT='(I0,T15,I0,T30,I0)',nBad,nGood,nBad+nGood
@@ -92,6 +95,10 @@ PRO JOURNAL__20160606__NOW_STITCH_TOGETHER_THE_RESULTS_AND_MAKE_SURE_THEYRE_NOT_
 
   ENDFOR
 
+  PRINT,'Totbad  : ' + STRCOMPRESS(totBad,/REMOVE_ALL)
+  PRINT,'Totgood : ' + STRCOMPRESS(totGood,/REMOVE_ALL)
+  PRINT,'Total   : ' + STRCOMPRESS(totGood+totBad,/REMOVE_ALL)
+  PRINT,''
   PRINT,"Save all dat!!"
   SAVE,closest_diffs_final,alf_i_final, $
        closest_iSpec_i_final,closest_iSpec_t_final, $
