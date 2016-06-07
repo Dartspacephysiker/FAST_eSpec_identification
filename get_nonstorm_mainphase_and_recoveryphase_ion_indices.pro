@@ -1,5 +1,5 @@
-;2016/06/04
-PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
+;2016/06/07
+PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES, $
    NONSTORM_I=ns_i, $
    MAINPHASE_I=mp_i, $
    RECOVERYPHASE_I=rp_i, $
@@ -34,10 +34,10 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
 
   LOAD_DST_AE_DBS,dst,ae,LUN=lun
   SET_TXTOUTPUT_DIR,txtOutputDir,/FOR_ESPEC_DB,/ADD_TODAY
-  LOAD_NEWELL_ESPEC_DB,eSpec
+  LOAD_NEWELL_ION_DB,ion
 
   IF KEYWORD_SET(produce_logFile) THEN BEGIN
-     logFile   = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + 'eSpec_DB' + indFileSuff + '--nonstorm_mainphase_and_recoveryphase_inds.log'
+     logFile   = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + 'ion_DB' + indFileSuff + '--nonstorm_mainphase_and_recoveryphase_inds.log'
      OPENW,logLun,txtOutputDir+logFile,/GET_LUN
   ENDIF
 
@@ -58,11 +58,11 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
   dst_i_list=LIST(ns_dst_i,mp_dst_i,rp_dst_i)
   strings=["nonstorm","mainphase","recoveryphase"]
 
-  todaysFile = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES(SUFFIX=indFileSuff, $
-                                                                         DSTCUTOFF=dstCutoff)
+  todaysFile = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES(SUFFIX=indFileSuff, $
+                                                                       DSTCUTOFF=dstCutoff)
 
   IF FILE_TEST(todaysFile) THEN BEGIN
-     PRINTF,lun,"Already have nonstorm and storm eSpec inds! Restoring today's file..."
+     PRINTF,lun,"Already have nonstorm and storm ion inds! Restoring today's file..."
      RESTORE,todaysFile
   ENDIF ELSE BEGIN
      
@@ -91,7 +91,7 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
         GET_DATA_AVAILABILITY_FOR_ARRAY_OF_UTC_RANGES, $
            T1_ARR=dst.time[inds[start_dst_ii]], $
            T2_ARR=dst.time[inds[stop_dst_ii]], $
-           DBSTRUCT=eSpec, $
+           DBSTRUCT=ion, $
            DBTIMES=dbTimes, $
            /FOR_ESPEC_DB, $
            /DO_NOT_MAKE_ORB_INFO, $
@@ -129,7 +129,7 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES, $
 
      ENDFOR
 
-     PRINTF,lun,"Saving FAST eSpec nonstorm/storm indices for today..."
+     PRINTF,lun,"Saving FAST ion nonstorm/storm indices for today..."
      save,ns_i,mp_i,rp_i,s_dst_i,ns_dst_i,mp_dst_i,rp_dst_i, $
           n_s,n_ns,n_mp,n_rp, $
           ns_t1,ns_t2,mp_t1,mp_t2,rp_t1,rp_t2, $
