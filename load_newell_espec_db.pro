@@ -60,6 +60,11 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      PRINTF,lun,'Loading eSpec DB: ' + NewellDBFile + '...'
      RESTORE,NewellDBDir+NewellDBFile
 
+     ;;Correct fluxes
+     PRINT,"Correcting eSpec fluxes..."
+     eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
+     eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
+
      ;;The following lines aren't necessary for this little beaut
 
      ;; IF FILE_TEST(NewellDBDir+defNewellDBCleanInds) THEN BEGIN

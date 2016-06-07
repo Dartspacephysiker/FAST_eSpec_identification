@@ -165,7 +165,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
         ENDCASE
 
         ;;Clean 'em up
-        nBef              = N_ELEMENTS(ion_i)
+        nBef_i            = N_ELEMENTS(ion_i)
         ;; ion_i             = CGSETINTERSECTION(ion_i,basicClean_ion_i,COUNT=nAft)
         PRINT,"Dropped " + STRCOMPRESS(nBef_i-nAft,/REMOVE_ALL) + " NaN- and INF-type Alfvén ion events..."
 
@@ -238,7 +238,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
      ;; tmp_alf_ion_i     = CGSETINTERSECTION(plot_i,good_alf_ion_i,INDICES_B=ion_deleteable_ii)
      ;; ion_i             = CGSETDIFFERENCE(ion_i,iSpec_assoc_w_alf_i[ion_deleteable_ii],COUNT=nAft)
 
-     ion_i                = CGSETDIFFERENCE(ion_i,iSpec_assoc_w_alf_i,COUNT=nAft)
+     ion_i                = CGSETDIFFERENCE(ion_i,good_iSpec_assoc_w_alf_i,COUNT=nAft)
      PRINT,"Dropped " + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + " Alfvén ion events..."
 
      ion__mlts            = ion.mlt[ion_i]

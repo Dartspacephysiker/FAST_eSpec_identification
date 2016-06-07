@@ -58,6 +58,11 @@ PRO LOAD_NEWELL_ION_DB,ion, $
      PRINTF,lun,'Loading ion DB: ' + NewellDBFile + '...'
      RESTORE,NewellDBDir+NewellDBFile
 
+     ;;Correct fluxes
+     PRINT,"Correcting ionDB fluxes..."
+     ion.ji[WHERE(ion.ilat GT 0)]  = (-1.)*(ion.ji[WHERE(ion.ilat GT 0)])
+     ion.jei[WHERE(ion.ilat GT 0)] = (-1.)*(ion.jei[WHERE(ion.ilat GT 0)])
+
      ;; IF FILE_TEST(NewellDBDir+defNewellDBCleanInds) THEN BEGIN
      ;;    RESTORE,NewellDBDir+defNewellDBCleanInds
      ;; ENDIF ELSE BEGIN        
