@@ -68,6 +68,8 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES, $
      
      PRINT,'Making todaysFile: ' + todaysFile
 
+     mostRecentFile        = '/SPENCEdata/Research/database/temps/mostRecent_eSpec_storms_inds.txt'
+
      IF KEYWORD_SET(give_timesplit_info) THEN BEGIN
         TIC
      ENDIF
@@ -134,6 +136,9 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES, $
           n_s,n_ns,n_mp,n_rp, $
           ns_t1,ns_t2,mp_t1,mp_t2,rp_t1,rp_t2, $
           FILENAME=todaysFile
+
+     PRINTF,lun,"Updating mostRecent file..."
+     SPAWN,'echo "' + todaysFile + '" > ' + mostRecentFile
 
   ENDELSE
 
