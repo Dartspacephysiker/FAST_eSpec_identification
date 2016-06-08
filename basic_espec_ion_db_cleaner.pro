@@ -21,7 +21,8 @@ FUNCTION BASIC_ESPEC_ION_DB_CLEANER,dbStruct,LUN=lun, $
         ;; clean_these_inds = INDGEN(N_ELEMENTS(dbTags))
         clean_these_inds = [1,2,3,4,5,6]
      ENDIF ELSE BEGIN
-        clean_these_inds = [2,3,7,8]
+        ;; clean_these_inds = [2,3,7,8]
+        ;; clean_these_inds=INDGEN(N_ELEMENTS(TAG_NAMES(dbStruct)))
      ENDELSE
 
 

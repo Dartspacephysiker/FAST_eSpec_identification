@@ -21,7 +21,7 @@
 ;	  Jei:DOUBLE(0)}                 ;Ion energy flux      (mW/m^2)
 ;-
 FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ_V2,eSpec,Je,Jee, $
-   mlt,ilat, $
+   mlt,ilat,alt,orbit, $
    PRODUCE_FAILCODE_OUTPUT=produce_failCodes, $
    OUT_FAILCODES=failCodes, $
    BATCH_MODE=batch_mode, $
@@ -419,26 +419,28 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ_V2,eSpec,Je,Jee, $
   ;; ENDELSE
 
   ;;Set up the event struct
-  event                                   = { x:time_e, $         ; When are you?
-            MLT:mlt, $
-            ILAT:ilat, $
-            mono:BYTE(mono), $       
-            broad:BYTE(broad), $     
-            diffuse:BYTE(diffuse), $ 
-            Je:Je, $                 
-            Jee:Jee, $               
-            nBad_eSpec:BYTE(nBad_e), $
-            version:DEF_ST_VERSION_NUM}
-
+  event                                   = { x:time_e, $ ; When are you?
+                                              orbit:orbit, $
+                                              MLT:mlt, $
+                                              ILAT:ilat, $
+                                              ALT:alt, $
+                                              mono:BYTE(mono), $       
+                                              broad:BYTE(broad), $     
+                                              diffuse:BYTE(diffuse), $ 
+                                              Je:Je, $                 
+                                              Jee:Jee, $               
+                                              nBad_eSpec:BYTE(nBad_e), $
+                                              version:DEF_ST_VERSION_NUM}
+  
   IF KEYWORD_SET(produce_failCodes) THEN BEGIN
      failCodes                            = { mono:mFCode, $
-                   mono_nAbove:mono_nAbove, $
-                   mono_nBelow:mono_nBelow, $
-                   broad:bFCode, $
-                   nBroad:nBroad, $
-                   N_broad_GE_min_eV:N_broad_GE_min_eV, $
-                   peakFlux:peakFlux, $
-                   peakEnergy:peakEnergy}
+                                              mono_nAbove:mono_nAbove, $
+                                              mono_nBelow:mono_nBelow, $
+                                              broad:bFCode, $
+                                              nBroad:nBroad, $
+                                              N_broad_GE_min_eV:N_broad_GE_min_eV, $
+                                              peakFlux:peakFlux, $
+                                              peakEnergy:peakEnergy}
   ENDIF
             ;; time_i:time_i, $         ;Ion time
             ;; Ji:Ji, $                 ;Ion number flux      (#/cm^2-s)

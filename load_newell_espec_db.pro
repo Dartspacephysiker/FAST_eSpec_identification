@@ -20,9 +20,9 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   ENDIF
   
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
-  defNewellDBFile        = 'eSpec_20160603_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+  defNewellDBFile        = 'eSpec_20160607_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
 
-  defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
+  ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
 
   IF N_ELEMENTS(lun) EQ 0 THEN BEGIN
      lun                 = -1

@@ -14,7 +14,7 @@
 ;	  Jei:DOUBLE(0)}                 ;Ion energy flux      (mW/m^2)
 ;-
 FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
-   mlt,ilat, $
+   mlt,ilat,alt,orbit, $
    ;; iSpec,Ji,Jei, $
    BATCH_MODE=batch_mode, $
    QUIET=quiet, $
@@ -332,8 +332,10 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
   ;;Set up the event struct
   ;; event = { time_e:time_e, $         ; When are you?
   event = { x:time_e, $         ; When are you?
+            orbit:orbit, $
             MLT:mlt, $
             ILAT:ilat, $
+            ALT:alt, $
             mono:BYTE(mono), $       ;0 = not monoenergetic, 1 = monoenergetic, 2 = strict_monoenergetic, (NEGATIVE) = step where algorithm failed
             broad:BYTE(broad), $     ;0 = not broadband    , 1 = broadband    , 2 = strict_broadband
             diffuse:BYTE(diffuse), $ ;0 = not diffuse      , 1 = diffuse      , 2 = diffuse, flux extrapolated to 50 keV

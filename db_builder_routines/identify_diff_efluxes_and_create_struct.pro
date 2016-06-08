@@ -1,5 +1,5 @@
 PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
-   mlt,ilat, $
+   mlt,ilat,alt,orbit, $
    events_final, $
    SC_POT=sc_pot, $
    IND_SC_POT=ind_sc_pot, $
@@ -87,7 +87,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
      tempeSpec = {x:eSpec.x[i],y:REVERSE(REFORM(eSpec.y[i,0:max_en_ind[i]])),v:REVERSE(REFORM(eSpec.v[i,0:max_en_ind[i]]))}
      IF KEYWORD_SET(produce_failCodes) THEN BEGIN
         tempEvent = DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ_V2(tempeSpec,je_vars[i],jee_vars[i], $
-                                                             mlt[i],ilat[i], $
+                                                             mlt[i],ilat[i],alt[i],orbit[i], $
                                                              PRODUCE_FAILCODE_OUTPUT=produce_failCodes, $
                                                              OUT_FAILCODES=tempFailCodes, $
                                                              QUIET=quiet, $
@@ -98,7 +98,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
      
      ENDIF ELSE BEGIN
         tempEvent = DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ(tempeSpec,je_vars[i],jee_vars[i], $
-                                                             mlt[i],ilat[i], $
+                                                             mlt[i],ilat[i],alt[i],orbit[i], $
                                                              QUIET=quiet, $
                                                              BATCH_MODE=batch_mode, $
                                                              ERRORMSG=errorMsg) ;, $

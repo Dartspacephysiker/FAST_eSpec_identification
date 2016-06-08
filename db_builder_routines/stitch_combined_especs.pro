@@ -10,7 +10,8 @@ PRO STITCH_COMBINED_ESPECS
   lastOrb                   = 16361
 
 
-  newFileDateStr            = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
+  ;; newFileDateStr            = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
+  newFileDateStr            = '20160607'
 
   outDir                    = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
 
@@ -44,7 +45,7 @@ PRO STITCH_COMBINED_ESPECS
 
      RESTORE,chunkDir+chunkTempFName
 
-     ADD_EVENT_TO_SPECTRAL_STRUCT,eSpec,eSpecs
+     ADD_EVENT_TO_SPECTRAL_STRUCT,eSpec,eSpecs,/HAS_ALT_AND_ORBIT
 
      TOC,clock
 
