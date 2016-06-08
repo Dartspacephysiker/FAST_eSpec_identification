@@ -169,9 +169,6 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
            END
         ENDCASE
 
-        ;;Clean 'em up
-        nBef_ion          = N_ELEMENTS(ion_i)
-        ;; ion_i             = CGSETINTERSECTION(ion_i,basicClean_ion_i,COUNT=nAft_ion)
         ;; PRINT,"Dropped " + STRCOMPRESS(nBef_ion-nAft_ion,/REMOVE_ALL) + " NaN- and INF-type Alfvén ion events..."
         PRINT,"Dropped " + STRCOMPRESS(nBef_ion-nAft_ion,/REMOVE_ALL) + " Alfvén ion events not associated with " + for_storms + " times ..."
         PRINT,FORMAT='(I0," remaining ...")',nAft_ion
@@ -288,7 +285,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
         END
         ELSE: BEGIN
            iFluxPlotType  = 'Ji_nonAlfven'
-           iNumFlux_data  = ion.ji[ion_i]
+           ;; iNumFlux_data  = ion.ji[ion_i]
            iNumFlux_data  = ion.ji
         END
      ENDCASE
