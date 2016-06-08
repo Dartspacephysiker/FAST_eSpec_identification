@@ -23,7 +23,7 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
   IF KEYWORD_SET(huge_structure) THEN BEGIN
      eSpec_interpreted  = TEMPORARY(eSpec)
   ENDIF ELSE BEGIN
-     eSpec_interpreted  = TEMPORARY(eSpec)
+     eSpec_interpreted  = eSpec
   ENDELSE
 
 

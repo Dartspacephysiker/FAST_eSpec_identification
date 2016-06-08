@@ -1,6 +1,7 @@
 ;2016/06/07
 PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             FOR_STORMS=for_storms, $
+                            NONALFVEN__JUNK_ALFVEN_CANDIDATES=nonAlfven__junk_alfven_candidates, $
                             T1_ARR=t1_arr,T2_ARR=t2_arr, $
                             EPLOTS=ePlots, $
                             EFLUXPLOTTYPE=eFluxPlotType, $
@@ -12,6 +13,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             OUT_ENUMFLUX_DATA=eNumFlux_data, $
                             OUT_IFLUX_DATA=iFlux_data, $
                             OUT_INUMFLUX_DATA=iNumFlux_data, $
+                            INDICES__NONALFVEN_ESPEC=eSpec_i, $
+                            INDICES__NONALFVEN_ION=ion_i, $
                             ESPEC__MLTS=eSpec__mlts, $
                             ESPEC__ILATS=eSpec__ilats, $
                             ION__MLTS=ion__mlts, $
@@ -130,44 +133,48 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
         todaysEspecFile   = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES(SUFFIX=indFileSuff, $
                                                                                       DSTCUTOFF=dstCutoff, $
                                                                                       /MOST_RECENT)
-        PRINT,'Getting nonAlfven electron data ...'
+        PRINT,'Getting ' + STRUPCASE(for_storms) + ' nonAlfven electron data ...'
         RESTORE,todaysEspecFile
         CASE 1 OF
            STRLOWCASE(for_storms) EQ 'nonstorm': BEGIN
-              eSpec_i     = CGSETINTERSECTION(good_eSpec_i,ns_i,COUNT=nAft)
+              eSpec_i     = CGSETINTERSECTION(good_eSpec_i,ns_i,COUNT=nAft_eSpec)
            END
            STRLOWCASE(for_storms) EQ 'mainphase': BEGIN
-              eSpec_i     = CGSETINTERSECTION(good_eSpec_i,mp_i,COUNT=nAft)
+              eSpec_i     = CGSETINTERSECTION(good_eSpec_i,mp_i,COUNT=nAft_eSpec)
            END
            STRLOWCASE(for_storms) EQ 'recoveryphase': BEGIN
-              eSpec_i     = CGSETINTERSECTION(good_eSpec_i,rp_i,COUNT=nAft)
+              eSpec_i     = CGSETINTERSECTION(good_eSpec_i,rp_i,COUNT=nAft_eSpec)
            END
         ENDCASE
 
-        PRINT,"Dropped " + STRCOMPRESS(nBef_eSpec-nAft,/REMOVE_ALL) + " NaN- and INF-type Alfvén ion events..."
+        ;; PRINT,"Dropped " + STRCOMPRESS(nBef_eSpec-nAft_eSpec,/REMOVE_ALL) + " NaN- and INF-type Alfvén ion events..."
+        PRINT,"Dropped " + STRCOMPRESS(nBef_eSpec-nAft_eSpec,/REMOVE_ALL) + " Alfvén eSpec events not associated with " + for_storms + " times ..."
+        PRINT,FORMAT='(I0," remaining ...")',nAft_eSpec
      ENDIF
      IF KEYWORD_SET(ionPlots) THEN BEGIN
         todaysIonFile     = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES(SUFFIX=indFileSuff, $
                                                                                     DSTCUTOFF=dstCutoff, $
                                                                                     /MOST_RECENT)
-        PRINT,'Getting nonAlfven ion data ...'
+        PRINT,'Getting ' + STRUPCASE(for_storms) + ' nonAlfven ion data ...'
         RESTORE,todaysIonFile
         CASE 1 OF
            STRLOWCASE(for_storms) EQ 'nonstorm': BEGIN
-              ion_i       = CGSETINTERSECTION(good_ion_i,ns_i,COUNT=nAft)
+              ion_i       = CGSETINTERSECTION(good_ion_i,ns_i,COUNT=nAft_ion)
            END
            STRLOWCASE(for_storms) EQ 'mainphase': BEGIN
-              ion_i       = CGSETINTERSECTION(good_ion_i,mp_i,COUNT=nAft)
+              ion_i       = CGSETINTERSECTION(good_ion_i,mp_i,COUNT=nAft_ion)
            END
            STRLOWCASE(for_storms) EQ 'recoveryphase': BEGIN
-              ion_i       = CGSETINTERSECTION(good_ion_i,rp_i,COUNT=nAft)
+              ion_i       = CGSETINTERSECTION(good_ion_i,rp_i,COUNT=nAft_ion)
            END
         ENDCASE
 
         ;;Clean 'em up
-        nBef_i            = N_ELEMENTS(ion_i)
-        ;; ion_i             = CGSETINTERSECTION(ion_i,basicClean_ion_i,COUNT=nAft)
-        PRINT,"Dropped " + STRCOMPRESS(nBef_i-nAft,/REMOVE_ALL) + " NaN- and INF-type Alfvén ion events..."
+        nBef_ion          = N_ELEMENTS(ion_i)
+        ;; ion_i             = CGSETINTERSECTION(ion_i,basicClean_ion_i,COUNT=nAft_ion)
+        ;; PRINT,"Dropped " + STRCOMPRESS(nBef_ion-nAft_ion,/REMOVE_ALL) + " NaN- and INF-type Alfvén ion events..."
+        PRINT,"Dropped " + STRCOMPRESS(nBef_ion-nAft_ion,/REMOVE_ALL) + " Alfvén ion events not associated with " + for_storms + " times ..."
+        PRINT,FORMAT='(I0," remaining ...")',nAft_ion
 
      ENDIF
   ENDIF ELSE BEGIN
@@ -213,58 +220,76 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
   ENDELSE
 
-;;Electrons
+  ;;Electrons
   IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
      LOAD_ALF_NEWELL_ESPEC_DB,!NULL,good_alf_eSpec_i,good_eSpec_assoc_w_alf_i,/DONT_LOAD_IN_MEMORY
 
-     nBef                 = N_ELEMENTS(ion_i)
+     nBef_eSpec           = N_ELEMENTS(eSpec_i)
 
-     ;; tmp_alf_eSpec_i   = CGSETINTERSECTION(plot_i,good_alf_eSpec_i,INDICES_B=eSpec_deleteable_ii)
-     ;; eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i[eSpec_deleteable_ii],COUNT=nAft)
+     IF KEYWORD_SET(nonAlfven__junk_alfven_candidates) THEN BEGIN
+        PRINT,"Even junking electron measurements associated with Alfvén wave CANDIDATES!"
+        eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i,COUNT=nAft_eSpec)
+     ENDIF ELSE BEGIN
+        tmp_alf_eSpec_i   = CGSETINTERSECTION(plot_i,good_alf_eSpec_i,INDICES_B=eSpec_deleteable_ii)
+        eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i[eSpec_deleteable_ii],COUNT=nAft_eSpec)
+     ENDELSE
 
-     eSpec_i              = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i,COUNT=nAft)
-     PRINT,"Dropped " + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + " Alfvén electron events..."
+     PRINT,"Dropped " + STRCOMPRESS(nBef_eSpec-nAft_eSpec,/REMOVE_ALL) + " Alfvén electron events..."
+     PRINT,FORMAT='(I0," remaining ...")',nAft_eSpec
 
-     eSpec__mlts          = eSpec.mlt[eSpec_i]
-     eSpec__ilats         = eSpec.ilat[eSpec_i]
+     ;; eSpec__mlts          = eSpec.mlt[eSpec_i]
+     ;; eSpec__ilats         = eSpec.ilat[eSpec_i]
+     eSpec__mlts          = eSpec.mlt
+     eSpec__ilats         = eSpec.ilat
   ENDIF
 
-;;Ions
+  ;;Ions
   IF KEYWORD_SET(ionPlots) THEN BEGIN
      LOAD_ALF_NEWELL_ION_DB,good_alf_ion_i,good_iSpec_assoc_w_alf_i,/DONT_LOAD_IN_MEMORY
 
-     nBef                 = N_ELEMENTS(ion_i)
+     nBef_ion             = N_ELEMENTS(ion_i)
 
-     ;; tmp_alf_ion_i     = CGSETINTERSECTION(plot_i,good_alf_ion_i,INDICES_B=ion_deleteable_ii)
-     ;; ion_i             = CGSETDIFFERENCE(ion_i,iSpec_assoc_w_alf_i[ion_deleteable_ii],COUNT=nAft)
+     IF KEYWORD_SET(nonAlfven__junk_alfven_candidates) THEN BEGIN
+        PRINT,"Even junking ion measurements associated with Alfvén wave CANDIDATES!"
+        ion_i             = CGSETDIFFERENCE(ion_i,good_iSpec_assoc_w_alf_i,COUNT=nAft_ion)
+     ENDIF ELSE BEGIN
+        tmp_alf_ion_i     = CGSETINTERSECTION(plot_i,good_alf_ion_i,INDICES_B=ion_deleteable_ii)
+        ion_i             = CGSETDIFFERENCE(ion_i,good_iSpec_assoc_w_alf_i[ion_deleteable_ii],COUNT=nAft_ion)
+     ENDELSE
 
-     ion_i                = CGSETDIFFERENCE(ion_i,good_iSpec_assoc_w_alf_i,COUNT=nAft)
-     PRINT,"Dropped " + STRCOMPRESS(nBef-nAft,/REMOVE_ALL) + " Alfvén ion events..."
+     PRINT,"Dropped " + STRCOMPRESS(nBef_ion-nAft_ion,/REMOVE_ALL) + " Alfvén ion events..."
+     PRINT,FORMAT='(I0," remaining ...")',nAft_ion
 
-     ion__mlts            = ion.mlt[ion_i]
-     ion__ilats           = ion.ilat[ion_i]
+     ;; ion__mlts            = ion.mlt[ion_i]
+     ;; ion__ilats           = ion.ilat[ion_i]
+     ion__mlts            = ion.mlt
+     ion__ilats           = ion.ilat
   ENDIF
 
 ;;Now get the data
   IF KEYWORD_SET(ePlots) THEN BEGIN
      eFluxPlotType        = 'eFlux_nonAlfven'
-     eFlux_data           = eSpec.jee[eSpec_i]
+     ;; eFlux_data           = eSpec.jee[eSpec_i]
+     eFlux_data           = eSpec.jee
   ENDIF
 
   IF KEYWORD_SET(eNumFlPlots) THEN BEGIN
      eNumFlPlotType       = 'eNumFlux_nonAlfven'
-     eNumFlux_data        = eSpec.je[eSpec_i]
+     ;; eNumFlux_data        = eSpec.je[eSpec_i]
+     eNumFlux_data        = eSpec.je
   ENDIF
 
   IF KEYWORD_SET(ionPlots) THEN BEGIN
      CASE 1 OF
         STRUPCASE(iFluxPlotType) EQ 'ENERGY': BEGIN
            iFluxPlotType  = 'JEi_nonAlfven'
-           iFlux_data     = ion.jei[ion_i]
+           ;; iFlux_data     = ion.jei[ion_i]
+           iFlux_data     = ion.jei
         END
         ELSE: BEGIN
            iFluxPlotType  = 'Ji_nonAlfven'
            iNumFlux_data  = ion.ji[ion_i]
+           iNumFlux_data  = ion.ji
         END
      ENDCASE
   ENDIF

@@ -65,6 +65,9 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
      eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
 
+     ;;Convert to strict Newell interpretation
+     CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec,/HUGE_STRUCTURE,/VERBOSE
+
      ;;The following lines aren't necessary for this little beaut
 
      ;; IF FILE_TEST(NewellDBDir+defNewellDBCleanInds) THEN BEGIN
