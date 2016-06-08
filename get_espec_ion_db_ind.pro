@@ -294,7 +294,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Limits on orbits to use?
-     IF KEYWORD_SET (orbRange) THEN BEGIN
+     IF KEYWORD_SET(orbRange) THEN BEGIN
         MIMC__orbRange                            = orbRange
         CASE N_ELEMENTS(orbRange) OF
            1: BEGIN
@@ -318,7 +318,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
      
 
      ;;limits on altitudes to use?
-     IF KEYWORD_SET (altitudeRange) AND is_ion THEN BEGIN
+     IF KEYWORD_SET(altitudeRange) THEN BEGIN
         MIMC__altitudeRange                       = altitudeRange
         IF N_ELEMENTS(altitudeRange) EQ 2 THEN BEGIN
            alt_i                                  = GET_ALTITUDE_INDS(dbStruct,MIMC__altitudeRange[0],MIMC__altitudeRange[1],LUN=lun)
