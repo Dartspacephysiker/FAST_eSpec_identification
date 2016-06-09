@@ -19,6 +19,7 @@ PRO GET_ALT_FOR_ALL_PARSED_ESPECS
 
   orbChunk_save_interval    = 500
   chunkNum                  = 0
+
   chunkDir                  = outDir+'fully_parsed/'
   chunk_saveFile_pref       = STRING(FORMAT='("eSpec_",A0,"_db--PARSED--Orbs_",I0,"-",I0)', $
                                      newFileDateStr, $
@@ -27,7 +28,6 @@ PRO GET_ALT_FOR_ALL_PARSED_ESPECS
 
   ;;String together a chunk of orbits, reanalyze, and save
   PRINT,FORMAT='("Start orb",T12,"Stop orb",T24,"N Predicted",T36,"N Actual",T48,"NT Predicted",T60,"NT Actual",T72,"N Orbs this chunk")'
-  cur_orbArr                = !NULL
   orbCount                  = 0
   nPredicted                = 0
   nActual                   = 0
@@ -39,10 +39,8 @@ PRO GET_ALT_FOR_ALL_PARSED_ESPECS
 
      chunkStartOrb   = curOrb
      chunkEndOrb     = (curOrb + orbChunk_save_interval-1) < lastOrb
-     ;; tmp_interval    = chunkEndOrb-chunkStartOrb
      clock           = TIC(STRING(FORMAT='("combine_all_parsed_especs--Orbs_",I0,"-",I0)',chunkStartOrb,chunkEndOrb))
      WHILE curOrb LE chunkEndOrb DO BEGIN
-     ;; WHILE orbCount LE tmp_interval DO BEGIN
         ;;Get events in this orb
         doneski                           = 0
         curInterval                       = 0
@@ -71,6 +69,7 @@ PRO GET_ALT_FOR_ALL_PARSED_ESPECS
                                         tmpjee_lc, $
                                         tmpje_lc
            alt             = !NULL
+
            RESTORE,tempFile
            
            GET_ALT_MLT_ILAT_FROM_FAST_EPHEM,curOrb,eSpecs_parsed.x, $
@@ -95,27 +94,15 @@ PRO GET_ALT_FOR_ALL_PARSED_ESPECS
         orbCount++
         curOrb++
      ENDWHILE
-     curOrb-- ;Fix the damage--trust me
+     curOrb--                   ;Fix the damage--trust me
      TOC,clock
      
-     ;; eSpecs           = {x:eSpecs.x, $
-     ;;                     orbit:cur_orbArr, $
-     ;;                     mlt:eSpecs.mlt, $
-     ;;                     ilat:eSpecs.ilat, $
-     ;;                     mono:eSpecs.mono, $
-     ;;                     broad:eSpecs.broad, $
-     ;;                     diffuse:eSpecs.diffuse, $
-     ;;                     je:eSpecs.je, $
-     ;;                     jee:eSpecs.jee, $
-     ;;                     nbad_espec:eSpecs.nbad_espec}
-
-     ;; CREATE_STRUCT(eSpecs,"orbit",cur_orbArr)
-
      chunkTempFName  = STRING(FORMAT='(A0,"--CHUNK_",I02,"--eSpecs_for_orbs_",I0,"-",I0,".sav")', $
                               chunk_saveFile_pref, $
                               chunkNum++, $
                               chunkStartOrb, $
                               chunkEndOrb)
+
      PRINT,"Saving " + chunkTempFName + '...'
      SAVE,eSpecs,FILENAME=chunkDir+chunkTempFName
 
@@ -129,7 +116,7 @@ PRO GET_ALT_FOR_ALL_PARSED_ESPECS
 
      ;;Now reset loop vars
      eSpecs          = !NULL
-     cur_orbArr      = !NULL
+     ;; cur_orbArr      = !NULL
 
      nPredicted      = 0
      nActual         = 0
@@ -159,18 +146,18 @@ PRO RESET_ESPEC_RESTOREFILE_VARS,especs_parsed, $
                                  tmpjee_lc, $
                                  tmpje_lc
 
-        especs_parsed                  = !NULL
-        ispec_up                       = !NULL
-        jei_up                         = !NULL
-        ji_up                          = !NULL
-        out_sc_min_energy_ind          = !NULL
-        out_sc_min_energy_ind_i        = !NULL
-        out_sc_pot                     = !NULL
-        out_sc_pot_i                   = !NULL
-        out_sc_time                    = !NULL
-        out_sc_time_i                  = !NULL
-        tmpespec_lc                    = !NULL
-        tmpjee_lc                      = !NULL
-        tmpje_lc                       = !NULL
+  especs_parsed                  = !NULL
+  ispec_up                       = !NULL
+  jei_up                         = !NULL
+  ji_up                          = !NULL
+  out_sc_min_energy_ind          = !NULL
+  out_sc_min_energy_ind_i        = !NULL
+  out_sc_pot                     = !NULL
+  out_sc_pot_i                   = !NULL
+  out_sc_time                    = !NULL
+  out_sc_time_i                  = !NULL
+  tmpespec_lc                    = !NULL
+  tmpjee_lc                      = !NULL
+  tmpje_lc                       = !NULL
 
 END

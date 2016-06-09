@@ -1,6 +1,7 @@
 PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
    mlt,ilat,alt,orbit, $
    events_final, $
+   HAS_ALT_AND_ORBIT=has_alt_and_orbit, $
    SC_POT=sc_pot, $
    IND_SC_POT=ind_sc_pot, $
    ORBSTR=orbStr, $
@@ -112,14 +113,14 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
                                         errorMsg), $
                                  /APPEND
      ENDIF
-     ADD_EVENT_TO_SPECTRAL_STRUCT,events,tempEvent
+     ADD_EVENT_TO_SPECTRAL_STRUCT,events,tempEvent,HAS_ALT_AND_ORBIT=has_alt_and_orbit
 
      IF KEYWORD_SET(give_timesplit_info) AND ( (i MOD split_interval) EQ split_interval-1 ) THEN BEGIN
         TOC,clock
      ENDIF
 
      IF tmpNEvents GE maxChain THEN BEGIN
-        ADD_EVENT_TO_SPECTRAL_STRUCT,events_final,events
+        ADD_EVENT_TO_SPECTRAL_STRUCT,events_final,events,HAS_ALT_AND_ORBIT=has_alt_and_orbit
 
         IF KEYWORD_SET(produce_failCodes) THEN BEGIN
            ADD_ESPEC_FAILCODES_TO_FAILCODE_STRUCT,failCodes_final,failCodes
@@ -161,7 +162,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
   ENDFOR
 
   IF tmpNEvents GE 1 THEN BEGIN
-     ADD_EVENT_TO_SPECTRAL_STRUCT,events_final,events
+     ADD_EVENT_TO_SPECTRAL_STRUCT,events_final,events,HAS_ALT_AND_ORBIT=has_alt_and_orbit
 
      events           = !NULL
      ;; previousTot      = nTotPredicted
