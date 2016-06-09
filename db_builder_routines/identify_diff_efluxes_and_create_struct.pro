@@ -18,6 +18,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
    
   COMPILE_OPT idl2
 
+  IF N_ELEMENTS(chunk_save_interval) EQ 0 THEN chunk_save_interval = 0
   ;; IF KEYWORD_SET(batch_mode) THEN BEGIN
   ;;    ON_ERROR, 2
   ;; ENDIF
@@ -68,10 +69,10 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
   tmpNEvents      = 0
   nTotPredicted   = 0
   maxChain        = split_interval
+  chunkNum        = 0
+  totNChunksSaved = 0
 
   IF KEYWORD_SET(save_chunks_for_speed) THEN BEGIN
-     chunkNum        = 0
-     totNChunksSaved = 0
      failCodes_string = 'failCodes_'
   ENDIF ELSE BEGIN
      failCodes_string = ''
@@ -137,7 +138,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
 
         IF KEYWORD_SET(save_chunks_for_speed) AND (nTotPredicted - totNChunksSaved) GE chunk_save_interval THEN BEGIN
 
-           chunkTempFName  = STRING(FORMAT='(A0,"--CHUNK_",I0,"--eSpecs_",A0,I0,"-",I0,".sav")',chunk_saveFile_pref,chunkNum,failCodes_string, $
+           chunkTempFName  = STRING(FORMAT='(A0,"--CHUNK_",I02,"--eSpecs_",A0,I0,"-",I0,".sav")',chunk_saveFile_pref,chunkNum,failCodes_string, $
                                     totNChunksSaved+1,nTotPredicted)
 
            PRINT,'Saving chunk to ' + chunkTempFName + '...'
@@ -163,6 +164,11 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
 
   IF tmpNEvents GE 1 THEN BEGIN
      ADD_EVENT_TO_SPECTRAL_STRUCT,events_final,events,HAS_ALT_AND_ORBIT=has_alt_and_orbit
+
+     IF KEYWORD_SET(produce_failCodes) THEN BEGIN
+        ADD_ESPEC_FAILCODES_TO_FAILCODE_STRUCT,failCodes_final,failCodes
+        failCodes     = !NULL
+     ENDIF
 
      events           = !NULL
      ;; previousTot      = nTotPredicted

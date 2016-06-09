@@ -1,7 +1,7 @@
 ;2016/06/04
 ;;NOTE: We do not clean the current database. It's clean as a whistle.
 PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
-                         ;; FAILCODES=failCodes, $
+                         FAILCODES=failCode, $
                          NEWELLDBDIR=NewellDBDir, $
                          NEWELLDBFILE=NewellDBFile, $
                          FORCE_LOAD_DB=force_load_db, $
@@ -14,13 +14,13 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   ;;This common block is defined ONLY here and in GET_ESPEC_ION_DB_IND
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      COMMON NEWELL,NEWELL__eSpec,NEWELL__HAVE_GOOD_I, $
-        ;; NEWELL__failCodes, $
+        NEWELL__failCode, $
         NEWELL__good_i,NEWELL__cleaned_i, $
         NEWELL__dbFile,NEWELL__dbDir
   ENDIF
   
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
-  defNewellDBFile        = 'eSpec_20160607_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+  defNewellDBFile        = 'eSpec_failCodes_20160609_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
 
   ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
 
@@ -32,7 +32,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      IF N_ELEMENTS(NEWELL__eSpec) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
         PRINT,'Restoring eSpec DB already in memory...'
         eSpec               = NEWELL__eSpec
-        ;; failCodes           = NEWELL__failCodes
+        failCodes           = NEWELL__failCodes
         NewellDBDir         = NEWELL__dbDir
         NewellDBFile        = NEWELL__dbFile
         RETURN
@@ -85,12 +85,12 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      NEWELL__eSpec          = eSpec
   ENDIF
 
-  ;; IF N_ELEMENTS(failCodes) NE 0 THEN BEGIN
-  ;;    NEWELL__failCodes   = failCodes
-  ;; ENDIF ELSE BEGIN
-  ;;    NEWELL__failCodes   = !NULL
-  ;;    PRINT,'This Newell DB file doesn''t have fail codes!'
-  ;; ENDELSE
+  IF N_ELEMENTS(failCode) NE 0 THEN BEGIN
+     NEWELL__failCodes   = failCode
+  ENDIF ELSE BEGIN
+     NEWELL__failCodes   = !NULL
+     PRINT,'This Newell DB file doesn''t have fail codes!'
+  ENDELSE
 
   RETURN
 

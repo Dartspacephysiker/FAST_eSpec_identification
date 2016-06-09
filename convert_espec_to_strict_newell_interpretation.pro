@@ -37,7 +37,7 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
 
   IF nB_ConvToM_ GT 0 THEN BEGIN
      eSpec_interpreted.broad[i_B_ConvToM_] = 255-10-1
-     IF KEYWORD_SET(verbose) THEN PRINT,"nB_Conv_to_M   " + STRCOMPRESS(nB_ConvToM_,/REMOVE_ALL)
+     IF KEYWORD_SET(verbose) THEN PRINT,"nB_Conv_to_M_  " + STRCOMPRESS(nB_ConvToM_,/REMOVE_ALL)
   ENDIF
   IF nB_ConvToMS GT 0 THEN BEGIN
      eSpec_interpreted.broad[i_B_ConvToMS] = 255-10-1

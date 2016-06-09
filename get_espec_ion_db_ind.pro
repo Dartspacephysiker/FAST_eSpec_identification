@@ -56,13 +56,16 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         NEWELL_I__dbFile,NEWELL_I__dbDir, $
         NEWELL_I__RECALCULATE
      
-     COMMON NEWELL,NEWELL__eSpec,NEWELL__HAVE_GOOD_I, $
-        ;; NEWELL__failCodes, $
-        NEWELL__good_i,NEWELL__cleaned_i, $
-        NEWELL__dbFile,NEWELL__dbDir
+     ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_ALF_NEWELL_ESPEC_DB
+     COMMON NWLL_ALF,NWLL_ALF__eSpec,NWLL_ALF__HAVE_GOOD_I, $
+        NWLL_ALF__good_eSpec_i, $
+        NWLL_ALF__good_alf_i, $
+        NWLL_ALF__failCodes, $
+        NWLL_ALF__despun, $
+        NWLL_ALF__dbFile,NWLL_ALF__dbDir, $
+        NWLL_ALF__RECALCULATE
 
   ENDIF
-
                                 ;For statistical auroral oval
   defHwMAurOval=0
   defHwMKpInd=7
@@ -134,10 +137,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         ENDIF
      ENDELSE
   ENDIF ELSE BEGIN
-     IF N_ELEMENTS(NEWELL__eSpec) NE 0 THEN BEGIN
-        dbStruct                                  = NEWELL__eSpec
-        dbFile                                    = NEWELL__dbFile
-        dbDir                                     = NEWELL__dbDir
+     IF N_ELEMENTS(NWLL_ALF__eSpec) NE 0 THEN BEGIN
+        dbStruct                                  = NWLL_ALF__eSpec
+        dbFile                                    = NWLL_ALF__dbFile
+        dbDir                                     = NWLL_ALF__dbDir
      ENDIF ELSE BEGIN
         LOAD_NEWELL_ESPEC_DB,dbStruct, $
                              ;; FAILCODES=failCodes, $
@@ -147,21 +150,21 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                              DONT_LOAD_IN_MEMORY=nonMem, $
                              ;; OUT_GOOD_I=good_i, $
                              LUN=lun
-        NEWELL__eSpec                            = dbStruct
-        NEWELL__dbFile                           = dbFile
-        NEWELL__dbDir                            = dbDir
+        NWLL_ALF__eSpec                            = dbStruct
+        NWLL_ALF__dbFile                           = dbFile
+        NWLL_ALF__dbDir                            = dbDir
      ENDELSE
   ENDELSE
 
   ;;Now check to see whether we have the appropriate vars for each guy
   IF ~is_ion THEN BEGIN
-     IF ~KEYWORD_SET(NEWELL__HAVE_GOOD_I) OR KEYWORD_SET(reset_good_inds) THEN BEGIN
+     IF ~KEYWORD_SET(NWLL_ALF__HAVE_GOOD_I) OR KEYWORD_SET(reset_good_inds) THEN BEGIN
         IF KEYWORD_SET(reset_good_inds) THEN BEGIN
            PRINT,'Resetting good eSpec inds...'
         ENDIF
         calculate                                 = 1
      ENDIF ELSE BEGIN
-        IF N_ELEMENTS(NEWELL__good_i) NE 0 THEN BEGIN
+        IF N_ELEMENTS(NWLL_ALF__good_i) NE 0 THEN BEGIN
            CHECK_FOR_NEW_ESPEC_ION_IND_CONDS,is_ion, $
                                              ORBRANGE=orbRange, $
                                              ALTITUDERANGE=altitudeRange, $
@@ -188,9 +191,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                              LUN=lun
            calculate                             = MIMC__RECALCULATE
            ;; NEWELL_I__HAVE_GOOD_I                 = have_good_i
-           NEWELL__HAVE_GOOD_I                   = have_good_i
+           NWLL_ALF__HAVE_GOOD_I                   = have_good_i
         ENDIF ELSE BEGIN
-           PRINT,'But you should already have NEWELL__good_i!!'
+           PRINT,'But you should already have NWLL_ALF__good_i!!'
            STOP
         ENDELSE
      ENDELSE
@@ -228,7 +231,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                              LUN=lun
            calculate                              = MIMC__RECALCULATE
            NEWELL_I__HAVE_GOOD_I                  = have_good_i
-           ;; NEWELL__HAVE_GOOD_I                    = have_good_i
+           ;; NWLL_ALF__HAVE_GOOD_I                    = have_good_i
         ENDIF ELSE BEGIN
            PRINT,'But you should already have NEWELL_I__good_i!!'
            STOP
@@ -402,16 +405,16 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         good_i                                    = CGSETINTERSECTION(good_i,NEWELL_I__cleaned_i) 
      ENDIF ELSE BEGIN
         PRINT,"eSpec DB needs no cleaning. She's clean as a whistle, you know."
-        ;; IF N_ELEMENTS(NEWELL__cleaned_i) EQ 0 THEN BEGIN
-           ;; NEWELL__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)
-        ;;    NEWELL__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)
-        ;;    IF NEWELL__cleaned_i EQ !NULL THEN BEGIN
+        ;; IF N_ELEMENTS(NWLL_ALF__cleaned_i) EQ 0 THEN BEGIN
+           ;; NWLL_ALF__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)
+        ;;    NWLL_ALF__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)
+        ;;    IF NWLL_ALF__cleaned_i EQ !NULL THEN BEGIN
         ;;       PRINTF,lun,"Couldn't clean fastloc DB! Sup with that?"
         ;;       STOP
         ;;    ENDIF ELSE BEGIN
         ;;    ENDELSE
         ;; ENDIF
-        ;; good_i                                    = CGSETINTERSECTION(good_i,NEWELL__cleaned_i) 
+        ;; good_i                                    = CGSETINTERSECTION(good_i,NWLL_ALF__cleaned_i) 
      ENDELSE
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -458,8 +461,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         NEWELL_I__good_i                          = good_i
         NEWELL_I__HAVE_GOOD_I                     = 1
      ENDIF ELSE BEGIN
-        NEWELL__good_i                           = good_i
-        NEWELL__HAVE_GOOD_I                      = 1
+        NWLL_ALF__good_i                           = good_i
+        NWLL_ALF__HAVE_GOOD_I                      = 1
      ENDELSE
 
   ENDIF ELSE BEGIN
@@ -475,19 +478,12 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         ;;    out_cdbTime = NEWELL_I__times
         ;; ENDIF
      ENDIF ELSE BEGIN
-        good_i                                    = NEWELL__good_i
-        NEWELL__HAVE_GOOD_I                       = 1
+        good_i                                    = NWLL_ALF__good_i
+        NWLL_ALF__HAVE_GOOD_I                       = 1
         ;; IF ARG_PRESENT(out_fastLoc) AND N_ELEMENTS(out_fastLoc) EQ 0 THEN BEGIN
         ;;    PRINT,'Giving you fastLoc...'
-        ;;    out_fastLoc = NEWELL__eSpec
+        ;;    out_fastLoc = NWLL_ALF__eSpec
         ;; ENDIF
-        ;; IF ARG_PRESENT(out_times_fastLoc) AND N_ELEMENTS(out_times_fastLoc) EQ 0 THEN BEGIN
-        ;;    PRINT,'Giving you fastLoc_times...'
-        ;;    out_times_fastLoc = NEWELL__times
-        ;; ENDIF
-        ;; IF ARG_PRESENT(out_delta_t_fastLoc) AND N_ELEMENTS(out_delta_t_fastLoc) EQ 0 THEN BEGIN
-        ;;    PRINT,'Giving you fastLoc_times...'
-        ;;    out_delta_t_fastLoc = NEWELL__delta_t
         ;; ENDIF
      ENDELSE
   ENDELSE

@@ -6,7 +6,7 @@ PRO REPROCESS_ESPECS
   ;;Running options
   loud                      = 1
 
-  firstOrb                  = 500
+  firstOrb                  = 1500
   lastOrb                   = 16361
 
 
@@ -18,7 +18,7 @@ PRO REPROCESS_ESPECS
   outDir                    = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
 
   orbChunk_save_interval    = 250
-  chunkNum                  = 0
+  chunkNum                  = 4
 
   chunkDir                  = outDir+'fully_parsed/'
   chunk_saveFile_pref       = STRING(FORMAT='("eSpec_",A0,"_db--PARSED--Orbs_",I0,"-",I0)', $
@@ -80,19 +80,22 @@ PRO REPROCESS_ESPECS
                                             LOGLUN=logLun
 
            eSpecs_parsed   = !NULL
-           eSpecs_parse    = !NULL
+           eSpecs_temp     = !NULL
+           failCodes_temp  = !NULL
+
            nEvents         = N_ELEMENTS(tmpeSpec_lc.x)
            IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,tmpeSpec_lc,tmpjee_lc,tmpJe_lc,mlt,ilat,alt,MAKE_ARRAY(nEvents,VALUE=curOrb), $
-                                                   eSpecs_parse, $
+                                                   eSpecs_temp, $
                                                    /QUIET, $
                                                    /HAS_ALT_AND_ORBIT, $
                                                    SC_POT=out_sc_pot, $
                                                    /PRODUCE_FAILCODE_OUTPUT, $
-                                                   OUT_FAILCODES=failCodes, $
+                                                   OUT_FAILCODES=failCodes_temp, $
                                                    /GIVE_TIMESPLIT_INFO, $
                                                    /BATCH_MODE
            ;; ADD_EVENT_TO_SPECTRAL_STRUCT__WITH_ALT,eSpecs,eSpecs_parsed,alt,MAKE_ARRAY(nEvents,VALUE=curOrb)
-           ADD_EVENT_TO_SPECTRAL_STRUCT,eSpecs,eSpecs_parse,/HAS_ALT_AND_ORBIT
+           ADD_EVENT_TO_SPECTRAL_STRUCT,eSpecs,eSpecs_temp,/HAS_ALT_AND_ORBIT
+           ADD_ESPEC_FAILCODES_TO_FAILCODE_STRUCT,failCodes,failCodes_temp
 
            nPredicted     += nEvents
 

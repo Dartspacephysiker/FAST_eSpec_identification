@@ -13,8 +13,14 @@ PRO CAT_EVENTS_FROM_PARSED_SPECTRAL_STRUCT,events,eSpecs_parsed,cat_i
 
   IF N_ELEMENTS(cat_i) NE 0 THEN BEGIN
      temp_parsed = { x:eSpecs_parsed.x[cat_i], $
+
+                     orbit:eSpecs_parsed.orbit[cat_i], $
+
                      MLT:eSpecs_parsed.mlt[cat_i], $
                      ILAT:eSpecs_parsed.ilat[cat_i], $
+
+                     ALT:eSpecs_parsed.alt[cat_i], $
+
                      mono:eSpecs_parsed.mono[cat_i], $
                      broad:eSpecs_parsed.broad[cat_i], $
                      diffuse:eSpecs_parsed.diffuse[cat_i], $
@@ -30,14 +36,20 @@ PRO CAT_EVENTS_FROM_PARSED_SPECTRAL_STRUCT,events,eSpecs_parsed,cat_i
   ENDIF ELSE BEGIN
 
      events = { x:[events.x,temp_parsed.x], $
+
+                orbit:[events.orbit,temp_parsed.orbit], $
+
                 MLT:[events.mlt,temp_parsed.mlt], $
                 ILAT:[events.ilat,temp_parsed.ilat], $
-               mono:[events.mono,temp_parsed.mono], $ 
-               broad:[events.broad,temp_parsed.broad], $
-               diffuse:[events.diffuse,temp_parsed.diffuse], $
-               Je:[events.Je,temp_parsed.Je], $               
-               Jee:[events.Jee,temp_parsed.Jee], $            
-               nBad_eSpec:[events.nBad_eSpec,temp_parsed.nBad_eSpec]}
+
+                ALT:[events.alt,temp_parsed.alt], $
+
+                mono:[events.mono,temp_parsed.mono], $ 
+                broad:[events.broad,temp_parsed.broad], $
+                diffuse:[events.diffuse,temp_parsed.diffuse], $
+                Je:[events.Je,temp_parsed.Je], $               
+                Jee:[events.Jee,temp_parsed.Jee], $            
+                nBad_eSpec:[events.nBad_eSpec,temp_parsed.nBad_eSpec]}
 
   ENDELSE
   
