@@ -6,6 +6,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          NEWELLDBFILE=NewellDBFile, $
                          FORCE_LOAD_DB=force_load_db, $
                          DONT_LOAD_IN_MEMORY=nonMem, $
+                         JUST_TIMES=just_times, $
+                         OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
                          LUN=lun
 
@@ -30,11 +32,19 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
 
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      IF N_ELEMENTS(NEWELL__eSpec) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
-        PRINT,'Restoring eSpec DB already in memory...'
-        eSpec               = NEWELL__eSpec
-        failCodes           = NEWELL__failCodes
-        NewellDBDir         = NEWELL__dbDir
-        NewellDBFile        = NEWELL__dbFile
+        CASE 1 OF
+           KEYWORD_SET(just_times): BEGIN
+              PRINT,"Just giving eSpec times ..."
+              out_times     = eSpec.x
+           END
+           ELSE: BEGIN
+              PRINT,'Restoring eSpec DB already in memory...'
+              eSpec         = NEWELL__eSpec
+              failCodes     = NEWELL__failCodes
+              NewellDBDir   = NEWELL__dbDir
+              NewellDBFile  = NEWELL__dbFile
+           END
+        ENDCASE
         RETURN
      ENDIF
   ENDIF
@@ -81,16 +91,22 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   ENDIF ELSE BEGIN
      PRINTF,lun,'eSpec DB already loaded! Not restoring ' + NewellDBFile + '...'
   ENDELSE
+
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      NEWELL__eSpec          = eSpec
+
+     IF N_ELEMENTS(failCode) NE 0 THEN BEGIN
+        NEWELL__failCodes   = failCode
+     ENDIF ELSE BEGIN
+        NEWELL__failCodes   = !NULL
+        PRINT,'This Newell DB file doesn''t have fail codes!'
+     ENDELSE
+
   ENDIF
 
-  IF N_ELEMENTS(failCode) NE 0 THEN BEGIN
-     NEWELL__failCodes   = failCode
-  ENDIF ELSE BEGIN
-     NEWELL__failCodes   = !NULL
-     PRINT,'This Newell DB file doesn''t have fail codes!'
-  ENDELSE
+  IF KEYWORD_SET(just_times) THEN BEGIN
+     out_times              = TEMPORARY(eSpec)
+  ENDIF
 
   RETURN
 

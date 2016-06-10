@@ -5,12 +5,14 @@ PRO LOAD_NEWELL_ION_DB,ion, $
                        NEWELLDBFILE=NewellDBFile, $
                        FORCE_LOAD_DB=force_load_db, $
                        DONT_LOAD_IN_MEMORY=nonMem, $
+                       JUST_TIMES=just_times, $
+                       OUT_TIMES=out_times, $
                        ;; OUT_CLEANED_I=cleaned_i, $
                        LUN=lun
 
   COMPILE_OPT idl2
 
-  ;;This common block is defined ONLY here, I believe
+  ;;This common block is defined ONLY here and in GET_ESPEC_ION_DB_IND, I believe
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      COMMON NEWELL_I,NEWELL_I__ion,NEWELL_I__HAVE_GOOD_I, $
      NEWELL_I__good_i,NEWELL_I__cleaned_i, $
@@ -29,26 +31,34 @@ PRO LOAD_NEWELL_ION_DB,ion, $
 
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      IF N_ELEMENTS(NEWELL_I__ion) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
-        PRINT,'Restoring ion DB already in memory...'
-        ion                 = NEWELL_I__ion
-        NewellDBDir         = NEWELL_I__dbDir
-        NewellDBFile        = NEWELL_I__dbFile
+        CASE 1 OF
+           KEYWORD_SET(just_times): BEGIN
+              PRINT,"Just giving eSpec times ..."
+              out_times     = ion.x
+           END
+           ELSE: BEGIN
+              PRINT,'Restoring ion DB already in memory...'
+              ion           = NEWELL_I__ion
+              NewellDBDir   = NEWELL_I__dbDir
+              NewellDBFile  = NEWELL_I__dbFile
+           END
+        ENDCASE
         RETURN
      ENDIF
   ENDIF
 
   IF N_ELEMENTS(NewellDBDir) EQ 0 THEN BEGIN
-     NewellDBDir      = defNewellDBDir
+     NewellDBDir            = defNewellDBDir
   ENDIF
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     NEWELL_I__dbDir          = NewellDBDir
+     NEWELL_I__dbDir        = NewellDBDir
   ENDIF
 
   IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
-     NewellDBFile     = defNewellDBFile
+     NewellDBFile           = defNewellDBFile
   ENDIF
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     NEWELL_I__dbFile         = NewellDBFile
+     NEWELL_I__dbFile       = NewellDBFile
   ENDIF
 
   IF N_ELEMENTS(ion) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
@@ -80,6 +90,10 @@ PRO LOAD_NEWELL_ION_DB,ion, $
   ENDELSE
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      NEWELL_I__ion          = ion
+  ENDIF
+
+  IF KEYWORD_SET(just_times) THEN BEGIN
+     out_times              = TEMPORARY(ion)
   ENDIF
 
   RETURN
