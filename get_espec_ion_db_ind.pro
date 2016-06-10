@@ -2,11 +2,14 @@
 ;2016/06/07
 ;This is like GET_CHASTON_IND for the electron and ion DBs
 FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
+                              FOR_ALFVEN_DB=for_alfven_db, $
+                              DESPUN_ALF_DB=despun_alf_db, $
                               DBFILE=dbfile, $
                               DBDIR=dbDir, $
                               ORBRANGE=orbRange, $
                               ALTITUDERANGE=altitudeRange, $
-                              ;; CHARERANGE=charERange, $
+                              CHARERANGE=charERange, $
+                              CHARIERANGE=charIERange, $
                               BOTH_HEMIS=both_hemis, $
                               NORTH=north, $
                               SOUTH=south, $
@@ -51,19 +54,45 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
      MIMC__HwMKpInd
 
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     COMMON NEWELL_I,NEWELL_I__ion,NEWELL_I__HAVE_GOOD_I, $
-        NEWELL_I__good_i,NEWELL_I__cleaned_i, $
-        NEWELL_I__dbFile,NEWELL_I__dbDir, $
-        NEWELL_I__RECALCULATE
      
-     ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_ALF_NEWELL_ESPEC_DB
+     IF KEYWORD_SET(for_alfven_db) THEN BEGIN
      COMMON NWLL_ALF,NWLL_ALF__eSpec,NWLL_ALF__HAVE_GOOD_I, $
         NWLL_ALF__good_eSpec_i, $
         NWLL_ALF__good_alf_i, $
         NWLL_ALF__failCodes, $
         NWLL_ALF__despun, $
+        NWLL_ALF__charERange, $
         NWLL_ALF__dbFile,NWLL_ALF__dbDir, $
         NWLL_ALF__RECALCULATE
+
+     COMMON NWLL_ALF_I, $ ;NWLL_ALF_I__iSpec, $
+        NWLL_ALF_I__good_iSpec_i, $
+        NWLL_ALF_I__good_alf_i, $
+        NWLL_ALF_I__despun, $
+        NWLL_ALF_I__cleaned_i, $
+        NWLL_ALF_I__dbFile,NWLL_ALF_I__dbDir, $
+        NWLL_ALF_I__RECALCULATE
+
+  ENDIF ELSE BEGIN
+
+     ;;This common block is defined ONLY here and in LOAD_NEWELL_ION_DB, I believe
+     COMMON NEWELL_I ;; ,NEWELL_I__ion,NEWELL_I__HAVE_GOOD_I, $
+        ;; NEWELL_I__good_i,NEWELL_I__cleaned_i, $
+        ;; NEWELL_I__dbFile,NEWELL_I__dbDir, $
+        ;; NEWELL_I__charIERange, $
+        ;; NEWELL_I__RECALCULATE
+     
+     ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_NEWELL_ESPEC_DB
+     COMMON NEWELL ;; ,NEWELL__eSpec,NEWELL__HAVE_GOOD_I, $
+        ;; NEWELL__failCode, $
+        ;; NEWELL__good_i, $ 
+        ;; NEWELL__charERange, $
+        ;; ;;NEWELL__cleaned_i, $
+        ;; NEWELL__dbFile,NEWELL__dbDir, $
+     ;; NEWELL__RECALCULATE
+     
+
+  ENDELSE
 
   ENDIF
                                 ;For statistical auroral oval
@@ -117,55 +146,141 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
   ;;Get the databases if they're already in mem
   IF is_ion THEN BEGIN
-     IF N_ELEMENTS(NEWELL_I__ion) NE 0 THEN BEGIN
-        dbStruct                                  = NEWELL_I__ion
-        dbFile                                    = NEWELL_I__dbFile
-        dbDir                                     = NEWELL_I__dbDir
-     ENDIF ELSE BEGIN
-        LOAD_NEWELL_ION_DB,ion, $
-                           ;; FAILCODES=failCodes, $
-                           NEWELLDBDIR=dbDir, $
-                           NEWELLDBFILE=dbFile, $
-                           FORCE_LOAD_DB=force_load_db, $
-                           DONT_LOAD_IN_MEMORY=nonMem, $
-                           ;; OUT_CLEANED_I=cleaned_i, $
-                           LUN=lun
+     CASE 1 OF
+        KEYWORD_SET(for_alfven_db): BEGIN
+           IF N_ELEMENTS(NWLL_ALF_I__ion) NE 0 THEN BEGIN
+              dbStruct                                  = NWLL_ALF_I__ion
+              dbFile                                    = NWLL_ALF_I__dbFile
+              dbDir                                     = NWLL_ALF_I__dbDir
+           ENDIF ELSE BEGIN
+              LOAD_ALF_NEWELL_ION_DB, $ ;ion, $
+                 alf_i__good_iSpec, $
+                 good_iSpec_i, $
+                 ;; FAILCODES=failCodes, $
+                 NEWELLDBDIR=dbDir, $
+                 NEWELLDBFILE=dbFile, $
+                 FORCE_LOAD_DB=force_load_db, $
+                 DONT_LOAD_IN_MEMORY=nonMem, $
+                 ;; OUT_CLEANED_I=cleaned_i, $
+                 LUN=lun
+              
+              ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
+              ;;    ;; NWLL_ALF_I__iSpec                      = iSpec
+              ;;    NWLL_ALF_I__good_iSpec_i               = good_iSpec_i
+              ;;    NWLL_ALF_I__good_alf_i                 = alf_i__good_iSpec
+              ;;    NWLL_ALF_I__despun                     = KEYWORD_SET(despun_alf_db)
+              ;;    NWLL_ALF_I__dbFile                     = dbFile
+              ;;    NWLL_ALF_I__dbDir                      = dbDir
 
-        IF ~KEYWORD_SET(nonMem) THEN BEGIN
-           NEWELL_I__ion          = ion
-           ;; NEWELL_I__cleaned_i    = cleaned_i
-        ENDIF
-     ENDELSE
+              ;;    ;; NWLL_ALF_I__cleaned_i    = cleaned_i
+              ;; ENDIF
+           ENDELSE
+        END
+        ELSE: BEGIN
+           IF N_ELEMENTS(NEWELL_I__ion) NE 0 THEN BEGIN
+              dbStruct                                  = NEWELL_I__ion
+              dbFile                                    = NEWELL_I__dbFile
+              dbDir                                     = NEWELL_I__dbDir
+           ENDIF ELSE BEGIN
+              LOAD_NEWELL_ION_DB,ion, $
+                                 NEWELLDBDIR=dbDir, $
+                                 NEWELLDBFILE=dbFile, $
+                                 FORCE_LOAD_DB=force_load_db, $
+                                 DONT_LOAD_IN_MEMORY=nonMem, $
+                                 LUN=lun
+
+              ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
+              ;;    NEWELL_I__ion          = ion
+              ;; ENDIF
+           ENDELSE
+        END
+     ENDCASE
+
   ENDIF ELSE BEGIN
-     IF N_ELEMENTS(NWLL_ALF__eSpec) NE 0 THEN BEGIN
-        dbStruct                                  = NWLL_ALF__eSpec
-        dbFile                                    = NWLL_ALF__dbFile
-        dbDir                                     = NWLL_ALF__dbDir
-     ENDIF ELSE BEGIN
-        LOAD_NEWELL_ESPEC_DB,dbStruct, $
-                             ;; FAILCODES=failCodes, $
-                             NEWELLDBDIR=dbDir, $
-                             NEWELLDBFILE=dbFile, $
-                             FORCE_LOAD_DB=force_load_db, $
-                             DONT_LOAD_IN_MEMORY=nonMem, $
-                             ;; OUT_GOOD_I=good_i, $
-                             LUN=lun
-        NWLL_ALF__eSpec                            = dbStruct
-        NWLL_ALF__dbFile                           = dbFile
-        NWLL_ALF__dbDir                            = dbDir
-     ENDELSE
+     CASE 1 OF
+        KEYWORD_SET(for_alfven_db): BEGIN
+           IF N_ELEMENTS(NWLL_ALF__eSpec) NE 0 THEN BEGIN
+              dbStruct                                  = NWLL_ALF__eSpec
+              dbFile                                    = NWLL_ALF__dbFile
+              dbDir                                     = NWLL_ALF__dbDir
+           ENDIF ELSE BEGIN
+              LOAD_ALF_NEWELL_ESPEC_DB,dbStruct,alf_i__good_eSpec,good_eSpec_i, $
+                                   FAILCODES=failCodes, $
+                                   NEWELLDBDIR=dbDir, $
+                                   NEWELLDBFILE=dbFile, $
+                                   FORCE_LOAD_DB=force_load_db, $
+                                   DESPUN_ALF_DB=despun_alf_db, $
+                                   DONT_LOAD_IN_MEMORY=nonMem, $
+                                   ;; OUT_GOOD_I=good_i, $
+                                   LUN=lun
+              IF ~KEYWORD_SET(nonMem) THEN BEGIN
+                 NWLL_ALF__eSpec                         = dbStruct
+                 NWLL_ALF__failCodes                     = failCodes
+                 NWLL_ALF__good_eSpec_i                  = good_eSpec_i
+                 NWLL_ALF__good_alf_i                    = alf_i__good_eSpec
+                 NWLL_ALF__despun                        = KEYWORD_SET(despun_alf_db)
+                 NWLL_ALF__dbFile                        = dbFile
+                 NWLL_ALF__dbDir                         = dbDir
+              ENDIF
+           ENDELSE
+        END
+        ELSE: BEGIN
+           IF N_ELEMENTS(NEWELL__eSpec) NE 0 THEN BEGIN
+              dbStruct                                  = NEWELL__eSpec
+              dbFile                                    = NEWELL__dbFile
+              dbDir                                     = NEWELL__dbDir
+           ENDIF ELSE BEGIN
+              LOAD_NEWELL_ESPEC_DB,eSpec, $
+                                   FAILCODES=failCodes, $
+                                   NEWELLDBDIR=dbDir, $
+                                   NEWELLDBFILE=dbFile, $
+                                   FORCE_LOAD_DB=force_load_db, $
+                                   DESPUN_ALF_DB=despun_alf_db, $
+                                   DONT_LOAD_IN_MEMORY=nonMem, $
+                                   ;; OUT_GOOD_I=good_i, $
+                                   LUN=lun
+              IF ~KEYWORD_SET(nonMem) THEN BEGIN
+                 NEWELL__eSpec                         = dbStruct
+                 NEWELL__failCodes                     = failCodes
+                 NEWELL__dbFile                        = dbFile
+                 NEWELL__dbDir                         = dbDir
+              ENDIF
+           ENDELSE
+        END
+     ENDCASE
+
   ENDELSE
 
   ;;Now check to see whether we have the appropriate vars for each guy
   IF ~is_ion THEN BEGIN
-     IF ~KEYWORD_SET(NWLL_ALF__HAVE_GOOD_I) OR KEYWORD_SET(reset_good_inds) THEN BEGIN
+     CASE 1 OF
+        KEYWORD_SET(for_alfven_db): BEGIN
+           have_em = KEYWORD_SET(NWLL_ALF__HAVE_GOOD_I)
+           goodIStr                               = 'NWLL_ALF__good_i'
+        END
+        ELSE: BEGIN
+           have_em = KEYWORD_SET(NEWELL__HAVE_GOOD_I)
+           goodIStr                               = 'NEWELL__good_i'
+        END
+     ENDCASE
+
+     IF ~KEYWORD_SET(have_em) OR KEYWORD_SET(reset_good_inds) THEN BEGIN
         IF KEYWORD_SET(reset_good_inds) THEN BEGIN
-           PRINT,'Resetting good eSpec inds...'
+           PRINT,'Resetting ' + goodIStr + ' ...'
         ENDIF
         calculate                                 = 1
      ENDIF ELSE BEGIN
-        IF N_ELEMENTS(NWLL_ALF__good_i) NE 0 THEN BEGIN
+        CASE 1 OF
+           KEYWORD_SET(for_alfven_db): BEGIN
+              nonzero_good_i                      = N_ELEMENTS(NWLL_ALF__good_i)
+           END
+           ELSE: BEGIN
+              nonzero_good_i                      = N_ELEMENTS(NEWELL__good_i)
+           END
+        ENDCASE
+        IF nonzero_good_i NE 0 THEN BEGIN
            CHECK_FOR_NEW_ESPEC_ION_IND_CONDS,is_ion, $
+                                             KEYWORD_SET(for_alfven_db) ? NWLL_ALF__RECALCULATE : NEWELL__RECALCULATE, $
                                              ORBRANGE=orbRange, $
                                              ALTITUDERANGE=altitudeRange, $
                                              CHARERANGE=charERange, $
@@ -189,23 +304,53 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                              NIGHTSIDE=nightside, $
                                              HAVE_GOOD_I=have_good_i, $
                                              LUN=lun
-           calculate                             = MIMC__RECALCULATE
-           ;; NEWELL_I__HAVE_GOOD_I                 = have_good_i
-           NWLL_ALF__HAVE_GOOD_I                   = have_good_i
+           calculate                             = KEYWORD_SET(for_alfven_db) ? NWLL_ALF__RECALCULATE : NEWELL__RECALCULATE
+           CASE 1 OF
+              KEYWORD_SET(for_alfven_db): BEGIN
+                 NWLL_ALF__HAVE_GOOD_I           = have_good_i
+                 NWLL_ALF_I__RECALCULATE         = calculate
+              END
+              ELSE: BEGIN
+                 NEWELL__HAVE_GOOD_I             = have_good_i
+                 NEWELL_I__RECALCULATE           = calculate ;;reset other DB too
+              END
+           ENDCASE
         ENDIF ELSE BEGIN
-           PRINT,'But you should already have NWLL_ALF__good_i!!'
+           PRINT,'But you should already have ' + goodIStr + '!!'
            STOP
         ENDELSE
      ENDELSE
   ENDIF ELSE BEGIN
-     IF ~KEYWORD_SET(NEWELL_I__HAVE_GOOD_I) OR KEYWORD_SET(reset_good_inds) THEN BEGIN
+     CASE 1 OF
+        KEYWORD_SET(for_alfven_db): BEGIN
+           have_em = KEYWORD_SET(NWLL_ALF_I_HAVE_GOOD_I)
+           goodIStr                              = 'NWLL_ALF_I__good_i'
+        END
+        ELSE: BEGIN
+           have_em = KEYWORD_SET(NEWELL_I_HAVE_GOOD_I)
+           goodIStr                              = 'NEWELL_I__good_i'
+        END
+     ENDCASE
+
+     IF ~KEYWORD_SET(have_em) OR KEYWORD_SET(reset_good_inds) THEN BEGIN
         IF KEYWORD_SET(reset_good_inds) THEN BEGIN
-           PRINT,'Resetting good ion inds...'
+           PRINT,'Resetting good ' + goodIStr + '...'
         ENDIF
-        calculate                                 = 1
+        calculate                                = 1
      ENDIF ELSE BEGIN
-        IF N_ELEMENTS(NEWELL_I__good_i) NE 0 THEN BEGIN
+        CASE 1 OF
+           KEYWORD_SET(for_alfven_db): BEGIN
+              nonzero_good_i                     = N_ELEMENTS(NWLL_ALF_I__good_i)
+           END
+           ELSE: BEGIN
+              nonzero_good_i                     = N_ELEMENTS(NEWELL_I__good_i)
+              
+           END
+        ENDCASE
+
+        IF nonzero_good_i NE 0 THEN BEGIN
            CHECK_FOR_NEW_ESPEC_ION_IND_CONDS,is_ion, $
+                                             KEYWORD_SET(for_alfven_db) ? NWLL_ALF_I__RECALCULATE : NEWELL_I__RECALCULATE, $
                                              ORBRANGE=orbRange, $
                                              ALTITUDERANGE=altitudeRange, $
                                              CHARERANGE=charERange, $
@@ -229,11 +374,19 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                              NIGHTSIDE=nightside, $
                                              HAVE_GOOD_I=have_good_i, $
                                              LUN=lun
-           calculate                              = MIMC__RECALCULATE
-           NEWELL_I__HAVE_GOOD_I                  = have_good_i
-           ;; NWLL_ALF__HAVE_GOOD_I                    = have_good_i
+           calculate                              = KEYWORD_SET(for_alfven_db) ? NWLL_ALF_I__RECALCULATE : NEWELL_I__RECALCULATE
+           CASE 1 OF
+              KEYWORD_SET(for_alfven_db): BEGIN
+                 NWLL_ALF_I__HAVE_GOOD_I          = have_good_i
+                 NWLL_ALF__RECALCULATE            = calculate
+              END
+              ELSE: BEGIN
+                 NEWELL_I__HAVE_GOOD_I            = have_good_i
+                 NEWELL__RECALCULATE              = calculate ;;make sure to recalculate other DB too
+              END
+           ENDCASE
         ENDIF ELSE BEGIN
-           PRINT,'But you should already have NEWELL_I__good_i!!'
+           PRINT,'But you should already have ' + goodIStr + '!!'
            STOP
         ENDELSE
      ENDELSE
@@ -247,7 +400,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
      ;;Welcome message
      printf,lun,""
-     printf,lun,"****From GET_ESPEC_ION_IND****"
+     printf,lun,"****From GET_ESPEC_ION_DB_IND****"
      printf,lun,FORMAT='("DBFile                        :",T35,A0)',dbFile
      printf,lun,""
 
@@ -335,38 +488,46 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
      
      ;; was using this to compare our Poynting flux estimates against Keiling et al. 2003 Fig. 3
      ;;limits on characteristic electron energies to use?
-     ;; IF KEYWORD_SET (charERange) AND is_ion THEN BEGIN
-     ;;    IF N_ELEMENTS(charERange) EQ 2 THEN BEGIN
-     ;;       MIMC__charERange                       = charERange
+     IF KEYWORD_SET (charERange) AND ~is_ion THEN BEGIN
+        IF N_ELEMENTS(charERange) EQ 2 THEN BEGIN
+           MIMC__charERange                    = charERange
            
-     ;;       IF KEYWORD_SET(chastDB) THEN BEGIN
-     ;;          chare_i                             = WHERE(dbStruct.char_elec_energy GE MIMC__charERange[0] AND $
-     ;;                                                      dbStruct.char_elec_energy LE MIMC__charERange[1])
-     ;;       ENDIF ELSE BEGIN
-     ;;          chare_i                             = WHERE(dbStruct.max_chare_losscone GE MIMC__charERange[0] AND $
-     ;;                                                      dbStruct.max_chare_losscone LE MIMC__charERange[1])
-     ;;       ENDELSE
-     ;;       region_i                               = CGSETINTERSECTION(region_i,chare_i)
-     ;;    ENDIF ELSE BEGIN
-     ;;       printf,lun,"Incorrect input for keyword 'charERange'!!"
-     ;;       printf,lun,"Please use charERange=[minCharE maxCharE]"
-     ;;       RETURN, -1
-     ;;    ENDELSE
-     ;; ENDIF
+           chare                               = ABS(dbStruct.jee/dbStruct.je)*6.242*1.0e11
+           ;; chare_i                             = WHERE(dbStruct.max_chare_losscone GE MIMC__charERange[0] AND $
+           ;;                                             dbStruct.max_chare_losscone LE MIMC__charERange[1])
+           chare_i                             = WHERE(chare GE MIMC__charERange[0] AND $
+                                                       chare LE MIMC__charERange[1])
 
-     ;; IF KEYWORD_SET(poyntRange) AND is_ion THEN BEGIN
-     ;;    MIMC__poyntRange                       = poyntRange
-     ;;    IF N_ELEMENTS(poyntRange) NE 2 OR (MIMC__poyntRange[1] LE MIMC__poyntRange[0]) THEN BEGIN
-     ;;       PRINT,"Invalid Poynting range specified! poyntRange should be a two-element vector, [minPoynt maxPoynt]"
-     ;;       PRINT,"No Poynting range set..."
-     ;;       RETURN, -1
-     ;;    ENDIF ELSE BEGIN
-     ;;       region_i=CGSETINTERSECTION(region_i,where(dbStruct.pFluxEst GE MIMC__poyntRange[0] AND $
-     ;;                                             dbStruct.pFluxEst LE MIMC__poyntRange[1]))
-     ;;       printf,lun,FORMAT='("Poynting flux limits (eV)     :",T35,G8.2,T45,G8.2)',MIMC__poyntRange[0],MIMC__poyntRange[1]
-     ;;    ENDELSE
-     ;; ENDIF
+           region_i                            = CGSETINTERSECTION(region_i,chare_i)
+        ENDIF ELSE BEGIN
+           printf,lun,"Incorrect input for keyword 'charERange'!!"
+           printf,lun,"Please use charERange=[minCharE maxCharE]"
+           RETURN, -1
+        ENDELSE
+     ENDIF
 
+     IF KEYWORD_SET (charIERange) AND is_ion THEN BEGIN
+        IF N_ELEMENTS(charIERange) EQ 2 THEN BEGIN
+           CASE 1 OF
+              KEYWORD_SET(for_alfven_db): BEGIN
+                 NWLL_ALF_I__charIERange       = charIERange
+              END
+              ELSE: BEGIN
+                 NEWELL_I__charIERange         = charIERange
+              END
+           ENDCASE
+           
+           charie                              = ABS(dbStruct.jei/dbStruct.ji)*6.242*1.0e11
+           charie_i                            = WHERE(charie GE charIERange[0] AND $
+                                                       charie LE charIERange[1])
+
+           region_i                            = CGSETINTERSECTION(region_i,charie_i)
+        ENDIF ELSE BEGIN
+           printf,lun,"Incorrect input for keyword 'charIERange'!!"
+           printf,lun,"Please use charIERange=[minCharIE maxCharIE]"
+           RETURN, -1
+        ENDELSE
+     ENDIF
 
      ;;gotta screen to make sure it's in ACE db too:
      ;;Only so many are useable, since ACE data start in 1998
@@ -381,28 +542,58 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
      ;;Now, clear out all the garbage (NaNs & Co.)
      IF is_ion THEN BEGIN
-        IF N_ELEMENTS(NEWELL_I__cleaned_i) EQ 0 THEN BEGIN
-           
-           tempDir                = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
-           defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
-  
-           IF FILE_TEST(tempDir+defNewellDBCleanInds) THEN BEGIN
-              RESTORE,tempDir+defNewellDBCleanInds
-           ENDIF ELSE BEGIN        
-              PRINT,'Making NaN- and INF-less ion DB inds in ' + defNewellDBCleanInds + '...'
-              cleaned_i = BASIC_ESPEC_ION_DB_CLEANER(dbStruct,/CLEAN_NANS_AND_INFINITIES)
-              PRINT,'Saving NaN- and INF-less ion DB inds to ' + defNewellDBCleanInds + '...'
-              SAVE,cleaned_i,FILENAME=tempDir+defNewellDBCleanInds
-           ENDELSE
+        CASE 1 OF
+           KEYWORD_SET(for_alfven_db): BEGIN
+              nClean_i            = N_ELEMENTS(NWLL_ALF_I__cleaned_i)
+           END
+           ELSE: BEGIN
+              nClean_i            = N_ELEMENTS(NEWELL_I__cleaned_i)
+           END
+        ENDCASE
 
-           NEWELL_I__cleaned_i                     = cleaned_i
-           IF NEWELL_I__cleaned_i EQ !NULL THEN BEGIN
-              PRINTF,lun,"Couldn't clean Alfvén DB! Sup with that?"
-              STOP
-           ENDIF ELSE BEGIN
-           ENDELSE
+        IF nClean_i EQ 0 THEN BEGIN
+           
+           ;; IF  THEN BEGIN
+           tempDir                = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
+        CASE 1 OF
+           KEYWORD_SET(for_alfven_db): BEGIN
+              defNewellDBCleanInds   = 'alf_iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
+           END
+           ELSE: BEGIN
+              defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
+           END
+        ENDCASE
+           
+              IF FILE_TEST(tempDir+defNewellDBCleanInds) THEN BEGIN
+                 RESTORE,tempDir+defNewellDBCleanInds
+              ENDIF ELSE BEGIN        
+                 PRINT,'Making NaN- and INF-less ion DB inds in ' + defNewellDBCleanInds + '...'
+                 cleaned_i = BASIC_ESPEC_ION_DB_CLEANER(dbStruct,/CLEAN_NANS_AND_INFINITIES)
+                 PRINT,'Saving NaN- and INF-less ion DB inds to ' + defNewellDBCleanInds + '...'
+                 SAVE,cleaned_i,FILENAME=tempDir+defNewellDBCleanInds
+              ENDELSE
+
+           CASE 1 OF
+              KEYWORD_SET(for_alfven_db): BEGIN
+                 NWLL_ALF_I__cleaned_i             = cleaned_i
+                 IF NWLL_ALF_I__cleaned_i EQ !NULL THEN BEGIN
+                    PRINTF,lun,"Couldn't clean Alfvén DB! Sup with that?"
+                    STOP
+                 ENDIF ELSE BEGIN
+                 ENDELSE
+              END
+              ELSE: BEGIN
+                 NEWELL_I__cleaned_i               = cleaned_i
+                 IF NEWELL_I__cleaned_i EQ !NULL THEN BEGIN
+                    PRINTF,lun,"Couldn't clean Alfvén DB! Sup with that?"
+                    STOP
+                 ENDIF ELSE BEGIN
+                 ENDELSE
+              END
+           ENDCASE
         ENDIF
-        good_i                                    = CGSETINTERSECTION(good_i,NEWELL_I__cleaned_i) 
+        good_i                                    = CGSETINTERSECTION(good_i, $
+        KEYWORD_SET(for_alfven_db) ? NWLL_ALF_I__cleaned_i : NEWELL_I__cleaned_i) 
      ENDIF ELSE BEGIN
         PRINT,"eSpec DB needs no cleaning. She's clean as a whistle, you know."
         ;; IF N_ELEMENTS(NWLL_ALF__cleaned_i) EQ 0 THEN BEGIN

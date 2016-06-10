@@ -17,8 +17,11 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      COMMON NEWELL,NEWELL__eSpec,NEWELL__HAVE_GOOD_I, $
         NEWELL__failCode, $
-        NEWELL__good_i,NEWELL__cleaned_i, $
-        NEWELL__dbFile,NEWELL__dbDir
+        NEWELL__good_i, $
+        NEWELL__charERange, $
+        ;; NEWELL__cleaned_i, $
+        NEWELL__dbFile,NEWELL__dbDir, $
+        NEWELL__RECALCULATE
   ENDIF
   
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
