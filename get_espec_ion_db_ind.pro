@@ -54,21 +54,28 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      
      IF KEYWORD_SET(for_alfven_db) THEN BEGIN
-     COMMON NWLL_ALF,NWLL_ALF__eSpec,NWLL_ALF__HAVE_GOOD_I, $
+        ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_ALF_NEWELL_ESPEC_DB
+     COMMON NWLL_ALF, $
+        NWLL_ALF__eSpec, $
+        NWLL_ALF__HAVE_GOOD_I, $
         NWLL_ALF__good_eSpec_i, $
         NWLL_ALF__good_alf_i, $
         NWLL_ALF__failCodes, $
         NWLL_ALF__despun, $
         NWLL_ALF__charERange, $
-        NWLL_ALF__dbFile,NWLL_ALF__dbDir, $
+        NWLL_ALF__dbFile, $
+        NWLL_ALF__dbDir, $
         NWLL_ALF__RECALCULATE
 
+     ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_ALF_NEWELL_ION_DB
      COMMON NWLL_ALF_I, $ ;NWLL_ALF_I__iSpec, $
         NWLL_ALF_I__good_iSpec_i, $
         NWLL_ALF_I__good_alf_i, $
         NWLL_ALF_I__despun, $
         NWLL_ALF_I__cleaned_i, $
-        NWLL_ALF_I__dbFile,NWLL_ALF_I__dbDir, $
+        NWLL_ALF_I__charIERange, $
+        NWLL_ALF_I__dbFile, $
+        NWLL_ALF_I__dbDir, $
         NWLL_ALF_I__RECALCULATE
 
   ENDIF ELSE BEGIN
