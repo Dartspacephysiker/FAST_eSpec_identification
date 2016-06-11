@@ -25,7 +25,12 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   ENDIF
   
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
+
+  ;;The file with failcodes
   defNewellDBFile        = 'eSpec_failCodes_20160609_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+
+  ;;The file without failcodes
+  defNewellDBFile        = 'eSpec_20160607_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
 
   ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
 
@@ -79,6 +84,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
 
      ;;Convert to strict Newell interpretation
+
+     PRINT,"Converting eSpec DB to strict Newell interpretation ..."
      CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec,/HUGE_STRUCTURE,/VERBOSE
 
      ;;The following lines aren't necessary for this little beaut
