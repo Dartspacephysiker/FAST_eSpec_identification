@@ -43,15 +43,16 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
 
   events       = !NULL
   nEvents      = N_ELEMENTS(eSpec.x)
-  energies     = REFORM(eSpec.v[0,*])
+  energies     = REFORM(eSpec.v[0,*]) ;;Note, energies are reversed so that low energies are at the highest indices!!
   nEnergies    = N_ELEMENTS(energies)
   max_en_ind   = MAKE_ARRAY(nEvents,/INTEGER,VALUE=-2)
   CASE 1 OF
      KEYWORD_SET(sc_pot): BEGIN
         FOR i=0,nEvents-1 DO BEGIN
-           tempInd       = MAX(WHERE(energies GT sc_pot[i]))
+           tempInd       = MAX(WHERE(energies GT sc_pot[i])) ;;Note (as above) that lowest energies are at HIGH indices!
+
            ;; tempMax      = MAX(WHERE(
-           max_en_ind[i] = tempInd
+              max_en_ind[i] = tempInd
         ENDFOR
      END
      KEYWORD_SET(ind_sc_pot): BEGIN

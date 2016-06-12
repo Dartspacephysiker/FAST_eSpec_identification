@@ -17,7 +17,6 @@ PRO LOAD_NEWELL_ORB_ESPEC_FILE,orbit,requested_interval, $
                                
   COMPILE_OPT IDL2
 
-  n_intvls                 = GET_ORBIT_N_INTERVALS(orbit) 
 
   IF ~KEYWORD_SET(orbit) THEN BEGIN
      PRINT,"Orbit number not provided; setting to default (500) ..."
@@ -25,7 +24,7 @@ PRO LOAD_NEWELL_ORB_ESPEC_FILE,orbit,requested_interval, $
   ENDIF
   orbStr                   = STRCOMPRESS(orbit,/REMOVE_ALL)
 
-  ;; IF KEYWORD_SET(requested_interval) THEN BEGIN
+  n_intvls                 = GET_ORBIT_N_INTERVALS(orbit) 
   intervalStr              = STRCOMPRESS((KEYWORD_SET(requested_interval) ? requested_interval : 0 ) < (n_intvls-1),/REMOVE_ALL)
 
   inDir                    = '/SPENCEdata/software/sdt/batch_jobs/Alfven_study/20160520--get_Newell_identification_for_Alfven_events--NOT_despun/Newell_batch_output/'
