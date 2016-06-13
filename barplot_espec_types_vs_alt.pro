@@ -116,7 +116,7 @@ FUNCTION BARPLOT_ESPEC_TYPES_VS_ALT,eSpec, $
   IF KEYWORD_SET(savePlot) THEN BEGIN
 
      IF KEYWORD_SET(spName) THEN outName = spName ELSE BEGIN
-        outName = GET_TODAY_STRING() + '--Newell-based_stats.png'
+        outName = GET_TODAY_STRING() + '--Newell-based_stats_vs_alt.png'
      ENDELSE
      IF N_ELEMENTS(plotDir) GT 0 THEN BEGIN
         pDir = plotDir
