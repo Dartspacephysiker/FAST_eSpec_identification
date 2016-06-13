@@ -16,6 +16,7 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
 
   ;;Gross rates?
   do_grossRate_fluxQuantities = 1
+  do_timeAvg_fluxQuantities   = 1
 
   ;;Plots to do
   ePlots                   = 1
@@ -30,7 +31,7 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
   pPlotRange                     = [5.e5,5.e8] ;for pFlux divided by width_x and multiplied by area
   logPFPlot                      = 1
 
-  ePlotRange               = [10^(6.0),10^(9.0)]
+  ePlotRange               = [5e7,10^(9.0)]
   eFluxPlotType            = 'eflux_nonalfven'
   logEfPlot                = 1
   noNegEflux               = 1
@@ -41,12 +42,12 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
   ;; ENumFlPlotRange          = [[1e-1,1e1], $
   ;;                             [1e7,1e9]]
   logENumFlPlot            = 1
-  ENumFlPlotRange          = [1e21,1e23]
+  ENumFlPlotRange          = [1e23,3e24]
 
   ;; logPfPlot                = 1
   ;; PPlotRange               = [1e-1,1e1]
   logPfPlot                = 0
-  PPlotRange               = [1e6,1e9]
+  PPlotRange               = [1e7,2e8]
 
   ;;;;;;;;;;;;;;;;;;;;;;
   ;;18-INTEG_ION_FLUX_UP

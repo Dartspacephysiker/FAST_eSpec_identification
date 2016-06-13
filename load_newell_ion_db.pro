@@ -13,13 +13,13 @@ PRO LOAD_NEWELL_ION_DB,ion, $
   COMPILE_OPT idl2
 
   ;;This common block is defined ONLY here and in GET_ESPEC_ION_DB_IND, I believe
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
      COMMON NEWELL_I,NEWELL_I__ion,NEWELL_I__HAVE_GOOD_I, $
         NEWELL_I__good_i,NEWELL_I__cleaned_i, $
         NEWELL_I__dbFile,NEWELL_I__dbDir, $
         NEWELL_I__charIERange, $
         NEWELL_I__RECALCULATE
-  ENDIF
+  ;; ENDIF
   
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
   defNewellDBFile        = 'iSpec_20160607_db--PARSED--Orbs_500-16361.sav'
@@ -30,7 +30,7 @@ PRO LOAD_NEWELL_ION_DB,ion, $
      lun                 = -1
   ENDIF
 
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
      IF N_ELEMENTS(NEWELL_I__ion) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
         CASE 1 OF
            KEYWORD_SET(just_times): BEGIN
@@ -46,21 +46,21 @@ PRO LOAD_NEWELL_ION_DB,ion, $
         ENDCASE
         RETURN
      ENDIF
-  ENDIF
+  ;; ENDIF
 
   IF N_ELEMENTS(NewellDBDir) EQ 0 THEN BEGIN
      NewellDBDir            = defNewellDBDir
   ENDIF
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
      NEWELL_I__dbDir        = NewellDBDir
-  ENDIF
+  ;; ENDIF
 
   IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
      NewellDBFile           = defNewellDBFile
   ENDIF
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
      NEWELL_I__dbFile       = NewellDBFile
-  ENDIF
+  ;; ENDIF
 
   IF N_ELEMENTS(ion) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
      IF KEYWORD_SET(force_load_db) THEN BEGIN
@@ -93,8 +93,12 @@ PRO LOAD_NEWELL_ION_DB,ion, $
      NEWELL_I__ion          = ion
   ENDIF
 
-  IF KEYWORD_SET(just_times) THEN BEGIN
-     out_times              = TEMPORARY(ion)
+  ;; IF KEYWORD_SET(just_times) THEN BEGIN
+  ;;    out_times              = TEMPORARY(ion.x)
+  ;; ENDIF
+
+  IF KEYWORD_SET(nonMem) THEN BEGIN
+     CLEAR_ION_DB_VARS
   ENDIF
 
   RETURN

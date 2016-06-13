@@ -81,20 +81,20 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
   ENDIF ELSE BEGIN
 
      ;;This common block is defined ONLY here and in LOAD_NEWELL_ION_DB, I believe
-     COMMON NEWELL_I ;; ,NEWELL_I__ion,NEWELL_I__HAVE_GOOD_I, $
-        ;; NEWELL_I__good_i,NEWELL_I__cleaned_i, $
-        ;; NEWELL_I__dbFile,NEWELL_I__dbDir, $
-        ;; NEWELL_I__charIERange, $
-        ;; NEWELL_I__RECALCULATE
+     COMMON NEWELL_I,NEWELL_I__ion,NEWELL_I__HAVE_GOOD_I, $
+        NEWELL_I__good_i,NEWELL_I__cleaned_i, $
+        NEWELL_I__dbFile,NEWELL_I__dbDir, $
+        NEWELL_I__charIERange, $
+        NEWELL_I__RECALCULATE
      
      ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_NEWELL_ESPEC_DB
-     COMMON NEWELL ;; ,NEWELL__eSpec,NEWELL__HAVE_GOOD_I, $
-        ;; NEWELL__failCode, $
-        ;; NEWELL__good_i, $ 
-        ;; NEWELL__charERange, $
-        ;; ;;NEWELL__cleaned_i, $
-        ;; NEWELL__dbFile,NEWELL__dbDir, $
-     ;; NEWELL__RECALCULATE
+     COMMON NEWELL,NEWELL__eSpec,NEWELL__HAVE_GOOD_I, $
+        NEWELL__failCode, $
+        NEWELL__good_i, $ 
+        NEWELL__charERange, $
+        ;;NEWELL__cleaned_i, $
+        NEWELL__dbFile,NEWELL__dbDir, $
+     NEWELL__RECALCULATE
      
 
   ENDELSE
@@ -240,13 +240,14 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                    NEWELLDBDIR=dbDir, $
                                    NEWELLDBFILE=dbFile, $
                                    FORCE_LOAD_DB=force_load_db, $
-                                   DESPUN_ALF_DB=despun_alf_db, $
                                    DONT_LOAD_IN_MEMORY=nonMem, $
                                    ;; OUT_GOOD_I=good_i, $
                                    LUN=lun
               IF ~KEYWORD_SET(nonMem) THEN BEGIN
                  NEWELL__eSpec                         = dbStruct
-                 NEWELL__failCodes                     = failCodes
+                 IF N_ELEMENTS(failCodes) GT 0 THEN BEGIN
+                    NEWELL__failCodes                  = failCodes
+                 ENDIF
                  NEWELL__dbFile                        = dbFile
                  NEWELL__dbDir                         = dbDir
               ENDIF

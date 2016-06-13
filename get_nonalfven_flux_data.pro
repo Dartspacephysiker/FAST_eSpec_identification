@@ -12,6 +12,9 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             ENUMFLPLOTTYPE=eNumFlPlotType, $
                             IONPLOTS=ionPlots, $
                             IFLUXPLOTTYPE=iFluxPlotType, $
+                            DO_TIMEAVG_FLUXQUANTITIES=do_timeAvg_fluxQuantities, $
+                            ESPEC_DELTA_T=eSpec_delta_t, $
+                            ION_DELTA_T=ion_delta_t, $
                             OUT_EFLUX_DATA=eFlux_data, $
                             OUT_ENUMFLUX_DATA=eNumFlux_data, $
                             OUT_IFLUX_DATA=iFlux_data, $
@@ -78,12 +81,29 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             ANGLELIM2=angleLim2, $
                             ;; GET_ESPEC_I_NOT_ION_I=get_eSpec_i, $
                             RESET_GOOD_INDS=reset_good_inds, $
-                            DO_NOT_SET_DEFAULTS=do_not_set_defaults
+                            DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
+                            DONT_LOAD_IN_MEMORY=nonMem
 
   COMPILE_OPT idl2
 
   IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
-     LOAD_NEWELL_ESPEC_DB,eSpec;,/DONT_LOAD_IN_MEMORY
+     LOAD_NEWELL_ESPEC_DB,eSpec,/DONT_LOAD_IN_MEMORY
+
+     IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
+        eSpec_delta_t          = [FLOAT(eSpec.x[1:-1]-eSpec.x[0:-2]),1.0]
+
+        worst                = WHERE(eSpec_delta_t LT 0,nWorst)
+        IF nWorst GT 0 THEN BEGIN
+           PRINT,'The worst!'
+           eSpec_delta_t[worst] = 2.0
+           ;; STOP
+        ENDIF
+
+        fixme                = WHERE(eSpec_delta_t GT 2,nFix)
+        IF nFix GT 0 THEN BEGIN
+           eSpec_delta_t[fixme] = 2.0
+        ENDIF
+     ENDIF
 
      IF ~KEYWORD_SET(for_IMF_screening) THEN BEGIN ;If doing IMF stuff, GET_RESTRICTED_AND_INTERPED_DB_INDICES will handle this
         good_eSpec_i         = GET_ESPEC_ION_DB_IND(eSpec,satellite,lun, $
@@ -116,7 +136,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                             RESET_GOOD_INDS=reset_good_inds, $
                                             DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                                             ;; /DONT_LOAD_IN_MEMORY, $
-                                            ;; DONT_LOAD_IN_MEMORY=nonMem, $
+                                            DONT_LOAD_IN_MEMORY=nonMem, $
                                             /PRINT_PARAM_SUMMARY)
 
         nBef_eSpec           = N_ELEMENTS(good_eSpec_i)
@@ -124,7 +144,22 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
   ENDIF
 
   IF KEYWORD_SET(ionPlots) THEN BEGIN
-     LOAD_NEWELL_ION_DB,ion;,OUT_GOOD_I=basicClean_ion_i
+     LOAD_NEWELL_ION_DB,ion,/DONT_LOAD_IN_MEMORY;,OUT_GOOD_I=basicClean_ion_i
+
+     IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
+        ion_delta_t            = [FLOAT(ion.x[1:-1]-ion.x[0:-2]),1.0]
+
+        worst                = WHERE(ion_delta_t LT 0,nWorst)
+        IF nWorst GT 0 THEN BEGIN
+           PRINT,'The worst!'
+           ;; STOP
+        ENDIF
+
+        fixme                = WHERE(ion_delta_t GT 2,nFix)
+        IF nFix GT 0 THEN BEGIN
+           ion_delta_t[fixme]  = 2.0
+        ENDIF
+     ENDIF
 
      IF ~KEYWORD_SET(for_IMF_screening) THEN BEGIN ;If doing IMF stuff, GET_RESTRICTED_AND_INTERPED_DB_INDICES will handle this
         good_ion_i           = GET_ESPEC_ION_DB_IND(ion,satellite,lun, $
@@ -154,7 +189,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                           RESET_GOOD_INDS=reset_good_inds, $
                                           DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                                           ;; /DONT_LOAD_IN_MEMORY, $
-                                          ;; DONT_LOAD_IN_MEMORY=nonMem, $
+                                          DONT_LOAD_IN_MEMORY=nonMem, $
                                           /PRINT_PARAM_SUMMARY)
 
         nBef_ion             = N_ELEMENTS(good_ion_i)
@@ -220,125 +255,129 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
         ;;In this case, we're going to grab all the IMF-type inds a bit later
         IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
            eSpec_i_list      = GET_RESTRICTED_AND_INTERPED_DB_INDICES(eSpec,satellite,delay,LUN=lun, $
-                                                                                   ;; DBTIMES=cdbTime, $
-                                                                                   DBFILE=dbfile, $
-                                                                                   HEMI=hemi, $
-                                                                                   ORBRANGE=orbRange, $
-                                                                                   ALTITUDERANGE=altitudeRange, $
-                                                                                   CHARERANGE=charERange, $
-                                                                                   ;; CHARIERANGE=charIERange, $ ;Only for non-Alfvén ions
-                                                                                   SAMPLE_T_RESTRICTION=sample_t_restriction, $
-                                                                                   MINMLT=minM, $
-                                                                                   MAXMLT=maxM, $
-                                                                                   BINM=binM, $
-                                                                                   SHIFTM=shiftM, $
-                                                                                   MINILAT=minI, $
-                                                                                   MAXILAT=maxI, $
-                                                                                   BINI=binI, $
-                                                                                   DO_LSHELL=do_lshell, $
-                                                                                   MINLSHELL=minL, $
-                                                                                   MAXLSHELL=maxL, $
-                                                                                   BINL=binL, $
-                                                                                   ;; MIN_MAGCURRENT=minMC, $
-                                                                                   ;; MAX_NEGMAGCURRENT=maxNegMC, $
-                                                                                   SMOOTH_IMF=smoothWindow, $
-                                                                                   BYMIN=byMin, $
-                                                                                   BYMAX=byMax, $
-                                                                                   BZMIN=bzMin, $
-                                                                                   BZMAX=bzMax, $
-                                                                                   BTMIN=btMin, $
-                                                                                   BTMAX=btMax, $
-                                                                                   BXMIN=bxMin, $
-                                                                                   BXMAX=bxMax, $
-                                                                                   DO_ABS_BYMIN=abs_byMin, $
-                                                                                   DO_ABS_BYMAX=abs_byMax, $
-                                                                                   DO_ABS_BZMIN=abs_bzMin, $
-                                                                                   DO_ABS_BZMAX=abs_bzMax, $
-                                                                                   DO_ABS_BTMIN=abs_btMin, $
-                                                                                   DO_ABS_BTMAX=abs_btMax, $
-                                                                                   DO_ABS_BXMIN=abs_bxMin, $
-                                                                                   DO_ABS_BXMAX=abs_bxMax, $
-                                                                                   RESET_OMNI_INDS=reset_omni_inds, $
-                                                                                   CLOCKSTR=clockStr, $
-                                                                                   DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
-                                                                                   RESTRICT_WITH_THESE_I=restrict_with_these_i, $
-                                                                                   DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
-                                                                                   BX_OVER_BYBZ=Bx_over_ByBz_Lim, $
-                                                                                   MULTIPLE_DELAYS=multiple_delays, $
-                                                                                   RESOLUTION_DELAY=delay_res, $
-                                                                                   BINOFFSET_DELAY=binOffset_delay, $
-                                                                                   MULTIPLE_IMF_CLOCKANGLES=multiple_IMF_clockAngles, $
-                                                                                   STABLEIMF=stableIMF, $
-                                                                                   DO_NOT_CONSIDER_IMF=do_not_consider_IMF, $
-                                                                                   OMNI_COORDS=omni_Coords, $
-                                                                                   ANGLELIM1=angleLim1, $
-                                                                                   ANGLELIM2=angleLim2, $
-                                                                                   HWMAUROVAL=HwMAurOval, $
-                                                                                   HWMKPIND=HwMKpInd, $
-                                                                                   RESET_GOOD_INDS=reset_good_inds);; , $
-                                                                                   ;; NO_BURSTDATA=no_burstData)
+                                                                      ;; DBTIMES=cdbTime, $
+                                                                      DBFILE=dbfile, $
+                                                                      HEMI=hemi, $
+                                                                      ORBRANGE=orbRange, $
+                                                                      ALTITUDERANGE=altitudeRange, $
+                                                                      CHARERANGE=charERange, $
+                                                                      ;; CHARIERANGE=charIERange, $ ;Only for non-Alfvén ions
+                                                                      SAMPLE_T_RESTRICTION=sample_t_restriction, $
+                                                                      MINMLT=minM, $
+                                                                      MAXMLT=maxM, $
+                                                                      BINM=binM, $
+                                                                      SHIFTM=shiftM, $
+                                                                      MINILAT=minI, $
+                                                                      MAXILAT=maxI, $
+                                                                      BINI=binI, $
+                                                                      DO_LSHELL=do_lshell, $
+                                                                      MINLSHELL=minL, $
+                                                                      MAXLSHELL=maxL, $
+                                                                      BINL=binL, $
+                                                                      ;; MIN_MAGCURRENT=minMC, $
+                                                                      ;; MAX_NEGMAGCURRENT=maxNegMC, $
+                                                                      SMOOTH_IMF=smoothWindow, $
+                                                                      BYMIN=byMin, $
+                                                                      BYMAX=byMax, $
+                                                                      BZMIN=bzMin, $
+                                                                      BZMAX=bzMax, $
+                                                                      BTMIN=btMin, $
+                                                                      BTMAX=btMax, $
+                                                                      BXMIN=bxMin, $
+                                                                      BXMAX=bxMax, $
+                                                                      DO_ABS_BYMIN=abs_byMin, $
+                                                                      DO_ABS_BYMAX=abs_byMax, $
+                                                                      DO_ABS_BZMIN=abs_bzMin, $
+                                                                      DO_ABS_BZMAX=abs_bzMax, $
+                                                                      DO_ABS_BTMIN=abs_btMin, $
+                                                                      DO_ABS_BTMAX=abs_btMax, $
+                                                                      DO_ABS_BXMIN=abs_bxMin, $
+                                                                      DO_ABS_BXMAX=abs_bxMax, $
+                                                                      RESET_OMNI_INDS=reset_omni_inds, $
+                                                                      CLOCKSTR=clockStr, $
+                                                                      DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
+                                                                      RESTRICT_WITH_THESE_I=restrict_with_these_i, $
+                                                                      DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
+                                                                      BX_OVER_BYBZ=Bx_over_ByBz_Lim, $
+                                                                      MULTIPLE_DELAYS=multiple_delays, $
+                                                                      RESOLUTION_DELAY=delay_res, $
+                                                                      BINOFFSET_DELAY=binOffset_delay, $
+                                                                      MULTIPLE_IMF_CLOCKANGLES=multiple_IMF_clockAngles, $
+                                                                      STABLEIMF=stableIMF, $
+                                                                      DO_NOT_CONSIDER_IMF=do_not_consider_IMF, $
+                                                                      OMNI_COORDS=omni_Coords, $
+                                                                      ANGLELIM1=angleLim1, $
+                                                                      ANGLELIM2=angleLim2, $
+                                                                      HWMAUROVAL=HwMAurOval, $
+                                                                      HWMKPIND=HwMKpInd, $
+                                                                      /FOR_ESPEC_OR_ION_DB, $
+                                                                      RESET_GOOD_INDS=reset_good_inds, $
+                                                                      DONT_LOAD_IN_MEMORY=nonMem) ;; , $
+           ;; NO_BURSTDATA=no_burstData)
 
 
         ENDIF
         IF KEYWORD_SET(ionPlots) THEN BEGIN
            ion_i_list        = GET_RESTRICTED_AND_INTERPED_DB_INDICES(ion,satellite,delay,LUN=lun, $
-                                                                                  ;; DBTIMES=cdbTime, $
-                                                                                  DBFILE=dbfile, $
-                                                                                  HEMI=hemi, $
-                                                                                  ORBRANGE=orbRange, $
-                                                                                  ALTITUDERANGE=altitudeRange, $
-                                                                                  ;; CHARERANGE=charERange, $
-                                                                                  CHARIERANGE=charIERange, $ ;Only for non-Alfvén ions
-                                                                                  SAMPLE_T_RESTRICTION=sample_t_restriction, $
-                                                                                  MINMLT=minM, $
-                                                                                  MAXMLT=maxM, $
-                                                                                   BINM=binM, $
-                                                                                   SHIFTM=shiftM, $
-                                                                                   MINILAT=minI, $
-                                                                                   MAXILAT=maxI, $
-                                                                                   BINI=binI, $
-                                                                                   DO_LSHELL=do_lshell, $
-                                                                                   MINLSHELL=minL, $
-                                                                                   MAXLSHELL=maxL, $
-                                                                                   BINL=binL, $
-                                                                                   ;; MIN_MAGCURRENT=minMC, $
-                                                                                   ;; MAX_NEGMAGCURRENT=maxNegMC, $
-                                                                                   SMOOTH_IMF=smoothWindow, $
-                                                                                   BYMIN=byMin, $
-                                                                                   BYMAX=byMax, $
-                                                                                   BZMIN=bzMin, $
-                                                                                   BZMAX=bzMax, $
-                                                                                   BTMIN=btMin, $
-                                                                                   BTMAX=btMax, $
-                                                                                   BXMIN=bxMin, $
-                                                                                   BXMAX=bxMax, $
-                                                                                   DO_ABS_BYMIN=abs_byMin, $
-                                                                                   DO_ABS_BYMAX=abs_byMax, $
-                                                                                   DO_ABS_BZMIN=abs_bzMin, $
-                                                                                   DO_ABS_BZMAX=abs_bzMax, $
-                                                                                   DO_ABS_BTMIN=abs_btMin, $
-                                                                                   DO_ABS_BTMAX=abs_btMax, $
-                                                                                   DO_ABS_BXMIN=abs_bxMin, $
-                                                                                   DO_ABS_BXMAX=abs_bxMax, $
-                                                                                   RESET_OMNI_INDS=reset_omni_inds, $
-                                                                                   CLOCKSTR=clockStr, $
-                                                                                   DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
-                                                                                   RESTRICT_WITH_THESE_I=restrict_with_these_i, $
-                                                                                   DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
-                                                                                   BX_OVER_BYBZ=Bx_over_ByBz_Lim, $
-                                                                                   MULTIPLE_DELAYS=multiple_delays, $
-                                                                                   RESOLUTION_DELAY=delay_res, $
-                                                                                   BINOFFSET_DELAY=binOffset_delay, $
-                                                                                   MULTIPLE_IMF_CLOCKANGLES=multiple_IMF_clockAngles, $
-                                                                                   STABLEIMF=stableIMF, $
-                                                                                   DO_NOT_CONSIDER_IMF=do_not_consider_IMF, $
-                                                                                   OMNI_COORDS=omni_Coords, $
-                                                                                   ANGLELIM1=angleLim1, $
-                                                                                   ANGLELIM2=angleLim2, $
-                                                                                   HWMAUROVAL=HwMAurOval, $
-                                                                                   HWMKPIND=HwMKpInd, $
-                                                                                   RESET_GOOD_INDS=reset_good_inds);; , $
-                                                                                   ;; NO_BURSTDATA=no_burstData)
+                                                                      ;; DBTIMES=cdbTime, $
+                                                                      DBFILE=dbfile, $
+                                                                      HEMI=hemi, $
+                                                                      ORBRANGE=orbRange, $
+                                                                      ALTITUDERANGE=altitudeRange, $
+                                                                      ;; CHARERANGE=charERange, $
+                                                                      CHARIERANGE=charIERange, $ ;Only for non-Alfvén ions
+                                                                      SAMPLE_T_RESTRICTION=sample_t_restriction, $
+                                                                      MINMLT=minM, $
+                                                                      MAXMLT=maxM, $
+                                                                      BINM=binM, $
+                                                                      SHIFTM=shiftM, $
+                                                                      MINILAT=minI, $
+                                                                      MAXILAT=maxI, $
+                                                                      BINI=binI, $
+                                                                      DO_LSHELL=do_lshell, $
+                                                                      MINLSHELL=minL, $
+                                                                      MAXLSHELL=maxL, $
+                                                                      BINL=binL, $
+                                                                      ;; MIN_MAGCURRENT=minMC, $
+                                                                      ;; MAX_NEGMAGCURRENT=maxNegMC, $
+                                                                      SMOOTH_IMF=smoothWindow, $
+                                                                      BYMIN=byMin, $
+                                                                      BYMAX=byMax, $
+                                                                      BZMIN=bzMin, $
+                                                                      BZMAX=bzMax, $
+                                                                      BTMIN=btMin, $
+                                                                      BTMAX=btMax, $
+                                                                      BXMIN=bxMin, $
+                                                                      BXMAX=bxMax, $
+                                                                      DO_ABS_BYMIN=abs_byMin, $
+                                                                      DO_ABS_BYMAX=abs_byMax, $
+                                                                      DO_ABS_BZMIN=abs_bzMin, $
+                                                                      DO_ABS_BZMAX=abs_bzMax, $
+                                                                      DO_ABS_BTMIN=abs_btMin, $
+                                                                      DO_ABS_BTMAX=abs_btMax, $
+                                                                      DO_ABS_BXMIN=abs_bxMin, $
+                                                                      DO_ABS_BXMAX=abs_bxMax, $
+                                                                      RESET_OMNI_INDS=reset_omni_inds, $
+                                                                      CLOCKSTR=clockStr, $
+                                                                      DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
+                                                                      RESTRICT_WITH_THESE_I=restrict_with_these_i, $
+                                                                      DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
+                                                                      BX_OVER_BYBZ=Bx_over_ByBz_Lim, $
+                                                                      MULTIPLE_DELAYS=multiple_delays, $
+                                                                      RESOLUTION_DELAY=delay_res, $
+                                                                      BINOFFSET_DELAY=binOffset_delay, $
+                                                                      MULTIPLE_IMF_CLOCKANGLES=multiple_IMF_clockAngles, $
+                                                                      STABLEIMF=stableIMF, $
+                                                                      DO_NOT_CONSIDER_IMF=do_not_consider_IMF, $
+                                                                      OMNI_COORDS=omni_Coords, $
+                                                                      ANGLELIM1=angleLim1, $
+                                                                      ANGLELIM2=angleLim2, $
+                                                                      HWMAUROVAL=HwMAurOval, $
+                                                                      HWMKPIND=HwMKpInd, $
+                                                                      /FOR_ESPEC_OR_ION_DB, $
+                                                                      RESET_GOOD_INDS=reset_good_inds, $
+                                                                      DONT_LOAD_IN_MEMORY=nonMem) ;; , $
+           ;; NO_BURSTDATA=no_burstData)
 
 
         ENDIF
@@ -395,19 +434,41 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                  DESPUN_ALF_DB=despun_alf_db, $
                                  /DONT_LOAD_IN_MEMORY
 
-        nBef_eSpec           = N_ELEMENTS(eSpec_i)
+        IF KEYWORD_SET(for_IMF_screening) THEN BEGIN
+           FOR jj=0,N_ELEMENTS(eSpec_i_list)-1 DO BEGIN
+              eSpec_i           = eSpec_i_list[jj]
 
-        IF KEYWORD_SET(nonAlfven__junk_alfven_candidates) THEN BEGIN
-           PRINT,"Even junking electron measurements associated with Alfvén wave CANDIDATES!"
-           eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i,COUNT=nAft_eSpec)
+              nBef_eSpec           = N_ELEMENTS(eSpec_i)
+
+              IF KEYWORD_SET(nonAlfven__junk_alfven_candidates) THEN BEGIN
+                 PRINT,"Even junking electron measurements associated with Alfvén wave CANDIDATES!"
+                 eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i,COUNT=nAft_eSpec)
+              ENDIF ELSE BEGIN
+                 tmp_alf_eSpec_i   = CGSETINTERSECTION(plot_i,good_alf_eSpec_i,INDICES_B=eSpec_deleteable_ii)
+                 eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i[eSpec_deleteable_ii],COUNT=nAft_eSpec)
+              ENDELSE
+
+              PRINT,"Dropped " + STRCOMPRESS(nBef_eSpec-nAft_eSpec,/REMOVE_ALL) + " Alfvén electron events..."
+              PRINT,FORMAT='(I0," remaining ...")',nAft_eSpec
+
+              eSpec_i_list[jj]     = eSpec_i
+           ENDFOR
         ENDIF ELSE BEGIN
-           tmp_alf_eSpec_i   = CGSETINTERSECTION(plot_i,good_alf_eSpec_i,INDICES_B=eSpec_deleteable_ii)
-           eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i[eSpec_deleteable_ii],COUNT=nAft_eSpec)
+
+           nBef_eSpec           = N_ELEMENTS(eSpec_i)
+
+           IF KEYWORD_SET(nonAlfven__junk_alfven_candidates) THEN BEGIN
+              PRINT,"Even junking electron measurements associated with Alfvén wave CANDIDATES!"
+              eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i,COUNT=nAft_eSpec)
+           ENDIF ELSE BEGIN
+              tmp_alf_eSpec_i   = CGSETINTERSECTION(plot_i,good_alf_eSpec_i,INDICES_B=eSpec_deleteable_ii)
+              eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i[eSpec_deleteable_ii],COUNT=nAft_eSpec)
+           ENDELSE
+
+           PRINT,"Dropped " + STRCOMPRESS(nBef_eSpec-nAft_eSpec,/REMOVE_ALL) + " Alfvén electron events..."
+           PRINT,FORMAT='(I0," remaining ...")',nAft_eSpec
+
         ENDELSE
-
-        PRINT,"Dropped " + STRCOMPRESS(nBef_eSpec-nAft_eSpec,/REMOVE_ALL) + " Alfvén electron events..."
-        PRINT,FORMAT='(I0," remaining ...")',nAft_eSpec
-
      ENDIF
 
      IF KEYWORD_SET(ionPlots) THEN BEGIN
@@ -475,6 +536,13 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
      ion__ilats              = ion.ilat
   ENDIF
 
-
+  IF KEYWORD_SET(for_IMF_screening) THEN BEGIN
+     IF KEYWORD_SET(espec_i_list) THEN BEGIN
+        eSpec_i              = eSpec_i_list
+     ENDIF
+     IF KEYWORD_SET(ion_i_list) THEN BEGIN
+        ion_i                = ion_i_list
+     ENDIF
+  ENDIF
 
 END

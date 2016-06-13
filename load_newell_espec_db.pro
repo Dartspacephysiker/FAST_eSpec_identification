@@ -14,7 +14,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   COMPILE_OPT idl2
 
   ;;This common block is defined ONLY here and in GET_ESPEC_ION_DB_IND
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
      COMMON NEWELL,NEWELL__eSpec,NEWELL__HAVE_GOOD_I, $
         NEWELL__failCode, $
         NEWELL__good_i, $
@@ -22,7 +22,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
         ;; NEWELL__cleaned_i, $
         NEWELL__dbFile,NEWELL__dbDir, $
         NEWELL__RECALCULATE
-  ENDIF
+  ;; ENDIF
   
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
 
@@ -38,7 +38,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      lun                 = -1
   ENDIF
 
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
      IF N_ELEMENTS(NEWELL__eSpec) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
         CASE 1 OF
            KEYWORD_SET(just_times): BEGIN
@@ -48,28 +48,30 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
            ELSE: BEGIN
               PRINT,'Restoring eSpec DB already in memory...'
               eSpec         = NEWELL__eSpec
-              failCodes     = NEWELL__failCodes
+              IF N_ELEMENTS(NEWELL__failCodes) GT 0 THEN BEGIN
+                 failCodes  = NEWELL__failCodes
+              ENDIF
               NewellDBDir   = NEWELL__dbDir
               NewellDBFile  = NEWELL__dbFile
            END
         ENDCASE
         RETURN
      ENDIF
-  ENDIF
+  ;; ENDIF
 
   IF N_ELEMENTS(NewellDBDir) EQ 0 THEN BEGIN
      NewellDBDir      = defNewellDBDir
   ENDIF
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     NEWELL__dbDir          = NewellDBDir
-  ENDIF
+  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  NEWELL__dbDir          = NewellDBDir
+  ;; ENDIF
 
   IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
      NewellDBFile     = defNewellDBFile
   ENDIF
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     NEWELL__dbFile         = NewellDBFile
-  ENDIF
+  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  NEWELL__dbFile         = NewellDBFile
+  ;; ENDIF
 
   IF N_ELEMENTS(eSpec) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
      IF KEYWORD_SET(force_load_db) THEN BEGIN
@@ -102,7 +104,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      PRINTF,lun,'eSpec DB already loaded! Not restoring ' + NewellDBFile + '...'
   ENDELSE
 
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
      NEWELL__eSpec          = eSpec
 
      IF N_ELEMENTS(failCode) NE 0 THEN BEGIN
@@ -112,11 +114,15 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
         PRINT,'This Newell DB file doesn''t have fail codes!'
      ENDELSE
 
-  ENDIF
+  ;; ENDIF
 
   IF KEYWORD_SET(just_times) THEN BEGIN
-     out_times              = TEMPORARY(eSpec)
+     out_times              = TEMPORARY(eSpec.x)
   ENDIF
+
+     IF KEYWORD_SET(nonMem) THEN BEGIN
+        CLEAR_ESPEC_DB_VARS
+     ENDIF
 
   RETURN
 
