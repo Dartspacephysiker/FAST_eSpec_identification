@@ -4,6 +4,7 @@ FUNCTION BARPLOT_ESPEC_TYPES_VS_MLT,eSpec, $
                                     MINMLT=minLoc, $
                                     MAXMLT=maxLoc, $
                                     YLOG=yLog, $
+                                    YRANGE=yRange, $
                                     TITLE=title, $
                                     ;; ONLY_NEWELL=only_newell, $
                                     ;; NEWELL_ESPEC_INTERPRETED=eSpec_interpreted, $
@@ -66,7 +67,8 @@ FUNCTION BARPLOT_ESPEC_TYPES_VS_MLT,eSpec, $
   lsArr                             = ['-','-','-']
 
   xRange                            = [0,24]
-  yRange                            = [0.7,1.03]
+  yRange                            = KEYWORD_SET(yRange) ? yRange : [0.7,1.03]
+  ;; yRange                            = [0.7,1.03]
 
   xTickValues                       = [0,3,6,9,12,15,18,21]
   xTickName                         = STRCOMPRESS(xTickValues,/REMOVE_ALL)

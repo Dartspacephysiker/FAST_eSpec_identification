@@ -3,6 +3,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             FOR_STORMS=for_storms, $
                             FOR_IMF_SCREENING=for_IMF_screening, $
                             NONALFVEN__JUNK_ALFVEN_CANDIDATES=nonAlfven__junk_alfven_candidates, $
+                            NONALFVEN__ALL_FLUXES=nonalfven__all_fluxes, $
                             DESPUN_ALF_DB=despun_alf_db, $
                             T1_ARR=t1_arr,T2_ARR=t2_arr, $
                             EPLOTS=ePlots, $
@@ -341,7 +342,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
 
         ENDIF
-     ENDIF
+     END
      ELSE: BEGIN
 
         ;;Electrons?
@@ -388,7 +389,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
   ENDCASE
 
   ;;Electrons
-  IF ~KEYWORD_SET(all_fluxes) THEN BEGIN
+  IF ~KEYWORD_SET(nonalfven__all_fluxes) THEN BEGIN
      IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
         LOAD_ALF_NEWELL_ESPEC_DB,!NULL,good_alf_eSpec_i,good_eSpec_assoc_w_alf_i, $
                                  DESPUN_ALF_DB=despun_alf_db, $
