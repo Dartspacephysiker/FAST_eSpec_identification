@@ -93,11 +93,13 @@ PRO JOURNAL__20160614__NEWELL_PROBOCCURRENCE_FOR_ZHANG_ET_AL_2014_PLOT
   ;; altRange            = [3000,4180]
   ;; altRange            = [4000,4180]
 
-  altRange            = [[300,1000], $
-                         [1000,2000], $
-                         [2000,3000], $
-                         [3000,4180], $
-                         [4000,4180]]
+  ;; altRange            = [[300,1000], $
+  ;;                        [1000,2000], $
+  ;;                        [2000,3000], $
+  ;;                        [3000,4180], $
+  ;;                        [4000,4180]]
+
+  altRange              = [2000,4180]
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;IMF condition stuff--run the ring!
@@ -113,13 +115,13 @@ PRO JOURNAL__20160614__NEWELL_PROBOCCURRENCE_FOR_ZHANG_ET_AL_2014_PLOT
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;ILAT stuff
-  ;; hemi                           = 'NORTH'
-  ;; minI                           = 61
-  ;; maxI                           = 87
+  hemi                           = 'NORTH'
+  minI                           = 61
+  maxI                           = 87
 
-  hemi                           = 'SOUTH'
-  minI                           = -87
-  maxI                           = -61
+  ;; hemi                           = 'SOUTH'
+  ;; minI                           = -87
+  ;; maxI                           = -61
 
   binI                           = 2.0
 
@@ -384,6 +386,7 @@ PRO JOURNAL__20160614__NEWELL_PROBOCCURRENCE_FOR_ZHANG_ET_AL_2014_PLOT
                                      N_TILE_COLUMNS=n_tile_columns, $
                                      TILING_ORDER=tiling_order, $
                                      TILE__FAVOR_ROWS=tile__favor_rows, $
+                                     TILE__INCLUDE_IMF_ARROWS=tile__include_IMF_arrows, $
                                      GROUP_LIKE_PLOTS_FOR_TILING=group_like_plots_for_tiling, $
                                      SCALE_LIKE_PLOTS_FOR_TILING=scale_like_plots_for_tiling, $
                                      ;; BLANK_TILE_POSITIONS=blank_tile_positions, $
