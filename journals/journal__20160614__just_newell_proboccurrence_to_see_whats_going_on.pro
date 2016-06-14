@@ -1,30 +1,33 @@
-;;06/13/16
-PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
+;;06/14/16
+PRO JOURNAL__20160614__JUST_NEWELL_PROBOCCURRENCE_TO_SEE_WHATS_GOING_ON
 
   COMPILE_OPT IDL2
 
   do_despunDB  = 1
 
-  hemi         = 'NORTH'
-  minI         = 61
-  maxI         = 85
-  binI         = 3
+  logAvgPlot   = 0
 
   do_not_consider_IMF = 1
 
   ;;Non-Alfvén options
-  nonAlfven_flux_plots  = 1
+  nonAlfven__newellPlot_probOccurrence = 1  
+  nonAlfven__newell_plotRange          = [[0.0,0.2], $
+                                          [0.0,0.2], $
+                                          [0.6,1.0]]
+  ;; nonAlfven_flux_plots  = 1
   nonAlfven__all_fluxes = 1
+  ;; newell_analyze_multiply_by_type_probability = 1
+  ;; newell_analyze_eFlux  = 1
 
   ;;Gross rates?
   do_grossRate_fluxQuantities = 0
   do_timeAvg_fluxQuantities   = 0
 
   ;;Plots to do
-  ePlots                   = 1
+  ePlots                   = 0
   eNumFlPlots              = 0
   pPlots                   = 0
-  ionPlots                 = 1
+  ionPlots                 = 0
   probOccurrencePlot       = 0
 
 
@@ -37,7 +40,7 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
   ;; logEfPlot                = 1
   ;; ePlotRange               = [5e7,10^(9.0)]
   logEfPlot                = 0
-  ePlotRange               = [0,10^(9.0)]
+  ePlotRange               = [0,1]
   noNegEflux               = 1
 
   eNumFlPlotType           = 'enumf_nonalfven'
@@ -45,8 +48,11 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
   ;; logENumFlPlot            = [1,1]
   ;; ENumFlPlotRange          = [[1e-1,1e1], $
   ;;                             [1e7,1e9]]
-  logENumFlPlot            = 1
-  ENumFlPlotRange          = [1e23,3e24]
+  ;; logENumFlPlot            = 1
+  ;; ENumFlPlotRange          = [1e23,3e24]
+  logENumFlPlot            = 0
+  ENumFlPlotRange          = [1e7,3e8]
+  
 
   ;; logPfPlot                = 1
   ;; PPlotRange               = [1e-1,1e1]
@@ -76,6 +82,11 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
   ;;                             [3180,4180]]
 
   ;; altRange                 = [[3675,4180]]
+  ;; altitudeRange            = [300,1000]
+  ;; altitudeRange            = [1000,2000]
+  ;; altitudeRange            = [2000,3000]
+  ;; altitudeRange            = [3000,4180]
+  altitudeRange            = [4000,4180]
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;IMF condition stuff--run the ring!
@@ -91,27 +102,26 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;ILAT stuff
-  hemi                           = 'NORTH'
-  minILAT                        = 61
-  maxILAT                        = 85
+  ;; hemi                           = 'NORTH'
+  ;; minI                           = 61
+  ;; maxI                           = 87
 
-  ;; hemi                           = 'SOUTH'
-  ;; minILAT                        = -86
-  ;; maxILAT                        = -61
+  hemi                           = 'SOUTH'
+  minI                           = -87
+  maxI                           = -61
 
-  binILAT                        = 4.0
+  binI                           = 2.0
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MLT stuff
-  binMLT                         = 1.0
-  shiftMLT                       = 0.0
+  binM                           = 0.5
+  shiftM                         = 0.0
 
   ;; minMLT                         = 6
   ;; maxMLT                         = 18
 
   ;;Bonus
   maskMin                        = 5
-
 
   PLOT_ALFVEN_STATS_IMF_SCREENING,maximus, $
                                   RESTRICT_WITH_THESE_I=restrict_with_these_i, $
@@ -193,6 +203,7 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
                                   AUTOSCALE_ENUMFLPLOTS=autoscale_eNumFlplots, $
                                   NEWELL_ANALYZE_EFLUX=newell_analyze_eFlux, $
                                   NEWELL_ANALYSIS__OUTPUT_SUMMARY=newell_analysis__output_summary, $
+                                  NEWELL_ANALYZE_MULTIPLY_BY_TYPE_PROBABILITY=newell_analyze_multiply_by_type_probability, $
                                   NONALFVEN_FLUX_PLOTS=nonAlfven_flux_plots, $
                                   NONALFVEN__JUNK_ALFVEN_CANDIDATES=nonAlfven__junk_alfven_candidates, $
                                   NONALFVEN__ALL_FLUXES=nonalfven__all_fluxes, $
@@ -254,6 +265,8 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
                                   NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
                                   NEWELLPLOT_NORMALIZE=newellPlot_normalize, $
                                   NEWELLPLOT_PROBOCCURRENCE=newellPlot_probOccurrence, $
+                                  NONALFVEN__NEWELLPLOT_PROBOCCURRENCE=nonAlfven__newellPlot_probOccurrence, $
+                                  NONALFVEN__NEWELL_PLOTRANGE=nonalfven__newell_plotRange, $
                                   TIMEAVGD_PFLUXPLOT=timeAvgd_pFluxPlot, $
                                   TIMEAVGD_PFLUXRANGE=timeAvgd_pFluxRange, $
                                   LOGTIMEAVGD_PFLUX=logTimeAvgd_PFlux, $
@@ -282,7 +295,8 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
                                   CUSTOM_GROSSRATE_CONVFACTOR=custom_grossRate_convFactor, $
                                   LOG_CUSTOM_MAXIND=log_custom_maxInd, $
                                   SUM_ELECTRON_AND_POYNTINGFLUX=sum_electron_and_poyntingflux, $
-                                  MEDIANPLOT=medianPlot, LOGAVGPLOT=logAvgPlot, $
+                                  MEDIANPLOT=medianPlot, $
+                                  LOGAVGPLOT=logAvgPlot, $
                                   ALL_LOGPLOTS=all_logPlots, $
                                   SQUAREPLOT=squarePlot, POLARCONTOUR=polarContour, $ ;WHOLECAP=wholeCap, $
                                   DBFILE=dbfile, $

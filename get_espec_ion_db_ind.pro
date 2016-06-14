@@ -88,13 +88,15 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         NEWELL_I__RECALCULATE
      
      ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_NEWELL_ESPEC_DB
-     COMMON NEWELL,NEWELL__eSpec,NEWELL__HAVE_GOOD_I, $
+     COMMON NEWELL,NEWELL__eSpec, $
+        NEWELL__HAVE_GOOD_I, $
         NEWELL__failCode, $
         NEWELL__good_i, $ 
         NEWELL__charERange, $
         ;;NEWELL__cleaned_i, $
-        NEWELL__dbFile,NEWELL__dbDir, $
-     NEWELL__RECALCULATE
+        NEWELL__dbFile, $
+        NEWELL__dbDir, $
+        NEWELL__RECALCULATE
      
 
   ENDELSE
@@ -538,13 +540,13 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      ;;gotta screen to make sure it's in ACE db too:
      ;;Only so many are useable, since ACE data start in 1998
      
-     IF KEYWORD_SET(satellite) THEN BEGIN
-        sat_i                                     = GET_SATELLITE_INDS(dbStruct,satellite,LUN=lun)
-        good_i                                    = region_i[where(region_i GE sat_i,nGood,complement=lost,ncomplement=nlost)]
-        lost                                      = region_i[lost]
-     ENDIF ELSE BEGIN
+     ;; IF KEYWORD_SET(satellite) THEN BEGIN
+     ;;    sat_i                                     = GET_SATELLITE_INDS(dbStruct,satellite,LUN=lun)
+     ;;    good_i                                    = region_i[where(region_i GE sat_i,nGood,complement=lost,ncomplement=nlost)]
+     ;;    lost                                      = region_i[lost]
+     ;; ENDIF ELSE BEGIN
         good_i                                    = region_i
-     ENDELSE
+     ;; ENDELSE
 
      ;;Now, clear out all the garbage (NaNs & Co.)
      IF is_ion THEN BEGIN

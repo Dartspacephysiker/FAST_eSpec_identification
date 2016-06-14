@@ -4,6 +4,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             FOR_IMF_SCREENING=for_IMF_screening, $
                             NONALFVEN__JUNK_ALFVEN_CANDIDATES=nonAlfven__junk_alfven_candidates, $
                             NONALFVEN__ALL_FLUXES=nonalfven__all_fluxes, $
+                            NONALFVEN__NEWELLPLOT_PROBOCCURRENCE=nonAlfven__newellPlot_probOccurrence, $
                             DESPUN_ALF_DB=despun_alf_db, $
                             T1_ARR=t1_arr,T2_ARR=t2_arr, $
                             EPLOTS=ePlots, $
@@ -70,6 +71,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
                             RESTRICT_WITH_THESE_I=restrict_with_these_i, $
                             BX_OVER_BYBZ=Bx_over_ByBz_Lim, $
+                            DELAY=delay, $
                             MULTIPLE_DELAYS=multiple_delays, $
                             RESOLUTION_DELAY=delay_res, $
                             BINOFFSET_DELAY=binOffset_delay, $
@@ -86,7 +88,16 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
   COMPILE_OPT idl2
 
-  IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
+  IF SIZE(plot_i,/TYPE) EQ 11 THEN BEGIN
+     PRINT,'plot_i is a list!'
+     plot_i_is_list = 1
+  ENDIF ELSE BEGIN
+     plot_i_is_list = 0
+  ENDELSE
+
+  IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) $
+     OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
+
      LOAD_NEWELL_ESPEC_DB,eSpec,/DONT_LOAD_IN_MEMORY
 
      IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
@@ -253,7 +264,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
      END
      KEYWORD_SET(for_IMF_screening): BEGIN
         ;;In this case, we're going to grab all the IMF-type inds a bit later
-        IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
+        IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) $
+        OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
            eSpec_i_list      = GET_RESTRICTED_AND_INTERPED_DB_INDICES(eSpec,satellite,delay,LUN=lun, $
                                                                       ;; DBTIMES=cdbTime, $
                                                                       DBFILE=dbfile, $
@@ -385,7 +397,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
      ELSE: BEGIN
 
         ;;Electrons?
-        IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
+        IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) $
+        OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
            GET_DATA_AVAILABILITY_FOR_ARRAY_OF_UTC_RANGES, $
               T1_ARR=t1_Arr, $
               T2_ARR=t2_Arr, $
@@ -429,14 +442,21 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
   ;;Electrons
   IF ~KEYWORD_SET(nonalfven__all_fluxes) THEN BEGIN
-     IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
+     IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) $
+     OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
         LOAD_ALF_NEWELL_ESPEC_DB,!NULL,good_alf_eSpec_i,good_eSpec_assoc_w_alf_i, $
                                  DESPUN_ALF_DB=despun_alf_db, $
                                  /DONT_LOAD_IN_MEMORY
 
         IF KEYWORD_SET(for_IMF_screening) THEN BEGIN
+           IF ~plot_i_is_list THEN BEGIN
+              PRINT,"Wait! Why isn't plot_i a list as well?!?"
+              STOP
+           ENDIF
+
            FOR jj=0,N_ELEMENTS(eSpec_i_list)-1 DO BEGIN
-              eSpec_i           = eSpec_i_list[jj]
+              eSpec_i              = eSpec_i_list[jj]
+              tmp_plot_i           = plot_i[jj]
 
               nBef_eSpec           = N_ELEMENTS(eSpec_i)
 
@@ -444,7 +464,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                  PRINT,"Even junking electron measurements associated with Alfvén wave CANDIDATES!"
                  eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i,COUNT=nAft_eSpec)
               ENDIF ELSE BEGIN
-                 tmp_alf_eSpec_i   = CGSETINTERSECTION(plot_i,good_alf_eSpec_i,INDICES_B=eSpec_deleteable_ii)
+                 tmp_alf_eSpec_i   = CGSETINTERSECTION(tmp_plot_i,good_alf_eSpec_i,INDICES_B=eSpec_deleteable_ii)
                  eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i[eSpec_deleteable_ii],COUNT=nAft_eSpec)
               ENDELSE
 
@@ -478,6 +498,33 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
         nBef_ion             = N_ELEMENTS(ion_i)
 
+        IF KEYWORD_SET(for_IMF_screening) THEN BEGIN
+           IF ~plot_i_is_list THEN BEGIN
+              PRINT,"Wait! Why isn't plot_i a list as well?!?"
+              STOP
+           ENDIF
+
+           FOR jj=0,N_ELEMENTS(ion_i_list)-1 DO BEGIN
+              ion_i              = ion_i_list[jj]
+              tmp_plot_i           = plot_i[jj]
+
+              nBef_ion           = N_ELEMENTS(ion_i)
+
+              IF KEYWORD_SET(nonAlfven__junk_alfven_candidates) THEN BEGIN
+                 PRINT,"Even junking electron measurements associated with Alfvén wave CANDIDATES!"
+                 ion_i           = CGSETDIFFERENCE(ion_i,good_iSpec_assoc_w_alf_i,COUNT=nAft_ion)
+              ENDIF ELSE BEGIN
+                 tmp_alf_ion_i   = CGSETINTERSECTION(tmp_plot_i,good_alf_ion_i,INDICES_B=ion_deleteable_ii)
+                 ion_i           = CGSETDIFFERENCE(ion_i,good_iSpec_assoc_w_alf_i[ion_deleteable_ii],COUNT=nAft_ion)
+              ENDELSE
+
+              PRINT,"Dropped " + STRCOMPRESS(nBef_ion-nAft_ion,/REMOVE_ALL) + " Alfvén electron events..."
+              PRINT,FORMAT='(I0," remaining ...")',nAft_ion
+
+              ion_i_list[jj]     = ion_i
+           ENDFOR
+        ENDIF ELSE BEGIN
+
         IF KEYWORD_SET(nonAlfven__junk_alfven_candidates) THEN BEGIN
            PRINT,"Even junking ion measurements associated with Alfvén wave CANDIDATES!"
            ion_i             = CGSETDIFFERENCE(ion_i,good_iSpec_assoc_w_alf_i,COUNT=nAft_ion)
@@ -488,6 +535,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
         PRINT,"Dropped " + STRCOMPRESS(nBef_ion-nAft_ion,/REMOVE_ALL) + " Alfvén ion events..."
         PRINT,FORMAT='(I0," remaining ...")',nAft_ion
+     ENDELSE
+
      ENDIF
   ENDIF
 
