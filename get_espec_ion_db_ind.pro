@@ -24,6 +24,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                               ;; MINLSHELL=minL, $
                               ;; MAXLSHELL=maxL, $
                               ;; BINLSHELL=binL, $
+                              USE_AACGM=use_aacgm, $
                               DAYSIDE=dayside, $
                               NIGHTSIDE=nightside, $
                               GET_ESPEC_I_NOT_ION_I=get_eSpec_i, $
@@ -111,6 +112,11 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
   ;; defPrintSummary                              = 0
 
   IF ~KEYWORD_SET(lun) THEN lun                   = defLun ;stdout
+
+  IF KEYWORD_SET(use_AACGM) THEN BEGIN
+     PRINT,"Fool! This hasn't been set up yet. You have to convert that unimaginably large database to other coordinates."
+     STOP
+  ENDIF
 
   IF ~KEYWORD_SET(do_not_set_defaults) THEN BEGIN
      SET_DEFAULT_MLT_ILAT_AND_MAGC,MINMLT=minM,MAXMLT=maxM,BINM=binM, $

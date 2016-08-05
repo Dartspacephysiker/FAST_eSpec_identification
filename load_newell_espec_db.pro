@@ -6,6 +6,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          NEWELLDBFILE=NewellDBFile, $
                          FORCE_LOAD_DB=force_load_db, $
                          DONT_LOAD_IN_MEMORY=nonMem, $
+                         DONT_PERFORM_CORRECTION=dont_perform_correction, $
                          JUST_TIMES=just_times, $
                          OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
@@ -45,7 +46,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
         CASE 1 OF
            KEYWORD_SET(just_times): BEGIN
               PRINT,"Just giving eSpec times ..."
-              out_times     = eSpec.x
+              out_times     = NEWELL__eSpec.x
            END
            ELSE: BEGIN
               PRINT,'Restoring eSpec DB already in memory...'
@@ -83,14 +84,18 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      RESTORE,NewellDBDir+NewellDBFile
 
      ;;Correct fluxes
-     PRINT,"Correcting eSpec fluxes..."
-     eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
-     eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
-
-     ;;Convert to strict Newell interpretation
-
-     PRINT,"Converting eSpec DB to strict Newell interpretation ..."
-     CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec,/HUGE_STRUCTURE,/VERBOSE
+     IF ~KEYWORD_SET(dont_perform_correction) THEN BEGIN
+        PRINT,"Correcting eSpec fluxes..."
+        eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
+        eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
+        
+        ;;Convert to strict Newell interpretation
+        
+        PRINT,"Converting eSpec DB to strict Newell interpretation ..."
+        CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec,/HUGE_STRUCTURE,/VERBOSE
+     ENDIF ELSE BEGIN
+        PRINT,"Not correcting sign in each hemisphere, and not converting to strict Newell interp ..."
+     ENDELSE
 
      ;;The following lines aren't necessary for this little beaut
 
