@@ -2,6 +2,7 @@
 ;;NOTE: We do not clean the current database. It's clean as a whistle.
 PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          FAILCODES=failCode, $
+                         USE_UNSORTED_FILE=use_unsorted_file, $
                          NEWELLDBDIR=NewellDBDir, $
                          NEWELLDBFILE=NewellDBFile, $
                          FORCE_LOAD_DB=force_load_db, $
@@ -37,6 +38,9 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
 
   ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
 
+  defSortNewellDBFile    =  "sorted--" + defNewellDBFile
+
+
   IF N_ELEMENTS(lun) EQ 0 THEN BEGIN
      lun                 = -1
   ENDIF
@@ -70,7 +74,16 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   ;; ENDIF
 
   IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
-     NewellDBFile     = defNewellDBFile
+     CASE KEYWORD_SET(use_unsorted_file) OF
+        1: BEGIN
+           PRINT,'Using UNsorted eSpec DB ...'
+           NewellDBFile     = defNewellDBFile
+        END
+        ELSE: BEGIN
+           PRINT,'Using sorted eSpec DB ...'
+           NewellDBFile     = defSortNewellDBFile
+        END
+     ENDCASE
   ENDIF
   ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
   NEWELL__dbFile         = NewellDBFile

@@ -5,14 +5,16 @@ PRO JOURNAL__20160805__CONVERT_ALL_ESPECDB_ILATS_TO_MLATS
 
   orig_routineName = 'JOURNAL__20160805__CONVERT_ALL_FASTLOCDB_ILATS_TO_MLATS'
 
+  R_E              = 6371.2D    ;Earth radius in km, from IGRFLIB_V2.pro
+
   outDir           = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
 
   inFiles          = ['eSpec_20160607_db--PARSED--Orbs_500-16361--bonus_ephemeris_info.sav', $
                       'eSpec_20160607_db--PARSED--Orbs_500-16361--bonus_ephemeris_info--10to20mil.sav', $
                       'eSpec_20160607_db--PARSED--Orbs_500-16361--bonus_ephemeris_info--restavdebeste.sav']
 
-  inFileIndArr     = [[     0,1000000,2000000], $
-                      [999999,1999999,2999999]]
+  inFileIndArr     = [[     0,1000000,20000000], $
+                      [999999,1999999,28604344]]
 
   ;;This guy's too big to use ...
   ;; finalInFile       = 'sorted--eSpec_20160607_db--PARSED--Orbs_500-16361--bonus_ephemeris_info.sav'
@@ -27,8 +29,13 @@ PRO JOURNAL__20160805__CONVERT_ALL_ESPECDB_ILATS_TO_MLATS
 
   TIC
   clock = TIC('warnMe')
-  FOR k=0,N_ELEMENTS(inFiles)-1 DO BEGIN
-     LOAD_NEWELL_ESPEC_DB,/JUST_TIMES,OUT_TIMES=eSpecTimes
+  FOR k=2,N_ELEMENTS(inFiles)-1 DO BEGIN
+
+     LOAD_NEWELL_ESPEC_DB,/JUST_TIMES, $
+                          OUT_TIMES=eSpecTimes, $
+                          /DONT_LOAD_IN_MEMORY, $
+                          /DONT_PERFORM_CORRECTION
+
      inds        = inFileIndArr[k,*]
      eSTTemp     = eSpecTimes[inds[0]:inds[1]]
 
@@ -61,12 +68,12 @@ PRO JOURNAL__20160805__CONVERT_ALL_ESPECDB_ILATS_TO_MLATS
      ;;Times in CDF epoch time
      time_epoch           = UTC_TO_CDF_EPOCH(esTTemp)
 
-     YearArr              = FIX(STRMID(fastLoc.time,0,4))
-     MonthArr             = FIX(STRMID(fastLoc.time,5,2))
-     DayArr               = FIX(STRMID(fastLoc.time,8,2))
-     HourArr              = FIX(STRMID(fastLoc.time,11,2))
-     MinArr               = FIX(STRMID(fastLoc.time,14,2))
-     SecArr               = FLOAT(STRMID(fastLoc.time,17,6))
+     ;; YearArr              = FIX(STRMID(fastLoc.time,0,4))
+     ;; MonthArr             = FIX(STRMID(fastLoc.time,5,2))
+     ;; DayArr               = FIX(STRMID(fastLoc.time,8,2))
+     ;; HourArr              = FIX(STRMID(fastLoc.time,11,2))
+     ;; MinArr               = FIX(STRMID(fastLoc.time,14,2))
+     ;; SecArr               = FLOAT(STRMID(fastLoc.time,17,6))
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;feed it to GEOPACK
@@ -79,7 +86,16 @@ PRO JOURNAL__20160805__CONVERT_ALL_ESPECDB_ILATS_TO_MLATS
      PRINT,"Feeding it to GEOPACK ..."
      FOR i=0,nTot-1 DO BEGIN
 
-        GEOPACK_RECALC,YearArr[i],MonthArr[i],DayArr[i],HourArr[i],MinArr[i],SecArr[i],/DATE
+        tmpTime           = TIME_TO_STR(esTTemp[i])
+        YearArr           = FIX(STRMID(tmpTime,0,4))
+        MonthArr          = FIX(STRMID(tmpTime,5,2))
+        DayArr            = FIX(STRMID(tmpTime,8,2))
+        HourArr           = FIX(STRMID(tmpTime,11,2))
+        MinArr            = FIX(STRMID(tmpTime,14,2))
+        SecArr            = FLOAT(STRMID(tmpTime,17,6))
+
+        ;; GEOPACK_RECALC,YearArr[i],MonthArr[i],DayArr[i],HourArr[i],MinArr[i],SecArr[i],/DATE
+        GEOPACK_RECALC,YearArr,MonthArr,DayArr,HourArr,MinArr,SecArr,/DATE
 
         ;;do that dance
         ;;To MAG
@@ -108,18 +124,6 @@ PRO JOURNAL__20160805__CONVERT_ALL_ESPECDB_ILATS_TO_MLATS
         eEphem_GEO_arr[*,i] = [faPosgeo_x,faPosgeo_y,faPosgeo_z]
 
 
-        eEphem_MAGSph_arr    = [ $
-                               [90.-REFORM(eEphem_MAGSph_arr[0,*])], $
-                               [REFORM(eEphem_MAGSph_arr[1,*])], $
-                               [REFORM(eEphem_MAGSph_arr[2,*])-R_E] $ ;Convert to latitude from colatitude here
-                               ]   
-
-        eEphem_GEOSph_arr    = [ $
-                               [90.-REFORM(eEphem_GEOSph_arr[0,*])], $
-                               [REFORM(eEphem_GEOSph_arr[1,*])], $
-                               [REFORM(eEphem_GEOSph_arr[2,*])-R_E] $ ;Convert to latitude from colatitude here
-                               ]
-
         IF (i MOD 1e4) EQ 0 THEN BEGIN
            PRINT,'i = ' + STRCOMPRESS(i,/REMOVE_ALL)
            TOC,clock
@@ -127,6 +131,18 @@ PRO JOURNAL__20160805__CONVERT_ALL_ESPECDB_ILATS_TO_MLATS
 
      ENDFOR
 
+
+     eEphem_MAGSph_arr    = [ $
+                            [90.-REFORM(eEphem_MAGSph_arr[0,*])], $
+                            [REFORM(eEphem_MAGSph_arr[1,*])], $
+                            [REFORM(eEphem_MAGSph_arr[2,*])-R_E] $ ;Convert to latitude from colatitude here
+                            ]   
+
+     eEphem_GEOSph_arr    = [ $
+                            [90.-REFORM(eEphem_GEOSph_arr[0,*])], $
+                            [REFORM(eEphem_GEOSph_arr[1,*])], $
+                            [REFORM(eEphem_GEOSph_arr[2,*])-R_E] $ ;Convert to latitude from colatitude here
+                            ]
 
      eSpec_GEO     = {ALT:eEphem_GEOSph_arr[*,2], $
                       LON:eEphem_GEOSph_arr[*,1], $
