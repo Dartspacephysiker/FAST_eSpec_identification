@@ -8,9 +8,8 @@ PRO JOURNAL__20160803__GET_ESPEC_STUFF_IN_GEO_COORDS
   ;; outFile          = 'eSpec_20160607_db--PARSED--Orbs_500-16361--bonus_ephemeris_info--10to20mil.sav'
   outFile          = 'eSpec_20160607_db--PARSED--Orbs_500-16361--bonus_ephemeris_info--restavdebeste.sav'
 
-  defNewellDBFile        = 'eSpec_20160607_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
-
-  realFile         = 'sorted--' + defNewellDBFile
+  defNewellDBFile  = 'eSpec_20160607_db--PARSED--Orbs_500-16361.sav' 
+  realFile         = 'sorted--' + defNewellDBFile ;;This file does not need to be cleaned
 
   ;;Load the stuff we need 
   PRINT,'Restoring file with sorted/uniq times'
@@ -20,10 +19,16 @@ PRO JOURNAL__20160803__GET_ESPEC_STUFF_IN_GEO_COORDS
 
   ;; LOAD_NEWELL_ESPEC_DB,/JUST_TIMES,OUT_TIMES=eSpecTimes,/DONT_LOAD_IN_MEMORY
 
+  inFileIndArr     = [[     0,1000000,20000000], $
+                      [999999,1999999,28604344]]
+  k                = 2
+
   PRINT,'Sending it to GET_FA_ORBIT ...'
   ;; GET_FA_ORBIT,eSpecTimes[10000000:19999999],/TIME_ARRAY,/ALL,/DEFINITIVE
-  GET_FA_ORBIT,eSpecTimes[20000000:-1],/TIME_ARRAY,/ALL,/DEFINITIVE
-
+  ;; GET_FA_ORBIT,eSpecTimes[20000000:-1],/TIME_ARRAY,/ALL,/DEFINITIVE
+  inds        = inFileIndArr[k,*]
+  GET_FA_ORBIT,eSpecTimes[inds[0]:inds[-1]],/TIME_ARRAY,/ALL,/DEFINITIVE
+  
   GET_DATA,'ORBIT',DATA=orbit
   GET_DATA,'fa_pos',DATA=fa_pos
   GET_DATA,'ALT',DATA=alt

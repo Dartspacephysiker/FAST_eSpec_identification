@@ -76,24 +76,26 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
      CASE KEYWORD_SET(use_unsorted_file) OF
         1: BEGIN
-           PRINT,'Using UNsorted eSpec DB ...'
-           NewellDBFile     = defNewellDBFile
+           ;; PRINT,'Using UNsorted eSpec DB ...'
+           specType      = 'UNSORTED'
+           NewellDBFile  = defNewellDBFile
         END
         ELSE: BEGIN
-           PRINT,'Using sorted eSpec DB ...'
-           NewellDBFile     = defSortNewellDBFile
+           ;; PRINT,'Using sorted eSpec DB ...'
+           specType      = 'SORTED'
+           NewellDBFile  = defSortNewellDBFile
         END
      ENDCASE
   ENDIF
   ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
   NEWELL__dbFile         = NewellDBFile
   ;; ENDIF
-
+  IF N_ELEMENTS(specType) EQ 0 THEN specType = ''
   IF N_ELEMENTS(eSpec) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
      IF KEYWORD_SET(force_load_db) THEN BEGIN
-        PRINTF,lun,"Forced loading of eSpec database ..."
+        PRINTF,lun,"Forced loading of " + specType " eSpec database ..."
      ENDIF
-     PRINTF,lun,'Loading eSpec DB: ' + NewellDBFile + '...'
+     PRINTF,lun,'Loading ' + specType + ' eSpec DB: ' + NewellDBFile + '...'
      RESTORE,NewellDBDir+NewellDBFile
 
      ;;Correct fluxes
