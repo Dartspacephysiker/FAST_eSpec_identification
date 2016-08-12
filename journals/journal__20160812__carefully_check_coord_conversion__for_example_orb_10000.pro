@@ -21,42 +21,6 @@ PRO JOURNAL__20160812__CAREFULLY_CHECK_COORD_CONVERSION__FOR_EXAMPLE_ORB_10000
   ;;Now plot 'em
   hemi                 = 'NORTH'
 
-  eSTestUTC            = TIME_TO_STR(eSTest.x,/MSEC)
-
-  YearArr       = FIX(STRMID(eSTestUTC,0,4))
-  MonthArr      = FIX(STRMID(eSTestUTC,5,2))
-  DayArr        = FIX(STRMID(eSTestUTC,8,2))
-  HourArr       = FIX(STRMID(eSTestUTC,11,2))
-  MinArr        = FIX(STRMID(eSTestUTC,14,2))
-  SecArr        = FLOAT(STRMID(eSTestUTC,17,6))
-
-  nTot                 = N_ELEMENTS(esTestUTC)
-  eEphem_GEOSph_arr    = TRANSPOSE([[eSpec_GEO.LAT],[eSpec_GEO.LON],[eSpec_GEO.ALT]])
-  eEphem_AACGMSph_arr  = MAKE_ARRAY(4,nTot,/FLOAT) ;;One more for MLT at end
-
-  PRINT,"Feeding it to AACGM ..."
-  FOR i=0,nTot-1 DO BEGIN
-  ;; FOR i=0,100-1 DO BEGIN
-
-     e = AACGM_V2_SETDATETIME(YearArr[i],MonthArr[i],DayArr[i],HourArr[i],MinArr[i],SecArr[i])
-
-     ;;Get AACGM coords
-     tmpAACGM                  = CNVCOORD_V2(eEphem_GEOSph_arr[*,i], /ALLOW_TRACE)
-     AACGM_MLT                 = MLT_V2(tmpAACGM[1])
-     eEphem_AACGMSph_arr[*,i]  = [tmpAACGM,AACGM_MLT]
-
-     IF (i MOD 100) EQ 0 THEN PRINT,i
-
-  ENDFOR
-
-  eEphem_AACGMSph_arr[2,*]     = (eEphem_AACGMSph_arr[2,*]*R_E-R_E) ;convert back to altitude above sea level
-
-  eSpec_AACGM   = {ALT:eEphem_AACGMSph_arr[2,*], $
-                   MLT:eEphem_AACGMSph_arr[3,*], $
-                   LAT:eEphem_AACGMSph_arr[0,*]}
-
-
-
   ;; eSpec_GEO     = {ALT:eEphem_GEOSph_arr[*,2], $
   ;;                  LON:eEphem_GEOSph_arr[*,1], $
   ;;                  LAT:eEphem_GEOSph_arr[*,0]}
@@ -69,10 +33,12 @@ PRO JOURNAL__20160812__CAREFULLY_CHECK_COORD_CONVERSION__FOR_EXAMPLE_ORB_10000
   ;;                  LON:eEphem_GEISph_arr[*,1], $
   ;;                  LAT:eEphem_GEISph_arr[*,0]}
   
-  SAVE,eSTest,eSpecEphem,orbInds,eSpecCoords,eSpec_GEO,eSpec_GEI,eSpec_MAG,eSpec_AACGM,FILENAME=littleBabyFile
+  ;; eSpec_AACGM   = {ALT:REFORM(eEphem_AACGMSph_arr[2,*]), $
+  ;;                  MLT:REFORM(eEphem_AACGMSph_arr[3,*]), $
+  ;;                  LAT:REFORM(eEphem_AACGMSph_arr[0,*])}
 
   ;;Regulier
-  coordName            = 'GEI'
+  coordName            = 'GEI (SDT-provided)'
   plotTitle            = KEYWORD_SET(add_plotTitles) ? $
                          'Orbit '+orbString+' ('+ coordName+' coordinates)' : !NULL
   sPName               = 'FAST_ephem--orbit_' + orbString + '--' + coordName + '.png'
@@ -165,6 +131,44 @@ PRO JOURNAL__20160812__CAREFULLY_CHECK_COORD_CONVERSION__FOR_EXAMPLE_ORB_10000
                                    CURRENT_WINDOW=window, $
                                    PLOTSUFF=plotSuff, $
                                    IN_MAP=map, $
+                                   ;; SAVEPLOT=savePlot, $
+                                   SPNAME=sPName, $
+                                   PLOTDIR=plotDir, $
+                                   CLOSE_AFTER_SAVE=close_after_save, $
+                                   HUGEPLOTMODE=hugePlotMode, $
+                                   STRANS=sTrans, $
+                                   PLOTTITLE=plotTitle, $
+                                   ADD_LINE=add_line, $
+                                   LINESTYLE=lineStyle, $
+                                   NO_SYMBOL=no_symbol, $
+                                   OUT_ORBSTRARR_LIST=out_orbStrArr_list, $
+                                   OUT_WINDOW=out_window, $
+                                   ADD_LEGEND=add_legend, $
+                                   OUT_MAP=out_map, $
+                                   _EXTRA=e
+
+  ;;MAG
+  coordName            = 'AACGM'
+  ;; plotTitle            = KEYWORD_SET(add_plotTitles) ? $
+  ;;                        'Orbit '+orbString+' ('+ coordName+' coordinates)' : !NULL
+  plotTitle            = 'Orbit '+ orbString + ', Northern Hemisphere'
+  sPName               = 'FAST_ephem--orbit_' + orbString + '--' + 'GEI_GEO_MAG_AACGM' + '.png'
+  plotName             = coordName
+  color_list           = 'orange'
+  SIMPLE_STEREOGRAPHIC_SCATTERPLOT,eSpec_AACGM.mlt*15.,eSpec_AACGM.lat, $
+                                   HEMI=hemi, $
+                                   PLOTNAME=plotName, $
+                                   COLOR_LIST=color_list, $
+                                   ;; OVERLAYAURZONE=overlayAurZone, $
+                                   CENTERLON=centerLon, $
+                                   ;; OVERPLOT=overplot, $
+                                   /OVERPLOT, $
+                                   LAYOUT=layout, $
+                                   PLOTPOSITION=plotPosition, $
+                                   OUTPLOTARR=outPlotArr, $
+                                   CURRENT_WINDOW=window, $
+                                   PLOTSUFF=plotSuff, $
+                                   IN_MAP=map, $
                                    SAVEPLOT=savePlot, $
                                    SPNAME=sPName, $
                                    PLOTDIR=plotDir, $
@@ -180,7 +184,6 @@ PRO JOURNAL__20160812__CAREFULLY_CHECK_COORD_CONVERSION__FOR_EXAMPLE_ORB_10000
                                    /ADD_LEGEND, $
                                    OUT_MAP=out_map, $
                                    _EXTRA=e
-
 
   STOP
 
@@ -318,6 +321,43 @@ END
   ;;                  LON:eEphem_GEISph_arr[*,1], $
   ;;                  LAT:eEphem_GEISph_arr[*,0]}
     
+
+  ;; eSTestUTC            = TIME_TO_STR(eSTest.x,/MSEC)
+
+  ;; YearArr       = FIX(STRMID(eSTestUTC,0,4))
+  ;; MonthArr      = FIX(STRMID(eSTestUTC,5,2))
+  ;; DayArr        = FIX(STRMID(eSTestUTC,8,2))
+  ;; HourArr       = FIX(STRMID(eSTestUTC,11,2))
+  ;; MinArr        = FIX(STRMID(eSTestUTC,14,2))
+  ;; SecArr        = FLOAT(STRMID(eSTestUTC,17,6))
+
+  ;; nTot                 = N_ELEMENTS(esTestUTC)
+  ;; eEphem_GEOSph_arr    = TRANSPOSE([[eSpec_GEO.LAT],[eSpec_GEO.LON],[eSpec_GEO.ALT]])
+  ;; eEphem_AACGMSph_arr  = MAKE_ARRAY(4,nTot,/FLOAT) ;;One more for MLT at end
+
+  ;; PRINT,"Feeding it to AACGM ..."
+  ;; FOR i=0,nTot-1 DO BEGIN
+  ;; ;; FOR i=0,100-1 DO BEGIN
+
+  ;;    e = AACGM_V2_SETDATETIME(YearArr[i],MonthArr[i],DayArr[i],HourArr[i],MinArr[i],SecArr[i])
+
+  ;;    ;;Get AACGM coords
+  ;;    tmpAACGM                  = CNVCOORD_V2(eEphem_GEOSph_arr[*,i], /ALLOW_TRACE)
+  ;;    AACGM_MLT                 = MLT_V2(tmpAACGM[1])
+  ;;    eEphem_AACGMSph_arr[*,i]  = [tmpAACGM,AACGM_MLT]
+
+  ;;    IF (i MOD 100) EQ 0 THEN PRINT,i
+
+  ;; ENDFOR
+
+  ;; eEphem_AACGMSph_arr[2,*]     = (eEphem_AACGMSph_arr[2,*]*R_E-R_E) ;convert back to altitude above sea level
+
+  ;; eSpec_AACGM   = {ALT:REFORM(eEphem_AACGMSph_arr[2,*]), $
+  ;;                  MLT:REFORM(eEphem_AACGMSph_arr[3,*]), $
+  ;;                  LAT:REFORM(eEphem_AACGMSph_arr[0,*])}
+
+  ;; SAVE,eSTest,eSpecEphem,orbInds,eSpecCoords,eSpec_GEO,eSpec_GEI,eSpec_MAG,eSpec_AACGM,FILENAME=littleBabyFile
+
   ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; ;;make struct
   ;; eSpecCoords = {TIME: esTTemp, $
