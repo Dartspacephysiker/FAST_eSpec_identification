@@ -13,8 +13,8 @@ PRO JOURNAL__20160805__CONVERT_ALL_ESPECDB_ILATS_TO_MLATS
                       'eSpec_20160607_db--PARSED--Orbs_500-16361--bonus_ephemeris_info--10to20mil.sav', $
                       'eSpec_20160607_db--PARSED--Orbs_500-16361--bonus_ephemeris_info--restavdebeste.sav']
 
-  inFileIndArr     = [[     0,1000000,20000000], $
-                      [999999,1999999,28604344]]
+  inFileIndArr     = [[      0,10000000,20000000], $
+                      [9999999,19999999,28604344]]
 
   ;;This guy's too big to use ...
   ;; finalInFile       = 'sorted--eSpec_20160607_db--PARSED--Orbs_500-16361--bonus_ephemeris_info.sav'
@@ -29,7 +29,7 @@ PRO JOURNAL__20160805__CONVERT_ALL_ESPECDB_ILATS_TO_MLATS
 
   TIC
   clock = TIC('warnMe')
-  FOR k=2,N_ELEMENTS(inFiles)-1 DO BEGIN
+  FOR k=0,N_ELEMENTS(inFiles)-2 DO BEGIN
 
      LOAD_NEWELL_ESPEC_DB,/JUST_TIMES, $
                           OUT_TIMES=eSpecTimes, $
