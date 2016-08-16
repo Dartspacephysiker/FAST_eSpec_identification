@@ -93,7 +93,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   IF N_ELEMENTS(specType) EQ 0 THEN specType = ''
   IF N_ELEMENTS(eSpec) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
      IF KEYWORD_SET(force_load_db) THEN BEGIN
-        PRINTF,lun,"Forced loading of " + specType " eSpec database ..."
+        PRINTF,lun,"Forced loading of " + specType + " eSpec database ..."
      ENDIF
      PRINTF,lun,'Loading ' + specType + ' eSpec DB: ' + NewellDBFile + '...'
      RESTORE,NewellDBDir+NewellDBFile

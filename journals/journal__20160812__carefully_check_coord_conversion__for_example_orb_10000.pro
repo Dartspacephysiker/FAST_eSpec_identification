@@ -37,13 +37,46 @@ PRO JOURNAL__20160812__CAREFULLY_CHECK_COORD_CONVERSION__FOR_EXAMPLE_ORB_10000
   ;;                  MLT:REFORM(eEphem_AACGMSph_arr[3,*]), $
   ;;                  LAT:REFORM(eEphem_AACGMSph_arr[0,*])}
 
+  coordName            = 'MLT-ILAT (SDT-provided)'
+  ;; plotTitle            = KEYWORD_SET(add_plotTitles) ? $
+  ;;                        'Orbit '+orbString+' ('+ coordName+' coordinates)' : !NULL
+  sPName               = 'FAST_ephem--orbit_' + orbString + '--' + coordName + '.png'
+  plotName             = coordName
+  color_list           = 'black'
+  SIMPLE_STEREOGRAPHIC_SCATTERPLOT,eSpecEphem.mlt*15.,eSpecEphem.ilat, $
+                                   HEMI=hemi, $
+                                   PLOTNAME=plotName, $
+                                   ;; OVERLAYAURZONE=overlayAurZone, $
+                                   COLOR_LIST=color_list, $
+                                   CENTERLON=centerLon, $
+                                   OVERPLOT=overplot, $
+                                   LAYOUT=layout, $
+                                   PLOTPOSITION=plotPosition, $
+                                   OUTPLOTARR=outPlotArr, $
+                                   CURRENT_WINDOW=window, $
+                                   PLOTSUFF=plotSuff, $
+                                   IN_MAP=map, $
+                                   ;; SAVEPLOT=savePlot, $
+                                   SPNAME=sPName, $
+                                   PLOTDIR=plotDir, $
+                                   CLOSE_AFTER_SAVE=close_after_save, $
+                                   HUGEPLOTMODE=hugePlotMode, $
+                                   STRANS=sTrans, $
+                                   PLOTTITLE=plotTitle, $
+                                   ADD_LINE=add_line, $
+                                   LINESTYLE=lineStyle, $
+                                   NO_SYMBOL=no_symbol, $
+                                   OUT_ORBSTRARR_LIST=out_orbStrArr_list, $
+                                   OUT_WINDOW=out_window, $
+                                   OUT_MAP=out_map, $
+                                   _EXTRA=e
   ;;Regulier
   coordName            = 'GEI (SDT-provided)'
   plotTitle            = KEYWORD_SET(add_plotTitles) ? $
                          'Orbit '+orbString+' ('+ coordName+' coordinates)' : !NULL
   sPName               = 'FAST_ephem--orbit_' + orbString + '--' + coordName + '.png'
   plotName             = coordName
-  color_list           = 'black'
+  color_list           = 'green'
   SIMPLE_STEREOGRAPHIC_SCATTERPLOT,eSpec_GEI.lon,eSpec_GEI.lat, $
                                    HEMI=hemi, $
                                    PLOTNAME=plotName, $
@@ -114,7 +147,7 @@ PRO JOURNAL__20160812__CAREFULLY_CHECK_COORD_CONVERSION__FOR_EXAMPLE_ORB_10000
   coordName            = 'MAG'
   plotTitle            = KEYWORD_SET(add_plotTitles) ? $
                          'Orbit '+orbString+' ('+ coordName+' coordinates)' : !NULL
-  sPName               = 'FAST_ephem--orbit_' + orbString + '--' + 'GEI_GEO_MAG' + '.png'
+  sPName               = 'FAST_ephem--orbit_' + orbString + '--' + 'MLT-ILAT_GEI_GEO_MAG' + '.png'
   plotName             = coordName
   color_list           = 'blue'
   SIMPLE_STEREOGRAPHIC_SCATTERPLOT,eSpec_MAG.lon,eSpec_MAG.lat, $
@@ -148,11 +181,11 @@ PRO JOURNAL__20160812__CAREFULLY_CHECK_COORD_CONVERSION__FOR_EXAMPLE_ORB_10000
                                    _EXTRA=e
 
   ;;MAG
-  coordName            = 'AACGM'
+  coordName            = 'AACGM_v2'
   ;; plotTitle            = KEYWORD_SET(add_plotTitles) ? $
   ;;                        'Orbit '+orbString+' ('+ coordName+' coordinates)' : !NULL
   plotTitle            = 'Orbit '+ orbString + ', Northern Hemisphere'
-  sPName               = 'FAST_ephem--orbit_' + orbString + '--' + 'GEI_GEO_MAG_AACGM' + '.png'
+  sPName               = 'FAST_ephem--orbit_' + orbString + '--' + 'GEI_GEO_MAG_AACGM_v2' + '.png'
   plotName             = coordName
   color_list           = 'orange'
   SIMPLE_STEREOGRAPHIC_SCATTERPLOT,eSpec_AACGM.mlt*15.,eSpec_AACGM.lat, $
@@ -280,7 +313,7 @@ END
   ;;    eEphem_GEO_arr[*,i] = [faPosgeo_x,faPosgeo_y,faPosgeo_z]
   ;;    eEphem_GEI_arr[*,i] = [eSpecEphem.fa_pos[i,0],eSpecEphem.fa_Pos[i,1],eSpecEphem.fa_Pos[i,2]]
   
-  ;;    GEOPACK_SPHCAR,eSpecEphem.faPos[i,0],eSpecEphem.faPos[i,1],eSpecEphem.faPos[i,2],gei_r,gei_theta,gei_phi,/TO_SPHERE,/DEGREE
+  ;;    GEOPACK_SPHCAR,eSpecEphem.fa_pos[i,0],eSpecEphem.fa_pos[i,1],eSpecEphem.fa_pos[i,2],gei_r,gei_theta,gei_phi,/TO_SPHERE,/DEGREE
   ;;    GEOPACK_SPHCAR,faPosgeo_x,faPosgeo_y,faPosgeo_z,geo_r,geo_theta,geo_phi,/TO_SPHERE,/DEGREE
   ;;    GEOPACK_SPHCAR,faPosmag_x,faPosmag_y,faPosmag_z,mag_r,mag_theta,mag_phi,/TO_SPHERE,/DEGREE
   
