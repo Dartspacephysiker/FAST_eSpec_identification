@@ -9,6 +9,7 @@ PRO JOURNAL__20160817__CONVERT_ESPECDB_ILATS_TO_AACGM__BELOW_2000_KM
 
   altitude_max      = 1990       ;in km
   allow_fl_trace    = 0          ;Allow fieldline tracing for AACGM_v2?
+  check_if_exists   = 1
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Input
 
@@ -41,7 +42,7 @@ PRO JOURNAL__20160817__CONVERT_ESPECDB_ILATS_TO_AACGM__BELOW_2000_KM
 
   TIC
   clock = TIC('warnMe')
-  FOR i=0,N_ELEMENTS(coordFiles)-2 DO BEGIN
+  FOR i=2,N_ELEMENTS(coordFiles)-1 DO BEGIN
 
      ;;Load the stuff we need (has GEO coords)
      PRINT,"Restoring " + coordFiles[i] + ' ...'
@@ -72,6 +73,25 @@ PRO JOURNAL__20160817__CONVERT_ESPECDB_ILATS_TO_AACGM__BELOW_2000_KM
         STOP
      ENDIF
      eSTTemp         = eSpecCoords.time[restrict_ii]
+
+     ;;Check if we've already got it
+     IF FILE_TEST(outDir+outFiles[i]) AND KEYWORD_SET(check_if_exists) THEN BEGIN
+
+        PRINT,"File exists:" + outFiles[i]
+        PRINT,"Checking for completeness ..."
+
+        eSpec_AACGM  = !NULL
+
+        RESTORE,outDir+outFiles[i]
+
+        IF N_ELEMENTS(eSpec_AACGM) GT 0 THEN BEGIN
+           IF N_ELEMENTS(eSpec_AACGM.alt) EQ N_ELEMENTS(eSTTemp) THEN BEGIN
+              PRINT,"File already complete:" + outFiles[i]
+              PRINT,"Skipping ..."
+              CONTINUE
+           ENDIF
+        ENDIF
+     ENDIF
 
      ;; eSTTemp         = eSpec_GEO[restrict_ii]
 
@@ -170,16 +190,16 @@ PRO JOURNAL__20160817__CONVERT_ESPECDB_ILATS_TO_AACGM__BELOW_2000_KM
 
      eEphem_AACGMSph_arr[2,*]     = (eEphem_AACGMSph_arr[2,*]*R_E-R_E) ;convert back to altitude above sea level
 
-     eSpec_AACGM   = {ALT:eEphem_AACGMSph_arr[2,*], $
-                    MLT:eEphem_AACGMSph_arr[3,*], $
-                    LAT:eEphem_AACGMSph_arr[0,*]}
+     eSpec_AACGM   = {ALT:REFORM(eEphem_AACGMSph_arr[2,*]), $
+                      MLT:REFORM(eEphem_AACGMSph_arr[3,*]), $
+                      LAT:REFORM(eEphem_AACGMSph_arr[0,*])}
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Save it
      PRINT,'Saving ' + outDir + outFiles[i] + '...'
-     save,eSpec_AACGM,restrict_ii,eSpec_i,FILENAME=outDir+outFiles[i]
+     SAVE,eSpec_AACGM,eEphem_AACGMSph_arr,restrict_ii,eSpec_i,FILENAME=outDir+outFiles[i]
 
-     PRINT,"Did it! Finished with loop " + STRCOMPRESS(i,/REMOVE_ALL) + '/' + $
+     PRINT,"Did it! Finished with loop " + STRCOMPRESS(i+1,/REMOVE_ALL) + '/' + $
            STRCOMPRESS(N_ELEMENTS(coordFiles),/REMOVE_ALL)
 
      TOC

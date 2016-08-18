@@ -66,6 +66,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             DO_ABS_BTMAX=abs_btMax, $
                             DO_ABS_BXMIN=abs_bxMin, $
                             DO_ABS_BXMAX=abs_bxMax, $
+                            BX_OVER_BY_RATIO_MAX=bx_over_by_ratio_max, $
+                            BX_OVER_BY_RATIO_MIN=bx_over_by_ratio_min, $
                             RESET_OMNI_INDS=reset_omni_inds, $
                             CLOCKSTR=clockStr, $
                             DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
@@ -305,6 +307,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                                                       DO_ABS_BTMAX=abs_btMax, $
                                                                       DO_ABS_BXMIN=abs_bxMin, $
                                                                       DO_ABS_BXMAX=abs_bxMax, $
+                                                                      BX_OVER_BY_RATIO_MAX=bx_over_by_ratio_max, $
+                                                                      BX_OVER_BY_RATIO_MIN=bx_over_by_ratio_min, $
                                                                       RESET_OMNI_INDS=reset_omni_inds, $
                                                                       CLOCKSTR=clockStr, $
                                                                       DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
@@ -369,6 +373,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                                                       DO_ABS_BTMAX=abs_btMax, $
                                                                       DO_ABS_BXMIN=abs_bxMin, $
                                                                       DO_ABS_BXMAX=abs_bxMax, $
+                                                                      BX_OVER_BY_RATIO_MAX=bx_over_by_ratio_max, $
+                                                                      BX_OVER_BY_RATIO_MIN=bx_over_by_ratio_min, $
                                                                       RESET_OMNI_INDS=reset_omni_inds, $
                                                                       CLOCKSTR=clockStr, $
                                                                       DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
