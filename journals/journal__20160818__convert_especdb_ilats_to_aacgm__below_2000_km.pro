@@ -1,4 +1,5 @@
 ;;2016/08/18
+;;Please compile AACGM lib before running: IDL> @compile_aacgm.pro
 PRO JOURNAL__20160818__CONVERT_ESPECDB_ILATS_TO_AACGM__BELOW_2000_KM
 
   COMPILE_OPT IDL2
@@ -101,10 +102,30 @@ PRO JOURNAL__20160818__CONVERT_ESPECDB_ILATS_TO_AACGM__BELOW_2000_KM
            PRINT,'Wrong number of elements!! Re-converting time stamps ...'
            recalcTime       = 1
         ENDIF ELSE BEGIN
+           hateIt           = 0
+           ;; IF savedAltitude_max NE altitude_max THEN BEGIN
+           ;;    PRINT,"Saved altmax (" + STRCOMPRESS(savedAltitude_max,/REMOVE_ALL) + " doesn't match! Recalculating timestamps..."
+           ;;    recalcTime    = 1
+           ;;    hateIt        = 1
+           ;; ENDIF
+           ;; IF savedR_E NE R_E THEN BEGIN
+           ;;    PRINT,"Saved R_E (" + STRCOMPRESS(savedR_E,/REMOVE_ALL) + " doesn't match! Recalculating timestamps..."
+           ;;    recalcTime    = 1
+           ;;    hateIt        = 1
+           ;; ENDIF
+           ;; IF savedAllow_fl_trace NE allow_fl_trace THEN BEGIN
+           ;;    PRINT,"Saved allow_fl_trace (" + STRCOMPRESS(savedAllow_fl_trace,/REMOVE_ALL) + " doesn't match! Recalculating timestamps..."
+           ;;    recalcTime    = 1
+           ;;    hateIt        = 1
+           ;; ENDIF
+
            PRINT,'Using already-converted timestamps from ' + timeThing[i] + ' ...'
-           PRINT,"Kidding! Continuing ..."
-           CONTINUE
-           recalcTime       = 0
+           ;; PRINT,"Kidding! Continuing ..."
+           ;; CONTINUE
+           IF ~KEYWORD_SET(hateIt) THEN BEGIN
+              recalcTime    = 0 
+           ENDIF
+
         ENDELSE
      ENDIF ELSE BEGIN
         recalcTime          = 1
@@ -122,10 +143,11 @@ PRO JOURNAL__20160818__CONVERT_ESPECDB_ILATS_TO_AACGM__BELOW_2000_KM
            esTTempStr[tempI] = TIME_TO_STR(esTTemp[tempI],/MSEC)
         ENDFOR
         PRINT,'Saving time strings to ' + timeThing[i] + ' ...'
-        SAVE,esttempstr,FILENAME=timeThing[i]
+        savedAltitude_max   = altitude_max
+        savedR_E            = R_E
+        savedAllow_fl_trace = allow_fl_trace
+        SAVE,esttempstr,savedAltitude_max,savedR_E,savedAllow_fl_trace,FILENAME=timeThing[i]
      ENDIF
-
-     STOP
 
      finalYearArr       = FIX(STRMID(esTTempStr,0,4))
      finalMonthArr      = FIX(STRMID(esTTempStr,5,2))
