@@ -36,68 +36,44 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
   
   COMPILE_OPT idl2
   
-  COMMON MLT_ILAT_MAGC_ETC,MIMC__RECALCULATE, $
-     MIMC__minMLT,MIMC__maxMLT, $
-     MIMC__minILAT,MIMC__maxILAT,MIMC__binILAT, $
-     MIMC__DO_lShell,MIMC__minLSHELL,MIMC__maxLSHELL,MIMC__binLSHELL, $
-     MIMC__minMC,MIMC__maxNegMC, $
-     MIMC__sample_t_restriction, $
-     MIMC__hemi, $
-     MIMC__orbRange, $
-     MIMC__altitudeRange, $
-     MIMC__charERange, $
-     MIMC__poyntRange, $
-     MIMC__despunDB,MIMC__chastDB, $
-     MIMC__north,MIMC__south,MIMC__both_hemis, $
-     MIMC__HwMAurOval, $
-     MIMC__HwMKpInd
+  @common__mlt_ilat_magc_etc.pro
+  ;; COMMON MLT_ILAT_MAGC_ETC,MIMC__RECALCULATE, $
+  ;;    MIMC__minMLT,MIMC__maxMLT, $
+  ;;    MIMC__minILAT,MIMC__maxILAT,MIMC__binILAT, $
+  ;;    MIMC__DO_lShell,MIMC__minLSHELL,MIMC__maxLSHELL,MIMC__binLSHELL, $
+  ;;    MIMC__minMC,MIMC__maxNegMC, $
+  ;;    MIMC__sample_t_restriction, $
+  ;;    MIMC__hemi, $
+  ;;    MIMC__orbRange, $
+  ;;    MIMC__altitudeRange, $
+  ;;    MIMC__charERange, $
+  ;;    MIMC__poyntRange, $
+  ;;    MIMC__despunDB,MIMC__chastDB, $
+  ;;    MIMC__north,MIMC__south,MIMC__both_hemis, $
+  ;;    MIMC__HwMAurOval, $
+  ;;    MIMC__HwMKpInd
 
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      
      IF KEYWORD_SET(for_alfven_db) THEN BEGIN
         ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_ALF_NEWELL_ESPEC_DB
-     COMMON NWLL_ALF, $
-        NWLL_ALF__eSpec, $
-        NWLL_ALF__HAVE_GOOD_I, $
-        NWLL_ALF__good_eSpec_i, $
-        NWLL_ALF__good_alf_i, $
-        NWLL_ALF__failCodes, $
-        NWLL_ALF__despun, $
-        NWLL_ALF__charERange, $
-        NWLL_ALF__dbFile, $
-        NWLL_ALF__dbDir, $
-        NWLL_ALF__RECALCULATE
+  @common__newell_alf.pro
 
-     ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_ALF_NEWELL_ION_DB
-     COMMON NWLL_ALF_I, $ ;NWLL_ALF_I__iSpec, $
-        NWLL_ALF_I__good_iSpec_i, $
-        NWLL_ALF_I__good_alf_i, $
-        NWLL_ALF_I__despun, $
-        NWLL_ALF_I__cleaned_i, $
-        NWLL_ALF_I__charIERange, $
-        NWLL_ALF_I__dbFile, $
-        NWLL_ALF_I__dbDir, $
-        NWLL_ALF_I__RECALCULATE
+  ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_ALF_NEWELL_ION_DB
+  @common__newell_alf_i.pro
 
   ENDIF ELSE BEGIN
 
      ;;This common block is defined ONLY here and in LOAD_NEWELL_ION_DB, I believe
-     COMMON NEWELL_I,NEWELL_I__ion,NEWELL_I__HAVE_GOOD_I, $
-        NEWELL_I__good_i,NEWELL_I__cleaned_i, $
-        NEWELL_I__dbFile,NEWELL_I__dbDir, $
-        NEWELL_I__charIERange, $
-        NEWELL_I__RECALCULATE
+     @common__newell_ion_db.pro
+     ;; COMMON NEWELL_I,NEWELL_I__ion,NEWELL_I__HAVE_GOOD_I, $
+     ;;    NEWELL_I__good_i,NEWELL_I__cleaned_i, $
+     ;;    NEWELL_I__dbFile,NEWELL_I__dbDir, $
+     ;;    NEWELL_I__charIERange, $
+     ;;    NEWELL_I__RECALCULATE
      
      ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_NEWELL_ESPEC_DB
-     COMMON NEWELL,NEWELL__eSpec, $
-        NEWELL__HAVE_GOOD_I, $
-        NEWELL__failCode, $
-        NEWELL__good_i, $ 
-        NEWELL__charERange, $
-        ;;NEWELL__cleaned_i, $
-        NEWELL__dbFile, $
-        NEWELL__dbDir, $
-        NEWELL__RECALCULATE
+    @common__newell_espec.pro
      
 
   ENDELSE
