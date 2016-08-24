@@ -15,7 +15,6 @@ PRO JOURNAL__20160823__STITCH_TOGETHER_BELOW_2000KM_FILES
      inFiles                = 'sorted--eSpec_20160607_db--Orbs_500-16361--BELOW_2000_km--AACGM_v2_coords' + $
                               ['_1','_2','_3']+'.sav'
      outFile                = 'sorted--eSpec_20160607_db--Orbs_500-16361--BELOW_2000_km--AACGM_v2_coords--combined.sav'
-
   ENDELSE
 
   ;;Final:
