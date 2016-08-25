@@ -10,11 +10,6 @@ PRO JOURNAL__20160825__CHECK_INTEGRITY_NOW_THAT_YOURE_NOT_AN_IDIOT__BELOW_2000KM
   indFiles     = 'sorted--eSpec_20160607_db--Orbs_500-16361--BELOW_2000_km--AACGM_v2_coords' + $
                  ['_1','_2','_3']+'--recalc_for_every_point.sav'
 
-  GEOMAGFiles  = 'sorted--eSpec_20160607_db--PARSED--Orbs_500-16361--GEO_and_MAG_coords' + $
-                 ['_1','_2','_3']+'.sav'
-
-
-
   ;;DB to check out
   dbDir        = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
   dbFile       = 'sorted--eSpec_20160607_db--PARSED--Orbs_500-16361.sav'

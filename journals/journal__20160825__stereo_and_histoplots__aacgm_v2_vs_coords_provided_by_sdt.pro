@@ -9,6 +9,7 @@ PRO JOURNAL__20160825__STEREO_AND_HISTOPLOTS__AACGM_V2_VS_COORDS_PROVIDED_BY_SDT
    STEREO_PLOTS=stereo_plots, $
    HISTO_PLOTS=histo_plots, $
    HISTO_ONEORB=histo_oneOrb, $
+   HISTO__SEPARATE_HEMIS=histo__separate_hemis, $
    RESTRICT_HISTO_ILAT_RANGE=restrict_histo_ILAT_range, $
    BATCH=batch
 
@@ -30,6 +31,10 @@ PRO JOURNAL__20160825__STEREO_AND_HISTOPLOTS__AACGM_V2_VS_COORDS_PROVIDED_BY_SDT
   dbFile        = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords.sav'
 
   IF KEYWORD_SET(batch) THEN savePlot = 1
+
+  IF N_ELEMENTS(histo__separate_hemis) EQ 0 THEN BEGIN
+     histo__separate_hemis = 0
+  ENDIF
 
   ;;Doing orb stuff?
   IF N_ELEMENTS(hemi) EQ 0 THEN BEGIN
@@ -111,8 +116,24 @@ PRO JOURNAL__20160825__STEREO_AND_HISTOPLOTS__AACGM_V2_VS_COORDS_PROVIDED_BY_SDT
 
   FOR iHemi=0,N_ELEMENTS(hemiArr)-1 DO BEGIN
 
-     hemis = hemiArr[iHemi]
+     hemis  = hemiArr[iHemi]
+     CASE STRUPCASE(hemis) OF
+        'NORTH': BEGIN
+           hemi_ii = WHERE(eSpec.coords.SDT.ILAT[orbInds] GT 0,nHere)
+           niceHemiString = 'Northern Hemisphere'
+        END
+        'SOUTH': BEGIN
+           hemi_ii = WHERE(eSpec.coords.SDT.ILAT[orbInds] LT 0,nHere)
+           niceHemiString = 'Southern Hemisphere'
+        END
+     ENDCASE
+        
+     IF nHere EQ 0 THEN BEGIN
+        PRINT,'No ' + hemis + 'inds available! Skipping ...' 
+        CONTINUE
+     ENDIF
 
+     hemi_i        = orbInds[TEMPORARY(hemi_ii)]
      ;;Histoplot stuff
      ;; dMLTPlotPref  = 'dMLT__AACGM_vs_SDT--'+hemi+'--'
      ;; dAltPlotPref  = 'dAlt__AACGM_vs_SDT--'+hemi+'--'
@@ -120,16 +141,6 @@ PRO JOURNAL__20160825__STEREO_AND_HISTOPLOTS__AACGM_V2_VS_COORDS_PROVIDED_BY_SDT
      dMLTPlotPref  = 'dMLT__AACGM_vs_SDT--'
      dAltPlotPref  = 'dAlt__AACGM_vs_SDT--'
      dLatPlotPref  = 'dLat__AACGM_vs_SDT--'
-
-
-     CASE STRUPCASE(hemis) OF
-        'NORTH': BEGIN
-           niceHemiString = 'Northern Hemisphere'
-        END
-        'SOUTH': BEGIN
-           niceHemiString = 'Southern Hemisphere'
-        END
-     ENDCASE
 
      IF KEYWORD_SET(histo_plots) THEN BEGIN
 
@@ -142,16 +153,36 @@ PRO JOURNAL__20160825__STEREO_AND_HISTOPLOTS__AACGM_V2_VS_COORDS_PROVIDED_BY_SDT
 
         CASE 1 OF
            KEYWORD_SET(histo_oneOrb): BEGIN
-              hInds   = orbInds
-              hPSuff  = orbString + fileExt
-              hPTSuff = '!C(orbit ' + orbString + ')'
+              IF histo__separate_hemis THEN BEGIN
+                 hInds   = hemi_i
+                 hPSuff  = orbString + hemis+ fileExt
+                 hPTSuff = '!C(Orbit ' + orbString + ', ' + niceHemiString + ')'
+              ENDIF ELSE BEGIN
+                 hInds   = orbInds
+                 hPSuff  = orbString + fileExt
+                 hPTSuff = '!C(Orbit ' + orbString + ')'
+              ENDELSE
            END
            ELSE: BEGIN
-              hInds  = LINDGEN(N_ELEMENTS(eSpec.x))
-              hPSuff = 'all_orbs' + fileExt
-              hPTSuff = '!C(all orbits )'
+              IF histo__separate_hemis THEN BEGIN
+                 CASE hemis OF
+                    'NORTH': BEGIN
+                       hInds = WHERE(eSpec.coords.SDT.ILAT GT 0,nHere)
+                    END
+                    'SOUTH': BEGIN
+                       hInds = WHERE(eSpec.coords.SDT.ILAT LT 0,nHere)
+                    END
+                 ENDCASE
+                 hPSuff  = orbString + hemis+ fileExt
+                 hPTSuff = '!C(Orbit ' + orbString + ', ' + niceHemiString + ')'
+              ENDIF ELSE BEGIN
+                 hInds   = LINDGEN(N_ELEMENTS(eSpec.x))
+                 hPSuff  = 'all_orbs' + fileExt
+                 hPTSuff = '!C(All orbits)'
+              ENDELSE
            ENDELSE
         ENDCASE
+
         diffMLT  = eSpec.coords.AACGM.MLT[hInds] - eSpec.coords.SDT.MLT[hInds]
         diffAlt  = eSpec.coords.AACGM.alt[hInds] - eSpec.coords.SDT.alt[hInds]
         diffLat  = eSpec.coords.AACGM.lat[hInds] - eSpec.coords.SDT.ILAT[hInds]

@@ -5,8 +5,6 @@ PRO JOURNAL__20160825__STITCH_TOGETHER_BELOW_2000KM_FILES__INCLUDING_OTHER_COORD
 
 
   inDir        = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
-
-
   inFiles      = 'sorted--eSpec_20160607_db--Orbs_500-16361--BELOW_2000_km--AACGM_v2_coords' + $
                  ['_1','_2','_3']+'--recalc_for_every_point.sav'
   GEOMAGFiles  = 'sorted--eSpec_20160607_db--PARSED--Orbs_500-16361--GEO_and_MAG_coords' + $
@@ -86,7 +84,8 @@ PRO JOURNAL__20160825__STITCH_TOGETHER_BELOW_2000KM_FILES__INCLUDING_OTHER_COORD
      eSpec_AACGM            = !NULL
      eEphem_AACGMSph_arr    = !NULL
      nESpec_i               = N_ELEMENTS(eSpec_i)
-     eSpec_i                = eSpec_i[TEMPORARY(restrict_ii)]
+     eSpec_i                = !NULL
+     ;; eSpec_i                = eSpec_i[TEMPORARY(restrict_ii)]
 
      ;;Now GEO and MAG
      PRINT,"Now the other coords ..."
@@ -102,15 +101,15 @@ PRO JOURNAL__20160825__STITCH_TOGETHER_BELOW_2000KM_FILES__INCLUDING_OTHER_COORD
      ENDELSE
 
      espec_GEOMAGTot                         += N_ELEMENTS(eSpec_GEO.alt)
-     eSpec_GEO_final.alt[start_i:stop_i]      = eSpec_GEO.alt[eSpec_i]
-     eSpec_GEO_final.lon[start_i:stop_i]      = eSpec_GEO.lon[eSpec_i]
-     eSpec_GEO_final.lat[start_i:stop_i]      = eSpec_GEO.lat[eSpec_i]
+     eSpec_GEO_final.alt[start_i:stop_i]      = eSpec_GEO.alt[restrict_ii]
+     eSpec_GEO_final.lon[start_i:stop_i]      = eSpec_GEO.lon[restrict_ii]
+     eSpec_GEO_final.lat[start_i:stop_i]      = eSpec_GEO.lat[restrict_ii]
 
-     eSpec_MAG_final.alt[start_i:stop_i]      = eSpec_MAG.alt[eSpec_i]
-     eSpec_MAG_final.lon[start_i:stop_i]      = eSpec_MAG.lon[eSpec_i]
-     eSpec_MAG_final.lat[start_i:stop_i]      = eSpec_MAG.lat[eSpec_i]
+     eSpec_MAG_final.alt[start_i:stop_i]      = eSpec_MAG.alt[restrict_ii]
+     eSpec_MAG_final.lon[start_i:stop_i]      = eSpec_MAG.lon[restrict_ii]
+     eSpec_MAG_final.lat[start_i:stop_i]      = eSpec_MAG.lat[restrict_ii]
      
-     tFinal[start_i:stop_i]                   = eSpecCoords.time[eSpec_i]
+     tFinal[start_i:stop_i]                   = eSpecCoords.time[restrict_ii]
 
      eSpecCoords         = !NULL
      eSpec_GEO           = !NULL
@@ -151,13 +150,13 @@ PRO JOURNAL__20160825__STITCH_TOGETHER_BELOW_2000KM_FILES__INCLUDING_OTHER_COORD
   PRINT,"eSpec(< 2000km) tStamps are " + (~KEYWORD_SET(is_tSorted) ? "NOT " : "") + "sorted"
 
   IF ~is_tSorted                           THEN STOP
-  ;; IF ~ARRAY_EQUAL(tFinal,eSpec.x[eSpec_i]) THEN BEGIN
-  ;;    diff = tFinal-eSpec.x[eSpec_i]
-  ;;    bad_i = WHERE(ABS(diff) GT 0.0001,nBad,COMPLEMENT=good_i,NCOMPLEMENT=nGood)
-  ;;    PRINT,STRCOMPRESS(nBad,/REMOVE_ALL) + ' instances where times do not match'
-  ;;    PRINT,'... but ' + STRCOMPRESS(nGood,/REMOVE_ALL) + ' instances where they do ...'
-  ;;    STOP
-  ;; ENDIF
+  IF ~ARRAY_EQUAL(tFinal,eSpec.x[eSpec_i]) THEN BEGIN
+     diff = tFinal-eSpec.x[eSpec_i]
+     bad_i = WHERE(ABS(diff) GT 0.0001,nBad,COMPLEMENT=good_i,NCOMPLEMENT=nGood)
+     PRINT,STRCOMPRESS(nBad,/REMOVE_ALL) + ' instances where times do not match'
+     PRINT,'... but ' + STRCOMPRESS(nGood,/REMOVE_ALL) + ' instances where they do ...'
+     STOP
+  ENDIF
 
   PRINT,"Blowing those events above 2000 km to Bermuda!"
   eSpec = {x          : eSpec.x[eSpec_i]     , $
@@ -165,9 +164,10 @@ PRO JOURNAL__20160825__STITCH_TOGETHER_BELOW_2000KM_FILES__INCLUDING_OTHER_COORD
            coords     : {SDT   : {MLT  : eSpec.MLT[eSpec_i]  , $
                                   ILAT : eSpec.ILAT[eSpec_i] , $
                                   alt  : eSpec.alt[eSpec_i]} , $
-                         AACGM : TEMPORARY(eSpec_AACGM)} , $
-                         ;; GEO   : TEMPORARY(eSpec_GEO)   , $
-                         ;; MAG   : TEMPORARY(eSpec_MAG)}  , $
+                         ;; AACGM : TEMPORARY(eSpec_AACGM)} , $
+                         AACGM : TEMPORARY(eSpec_AACGM) , $
+                         GEO   : TEMPORARY(eSpec_GEO)   , $
+                         MAG   : TEMPORARY(eSpec_MAG)}  , $
            Je         : eSpec.Je[eSpec_i]    , $
            JEe        : eSpec.JEe[eSpec_i]}
 

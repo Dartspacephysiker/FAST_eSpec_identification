@@ -1,5 +1,5 @@
 ;;08/23/16
-PRO JOURNAL__20160823__STITCH_TOGETHER_BELOW_2000KM_FILES
+PRO JOURNAL__20160823__STITCH_TOGETHER_BELOW_2000KM_AACGM_FILES
 
   COMPILE_OPT IDL2
 
@@ -55,7 +55,7 @@ PRO JOURNAL__20160823__STITCH_TOGETHER_BELOW_2000KM_FILES
                                LAT:MAKE_ARRAY(nTotal,/FLOAT)}
 
   eSpec_i_final             = MAKE_ARRAY(nTotal,/LONG)
-  restrict_ii_final         = MAKE_ARRAY(nTotal,/LONG)
+  ;; restrict_ii_final         = MAKE_ARRAY(nTotal,/LONG)
   eEphem_AACGMSph_arr_final = MAKE_ARRAY(4,nTotal,/FLOAT)
 
   ;;Now combine

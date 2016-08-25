@@ -4,7 +4,7 @@
 ;value for restrict_ii is only ever going to be the number of eSpec_i in the partial indFile!
 ;When the eSpec_i all get combined, there are some 28 million eSpec_i. However, restrict_ii
 ;will never run to any value greater than, say, 10 million. Of course there are duplicates!
-PRO JOURNAL__20160824__CHECK_INTEGRITY__BELOW_2000KM
+PRO JOURNAL__20160824__CHECK_INTEGRITY__BELOW_2000KM__AACGM_FILES
 
   COMPILE_OPT idl2
 
