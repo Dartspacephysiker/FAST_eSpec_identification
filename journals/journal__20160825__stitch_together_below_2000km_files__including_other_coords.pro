@@ -165,9 +165,9 @@ PRO JOURNAL__20160825__STITCH_TOGETHER_BELOW_2000KM_FILES__INCLUDING_OTHER_COORD
            coords     : {SDT   : {MLT  : eSpec.MLT[eSpec_i]  , $
                                   ILAT : eSpec.ILAT[eSpec_i] , $
                                   alt  : eSpec.alt[eSpec_i]} , $
-                         AACGM : TEMPORARY(eSpec_AACGM) , $
-                         GEO   : TEMPORARY(eSpec_GEO)   , $
-                         MAG   : TEMPORARY(eSpec_MAG)}  , $
+                         AACGM : TEMPORARY(eSpec_AACGM)} , $
+                         ;; GEO   : TEMPORARY(eSpec_GEO)   , $
+                         ;; MAG   : TEMPORARY(eSpec_MAG)}  , $
            Je         : eSpec.Je[eSpec_i]    , $
            JEe        : eSpec.JEe[eSpec_i]}
 
