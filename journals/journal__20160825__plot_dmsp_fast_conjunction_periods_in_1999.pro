@@ -17,6 +17,8 @@ PRO JOURNAL__20160825__PLOT_DMSP_FAST_CONJUNCTION_PERIODS_IN_1999
   dbDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
   dbFile        = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords.sav'
 
+  print_orbits  = 1
+
   RESTORE,dbDir+dbFile
 
   startString = ['1999-03-24/23:49:00.000', $
@@ -47,7 +49,18 @@ PRO JOURNAL__20160825__PLOT_DMSP_FAST_CONJUNCTION_PERIODS_IN_1999
 
   FOR j=0,nPeriods-1 DO BEGIN
      PRINT,'Period ' + STRCOMPRESS(j+1,/REMOVE_ALL) + '/' + $
-           STRCOMPRESS(nPeriods,/REMOVE_ALL) + ' ..'
+           STRCOMPRESS(nPeriods,/REMOVE_ALL) + ' ...'
+
+     IF KEYWORD_SET(print_orbits) THEN BEGIN
+        GET_FA_ORBIT,startStop_UTC[0,j],startStop_UTC[1,j]
+        GET_DATA,'ORBIT',DATA=orbit
+        CHECK_SORTED,orbit.x,isSort,SORTED_I=sort_i
+        IF ~isSort THEN orbit = {x:orbit.x[sort_i],y:orbit.y[sort_i]}
+        orbits  = orbit.y[UNIQ(orbit.y)]
+        nOrbs   = N_ELEMENTS(UNIQ(orbit.y))
+        PRINT,FORMAT='("Orbits: ",10(I0,:,", "))',orbits
+     ENDIF
+
      JOURNAL__20160825__STEREO_AND_HISTOPLOTS__AACGM_V2_VS_COORDS_PROVIDED_BY_SDT, $
         IN_ESPEC=eSpec, $
         T1=startStop_UTC[0,j], $
