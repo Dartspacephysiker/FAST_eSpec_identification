@@ -318,9 +318,10 @@ PRO PLOT_STEREO_AND_HISTOPLOTS__SMALL_ESPECSTRUCT, $
                             '--' + allCoordString + fileExt
 
         saveThisPlot      = 0
+        havePlotWindow    = 0
         IF ISA(in_window) THEN BEGIN
            havePlotWindow = 1
-           window         = havePlotWindow
+           window         = in_window
         ENDIF
 
         plotsRemaining    = nStereoPlots
@@ -376,7 +377,7 @@ PRO PLOT_STEREO_AND_HISTOPLOTS__SMALL_ESPECSTRUCT, $
            coordName            = 'GEI (SDT-provided)'
            plotName             = coordName
            color_list           = 'green'
-           SIMPLE_STEREOGRAPHIC_SCATTERPLOT,eSOrb_GEI.lon,eSOrb_GEI.lat, $
+           SIMPLE_STEREOGRAPHIC_SCATTERPLOT,eSOrb.coords.GEI.lon,eSOrb.coords.GEI.lat, $
                                             HEMI=hemis, $
                                             PLOTNAME=plotName, $
                                             ;; OVERLAYAURZONE=overlayAurZone, $

@@ -6,7 +6,8 @@ FUNCTION GET_ESPEC_COORD_CONVERSION,eSpec, $
                                     TIME_ARRAY=time_array, $
                                     ORBIT_ARRAY=orbitArr, $
                                     COMBINE_ALL_ESORB_STRUCTS=combine_eSOrbStructs, $
-                                    CONVERT_IF_NOTEXIST=convert_nonExisting
+                                    CONVERT_IF_NOTEXIST=convert_nonExisting, $
+                                    FORCE_CONVERSIONS=force_conversions
 
   COMPILE_OPT idl2
 
@@ -130,7 +131,7 @@ FUNCTION GET_ESPEC_COORD_CONVERSION,eSpec, $
               PRINT,"File doesn't exist; performing conversion for " + timeTypeStr + ' ' + tempFNStr + ' ...'
            ENDIF
         END
-        KEYWORD_SET(do_conversions): BEGIN
+        KEYWORD_SET(force_conversions): BEGIN
            convertMePlease = 1
         END
         ELSE: 
@@ -374,7 +375,7 @@ FUNCTION GET_ESPEC_COORD_CONVERSION,eSpec, $
                                originating_db      : NEWELL__dbFile} $
                 }
 
-  FOR k=0,nLoops-1 DO BEGIN
+  FOR k=1,nLoops-1 DO BEGIN
 
      eSOrbFinal  = {x          : [eSOrbFinal.x,eSOrbList[k].x]    , $
                     orbit      : [eSOrbFinal.orbit,eSOrbList[k].orbit], $

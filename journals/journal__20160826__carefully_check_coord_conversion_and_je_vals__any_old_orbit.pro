@@ -4,18 +4,21 @@ PRO JOURNAL__20160826__CAREFULLY_CHECK_COORD_CONVERSION_AND_JE_VALS__ANY_OLD_ORB
 
   COMPILE_OPT idl2
 
+  startPeriod         = 0
+
   ;;Want to convert and save coordinates?
   convert_nonExisting = 1
 
   ;;Want to do plots?
-  make_plots          = 1
+  make_plots          = 0
   stereo_plots        = 1
   histo_plots         = 1
   savePlot            = 1
   add_plotTitles      = 0
   plotHemi            = 'NORTH'
+  stop_and_admire     = 0
 
-  gen_orbList = 1 ;Generate the list afresh, for no good reason?
+  gen_orbList = 0 ;Generate the list afresh, for no good reason?
 
   startString = ['1999-03-24/23:49:00.000', $
                  '1999-03-25/13:04:00.000', $
@@ -43,9 +46,9 @@ PRO JOURNAL__20160826__CAREFULLY_CHECK_COORD_CONVERSION_AND_JE_VALS__ANY_OLD_ORB
   diff_UTC      = [startStop_UTC[1,*]-startStop_UTC[0,*]]
 
 
-  conjOrbList   = LIST([10241,10242],[10247,10248],9859,12137,12278,1543)
+  conjOrbList   = LIST([10241,10242],[10247,10248],9859,12137,12278,12543)
   nTot          = 0
-  FOR j=0,nPeriods-1 DO BEGIN
+  FOR j=startPeriod,nPeriods-1 DO BEGIN
 
      IF KEYWORD_SET(gen_orbList) THEN BEGIN
 
@@ -76,14 +79,15 @@ PRO JOURNAL__20160826__CAREFULLY_CHECK_COORD_CONVERSION_AND_JE_VALS__ANY_OLD_ORB
   PRINT,'N Total Orbits: ' + STRCOMPRESS(nTot,/REMOVE_ALL)
 
 
-  FOR j=0,nPeriods-1 DO BEGIN
+  FOR j=startPeriod,nPeriods-1 DO BEGIN
 
      eSOrb = GET_ESPEC_COORD_CONVERSION(eSpec,T1=startStop_UTC[0,j], $
                                         T2=startStop_UTC[1,j], $
                                         TIME_ARRAY=time_array, $
                                         ORBIT_ARRAY=orbitArr, $
                                         /COMBINE_ALL_ESORB_STRUCTS, $
-                                        CONVERT_IF_NOTEXIST=convert_nonExisting)
+                                        CONVERT_IF_NOTEXIST=convert_nonExisting, $
+                                        FORCE_CONVERSIONS=force_conversions)
 
      IF (eSOrb EQ !NULL) THEN CONTINUE
         
@@ -109,7 +113,7 @@ PRO JOURNAL__20160826__CAREFULLY_CHECK_COORD_CONVERSION_AND_JE_VALS__ANY_OLD_ORB
            RESTRICT_HISTO_ILAT_RANGE=restrict_histo_ILAT_range, $
            SAVEPLOT=savePlot, $
            PLOTDIR=plotDir, $
-           BATCH=batch
+           BATCH=~KEYWORD_SET(stop_and_admire)
      ENDIF
 
   ENDFOR
