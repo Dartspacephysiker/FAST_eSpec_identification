@@ -8,6 +8,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          FORCE_LOAD_DB=force_load_db, $
                          DONT_LOAD_IN_MEMORY=nonMem, $
                          DONT_PERFORM_CORRECTION=dont_perform_correction, $
+                         DONT_CONVERT_TO_STRICT_NEWELL=dont_convert_to_strict_newell, $
                          JUST_TIMES=just_times, $
                          OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
@@ -98,8 +99,12 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
         
         ;;Convert to strict Newell interpretation
         
-        PRINT,"Converting eSpec DB to strict Newell interpretation ..."
-        CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec,/HUGE_STRUCTURE,/VERBOSE
+        IF ~KEYWORD_SET(dont_convert_to_strict_newell) THEN BEGIN
+           PRINT,"Converting eSpec DB to strict Newell interpretation ..."
+           CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec,/HUGE_STRUCTURE,/VERBOSE
+        ENDIF ELSE BEGIN
+           PRINT,'Not converting eSpec to strict Newell interp ...'
+        ENDELSE
      ENDIF ELSE BEGIN
         PRINT,"Not correcting sign in each hemisphere, and not converting to strict Newell interp ..."
      ENDELSE

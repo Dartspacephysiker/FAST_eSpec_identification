@@ -7,7 +7,8 @@ PRO JOURNAL__20160826__CAREFULLY_CHECK_COORD_CONVERSION_AND_JE_VALS__ANY_OLD_ORB
   startPeriod         = 0
 
   ;;Want to convert and save coordinates?
-  convert_nonExisting = 1
+  convert_nonExisting = 0
+  force_conversions   = 1
 
   ;;Want to do plots?
   make_plots          = 0

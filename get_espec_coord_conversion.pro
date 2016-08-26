@@ -25,7 +25,7 @@ FUNCTION GET_ESPEC_COORD_CONVERSION,eSpec, $
 
   ;;Load the stuff we need 
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
-     LOAD_NEWELL_ESPEC_DB,/DONT_PERFORM_CORRECTION
+     LOAD_NEWELL_ESPEC_DB,/DONT_CONVERT_TO_STRICT_NEWELL
   ENDIF
 
   CASE 1 OF
@@ -140,8 +140,11 @@ FUNCTION GET_ESPEC_COORD_CONVERSION,eSpec, $
      IF KEYWORD_SET(convertMePlease) THEN BEGIN
         CASE 1 OF
            KEYWORD_SET(time_array): BEGIN
+              PRINT,"This has not been tested!"
+              STOP
+
               tmp_i        = VALUE_LOCATE(NEWELL__eSpec.x,t1,/L64)
-              CHECK_SORTED,tmp_i,isSort,SORTED_I=sort_ii,/QUIET
+              CHECK_SORTED,NEWELL__eSpec.x[tmp_i],isSort,SORTED_I=sort_ii,/QUIET
               IF ~isSort THEN BEGIN
                  PRINT,'Unsorted temporary indices!! Attempting to sort/clean ...'
                  tmp_i     = tmp_i[TEMPORARY(sort_ii)]
@@ -159,6 +162,19 @@ FUNCTION GET_ESPEC_COORD_CONVERSION,eSpec, $
            END
            KEYWORD_SET(t1[k]) AND KEYWORD_SET(t2[k]): BEGIN
               tmp_i        = WHERE((NEWELL__eSpec.x GE t1) AND (NEWELL__eSpec.x LE t2),nTmp)
+
+              ;;Are they safe?
+              CHECK_SORTED,NEWELL__eSpec.x[tmp_i],isSort,SORTED_I=sort_ii,/QUIET
+              IF ~isSort THEN BEGIN
+                 PRINT,'Unsorted temporary indices!! Attempting to sort/clean ...'
+                 tmp_i     = tmp_i[TEMPORARY(sort_ii)]
+                 nTmp      = N_ELEMENTS(tmp_i)
+              ENDIf
+              IF N_ELEMENTS(tmp_i) NE N_ELEMENTS(UNIQ(tmp_i)) THEN BEGIN
+                 PRINT,"There are duplicate tmpIndices present."
+                 STOP
+              ENDIF
+
            END
            KEYWORD_SET(orbitArr): BEGIN
               tmp_i        = WHERE(NEWELL__eSpec.orbit EQ orbNum,nTmp)
