@@ -7,11 +7,11 @@ PRO JOURNAL__20160826__CAREFULLY_CHECK_COORD_CONVERSION_AND_JE_VALS__ANY_OLD_ORB
   startPeriod         = 0
 
   ;;Want to convert and save coordinates?
-  convert_nonExisting = 0
-  force_conversions   = 1
+  convert_nonExisting = 1
+  force_conversions   = 0
 
   ;;Want to do plots?
-  make_plots          = 0
+  make_plots          = 1
   stereo_plots        = 1
   histo_plots         = 1
   savePlot            = 1
@@ -80,6 +80,8 @@ PRO JOURNAL__20160826__CAREFULLY_CHECK_COORD_CONVERSION_AND_JE_VALS__ANY_OLD_ORB
 
 
   FOR j=startPeriod,nPeriods-1 DO BEGIN
+
+     IF j EQ 1 THEN STOP
 
      eSOrb = GET_ESPEC_COORD_CONVERSION(eSpec,T1=startStop_UTC[0,j], $
                                         T2=startStop_UTC[1,j], $
