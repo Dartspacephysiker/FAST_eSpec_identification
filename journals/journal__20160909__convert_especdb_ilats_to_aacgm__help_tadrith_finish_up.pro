@@ -1,16 +1,18 @@
-;;2016/08/27
+;;2016/09/09
 ;;Please compile AACGM lib before running: IDL> @compile_aacgm.pro
-PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
+PRO JOURNAL__20160909__CONVERT_ESPECDB_ILATS_TO_AACGM__HELP_TADRITH_FINISH_UP
 
   COMPILE_OPT IDL2
 
-  orig_routineName  = 'JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM'
+  orig_routineName  = 'JOURNAL__20160909__CONVERT_ESPECDB_ILATS_TO_AACGM__HELP_TADRITH_FINISH_UP'
 
   R_E               = 6371.2D    ;Earth radius in km, from IGRFLIB_V2.pro
 
   altitude_max      = 4180       ;in km
   allow_fl_trace    = 1          ;Allow fieldline tracing for AACGM_v2?
   check_if_exists   = 1
+
+  startFile_i       = 2          ;START ON THE LAST FILE. DON'T QUESTION ME.
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Input
 
@@ -41,7 +43,7 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
 
   TIC
   clock = TIC('warnMe')
-  FOR i=1,N_ELEMENTS(coordFiles)-1 DO BEGIN
+  FOR i=startFile_i,N_ELEMENTS(coordFiles)-1 DO BEGIN
 
      ;;Load the stuff we need (has GEO coords)
      PRINT,"Restoring " + coordFiles[i] + ' ...'
@@ -175,7 +177,7 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
      ENDIF ELSE BEGIN
         nGotEm        = 0
         lastCheck     = 0
-        checkInterval = 100000
+        checkInterval = 10000
         startK        = 0
      ENDELSE
 
@@ -183,7 +185,7 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
      TIC
      runCName = "AACGM Clock"
      runC     = TIC(runCName)
-     FOR k=startK,nTot-1 DO BEGIN 
+     FOR k=nTot-1,startK,-1 DO BEGIN 
 
         ;; checkEmOut  = WHERE(( esTTemp GE  time_utc[k]) AND ( esTTemp LE time_utc[k+1]),nCheckEm)
 
