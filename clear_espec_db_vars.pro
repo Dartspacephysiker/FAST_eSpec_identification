@@ -1,8 +1,8 @@
-PRO CLEAR_ESPEC_DB_VARS
+PRO CLEAR_ESPEC_DB_VARS,QUIET=quiet
 
   COMMON NEWELL
 
-  PRINT,'Clearing eSpec COMMON vars ...'
+  IF ~KEYWORD_SET(quiet) THEN PRINT,'Clearing eSpec COMMON vars ...'
 
   NEWELL__eSpec        = !NULL
   NEWELL__HAVE_GOOD_I  = !NULL

@@ -12,7 +12,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          JUST_TIMES=just_times, $
                          OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
-                         LUN=lun
+                         LUN=lun, $
+                         QUIET=quiet
 
   COMPILE_OPT idl2
 
@@ -34,29 +35,37 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   defSortNewellDBFile    =  "sorted--" + defNewellDBFile
 
 
+  IF N_ELEMENTS(quiet) EQ 0 THEN quiet = 0
+
   IF N_ELEMENTS(lun) EQ 0 THEN BEGIN
      lun                 = -1
   ENDIF
 
   ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     IF N_ELEMENTS(NEWELL__eSpec) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
-        CASE 1 OF
-           KEYWORD_SET(just_times): BEGIN
-              PRINT,"Just giving eSpec times ..."
-              out_times     = NEWELL__eSpec.x
-           END
-           ELSE: BEGIN
-              PRINT,'Restoring eSpec DB already in memory...'
-              eSpec         = NEWELL__eSpec
-              IF N_ELEMENTS(NEWELL__failCodes) GT 0 THEN BEGIN
-                 failCodes  = NEWELL__failCodes
-              ENDIF
-              NewellDBDir   = NEWELL__dbDir
-              NewellDBFile  = NEWELL__dbFile
-           END
-        ENDCASE
-        RETURN
-     ENDIF
+  IF N_ELEMENTS(NEWELL__eSpec) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
+     CASE 1 OF
+        KEYWORD_SET(just_times): BEGIN
+           IF ~quiet THEN PRINT,"Just giving eSpec times ..."
+           out_times     = NEWELL__eSpec.x
+
+           IF KEYWORD_SET(nonMem) THEN BEGIN
+              CLEAR_ESPEC_DB_VARS
+           ENDIF
+
+           RETURN
+        END
+        ELSE: BEGIN
+           IF ~quiet THEN PRINT,'Restoring eSpec DB already in memory...'
+           eSpec         = NEWELL__eSpec
+           IF N_ELEMENTS(NEWELL__failCodes) GT 0 THEN BEGIN
+              failCodes  = NEWELL__failCodes
+           ENDIF
+           NewellDBDir   = NEWELL__dbDir
+           NewellDBFile  = NEWELL__dbFile
+        END
+     ENDCASE
+     RETURN
+  ENDIF
   ;; ENDIF
 
   IF N_ELEMENTS(NewellDBDir) EQ 0 THEN BEGIN
@@ -69,12 +78,12 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
      CASE KEYWORD_SET(use_unsorted_file) OF
         1: BEGIN
-           ;; PRINT,'Using UNsorted eSpec DB ...'
+           ;; IF ~quiet THEN PRINT,'Using UNsorted eSpec DB ...'
            specType      = 'UNSORTED'
            NewellDBFile  = defNewellDBFile
         END
         ELSE: BEGIN
-           ;; PRINT,'Using sorted eSpec DB ...'
+           ;; IF ~quiet THEN PRINT,'Using sorted eSpec DB ...'
            specType      = 'SORTED'
            NewellDBFile  = defSortNewellDBFile
         END
@@ -86,27 +95,27 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   IF N_ELEMENTS(specType) EQ 0 THEN specType = ''
   IF N_ELEMENTS(eSpec) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
      IF KEYWORD_SET(force_load_db) THEN BEGIN
-        PRINTF,lun,"Forced loading of " + specType + " eSpec database ..."
+        IF ~quiet THEN PRINTF,lun,"Forced loading of " + specType + " eSpec database ..."
      ENDIF
-     PRINTF,lun,'Loading ' + specType + ' eSpec DB: ' + NewellDBFile + '...'
+     IF ~quiet THEN PRINTF,lun,'Loading ' + specType + ' eSpec DB: ' + NewellDBFile + '...'
      RESTORE,NewellDBDir+NewellDBFile
 
      ;;Correct fluxes
      IF ~KEYWORD_SET(dont_perform_correction) THEN BEGIN
-        PRINT,"Correcting eSpec fluxes..."
+        IF ~quiet THEN PRINT,"Correcting eSpec fluxes..."
         eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
         eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
         
         ;;Convert to strict Newell interpretation
         
         IF ~KEYWORD_SET(dont_convert_to_strict_newell) THEN BEGIN
-           PRINT,"Converting eSpec DB to strict Newell interpretation ..."
+           IF ~quiet THEN PRINT,"Converting eSpec DB to strict Newell interpretation ..."
            CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec,/HUGE_STRUCTURE,/VERBOSE
         ENDIF ELSE BEGIN
-           PRINT,'Not converting eSpec to strict Newell interp ...'
+           IF ~quiet THEN PRINT,'Not converting eSpec to strict Newell interp ...'
         ENDELSE
      ENDIF ELSE BEGIN
-        PRINT,"Not correcting sign in each hemisphere, and not converting to strict Newell interp ..."
+        IF ~quiet THEN PRINT,"Not correcting sign in each hemisphere, and not converting to strict Newell interp ..."
      ENDELSE
 
      ;;The following lines aren't necessary for this little beaut
@@ -115,23 +124,23 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      ;;    RESTORE,NewellDBDir+defNewellDBCleanInds
      ;; ENDIF ELSE BEGIN        
      ;;    good_i = BASIC_ESPEC_ION_DB_CLEANER(eSpec,/CLEAN_NANS_AND_INFINITIES)
-     ;;    PRINT,'Saving NaN- and INF-less eSpec DB inds to ' + defNewellDBCleanInds + '...'
+     ;;    IF ~quiet THEN PRINT,'Saving NaN- and INF-less eSpec DB inds to ' + defNewellDBCleanInds + '...'
      ;;    SAVE,good_i,FILENAME=NewellDBDir+defNewellDBCleanInds
      ;; ENDELSE
      
   ENDIF ELSE BEGIN
-     PRINTF,lun,'eSpec DB already loaded! Not restoring ' + NewellDBFile + '...'
+     IF ~quiet THEN PRINTF,lun,'eSpec DB already loaded! Not restoring ' + NewellDBFile + '...'
   ENDELSE
 
   ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     NEWELL__eSpec          = eSpec
+  NEWELL__eSpec          = eSpec
 
-     IF N_ELEMENTS(failCode) NE 0 THEN BEGIN
-        NEWELL__failCodes   = failCode
-     ENDIF ELSE BEGIN
-        NEWELL__failCodes   = !NULL
-        PRINT,'This Newell DB file doesn''t have fail codes!'
-     ENDELSE
+  IF N_ELEMENTS(failCode) NE 0 THEN BEGIN
+     NEWELL__failCodes   = failCode
+  ENDIF ELSE BEGIN
+     NEWELL__failCodes   = !NULL
+     IF ~quiet THEN PRINT,'This Newell DB file doesn''t have fail codes!'
+  ENDELSE
 
   ;; ENDIF
 
@@ -139,9 +148,9 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      out_times              = TEMPORARY(eSpec.x)
   ENDIF
 
-     IF KEYWORD_SET(nonMem) THEN BEGIN
-        CLEAR_ESPEC_DB_VARS
-     ENDIF
+  IF KEYWORD_SET(nonMem) THEN BEGIN
+     CLEAR_ESPEC_DB_VARS,QUIET=quiet
+  ENDIF
 
   RETURN
 
