@@ -3,10 +3,13 @@ PRO JOURNAL__20161008__GET_ESPECDB_FOOTPOINTS_AND_MAGFIELD_RATIOS__SDT_STYLE
 
   COMPILE_OPT idl2
 
-  outDir        = '/SPENCEdata/Research/database/FAST/dartdb/saves/mapratio_dbs/TEMP_eSpec/'
+  outDir        = '/SPENCEdata/Research/database/FAST/dartdb/saves/mapratio_dbs/'
   outFilePref   = 'mapratio_for_20160607_eSpecDB--20161008--'
 
+  tmpDir        = outDir + 'TEMP_eSpec/'
   finalFile     = 'mapratio_for_20160607_eSpecDB--20161008.sav'
+
+  finalMappedDB = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav'
 
   delta         = 1000000
 
@@ -14,7 +17,8 @@ PRO JOURNAL__20161008__GET_ESPECDB_FOOTPOINTS_AND_MAGFIELD_RATIOS__SDT_STYLE
   ;; stop_k        = 29
 
   create_footpoint_files = 0
-  stitch_footpoint_files = 1
+  stitch_footpoint_files = 0
+  apply_ratios_to_db     = 1
 
   LOAD_NEWELL_ESPEC_DB,!NULL, $
                        OUT_TIMES=t, $
@@ -24,19 +28,28 @@ PRO JOURNAL__20161008__GET_ESPECDB_FOOTPOINTS_AND_MAGFIELD_RATIOS__SDT_STYLE
                        /QUIET
 
 
-  div = DIVVY_INDICES(N_ELEMENTS(t),delta,kDecPlace,lens)
+  need_div = KEYWORD_SET(create_footpoint_files) OR $
+             KEYWORD_SET(stitch_footpoint_files)
+
+  IF need_div THEN BEGIN
+     div = DIVVY_INDICES(N_ELEMENTS(t),delta,kDecPlace,lens)
+  ENDIF
 
   IF KEYWORD_SET(create_footpoint_files) THEN BEGIN
-     CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,outDir, $
+     CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,tmpDir, $
                             START_K=start_k, $
                             END_K=end_k
   ENDIF
 
   IF KEYWORD_SET(stitch_footpoint_files) THEN BEGIN
-     STITCH_TOGETHER_ESPEC_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,outDir, $
-                                           finalFile, $
+     STITCH_TOGETHER_ESPEC_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,tmpDir, $
+                                           finalFile,outDir, $
                                            START_K=start_k, $
                                            END_K=end_k
+  ENDIF
+
+  IF KEYWORD_SET(apply_ratios_to_db) THEN BEGIN
+     APPLY_RATIOS_TO_DB,finalMappedDB,finalFile,outDir
   ENDIF
 
 END
@@ -67,13 +80,13 @@ FUNCTION DIVVY_INDICES,N,delta,OUT_kDecPlace,OUT_lens
   RETURN,div
 END
 
-PRO CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,outDir, $
+PRO CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,tmpDir, $
                            START_K=start_k, $
                            END_K=end_k
   
   COMPILE_OPT idl2
 
-  IF ~MAKE_SURE_FILES_EXIST(div,kDecPlace,outFilePref,outDir) THEN RETURN
+  IF ~MAKE_SURE_FILES_EXIST(div,kDecPlace,outFilePref,tmpDir) THEN RETURN
 
   strtK = N_ELEMENTS(start_k) GT 0 ? start_k : 0
 
@@ -126,7 +139,7 @@ PRO CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,outDir, $
                    orbit: TEMPORARY(orbit)}
 
      PRINT,'Saving ' + outFilePref + outFileSuff + '.dat ...'
-     SAVE,mapRatio,FILENAME=outDir+outFilePref+outFileSuff+'.dat'
+     SAVE,mapRatio,FILENAME=tmpDir+outFilePref+outFileSuff+'.dat'
 
      mapRatio  = !NULL
 
@@ -137,14 +150,14 @@ PRO CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,outDir, $
 
 END
 
-PRO STITCH_TOGETHER_ESPEC_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,outDir, $
-                                          finalFile, $
+PRO STITCH_TOGETHER_ESPEC_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,tmpDir, $
+                                          finalFile,outDir, $
                                           START_K=start_k, $
                                           END_K=end_k
 
   COMPILE_OPT idl2
 
-  IF ~MAKE_SURE_FILES_EXIST(div,kDecPlace,outFilePref,outDir) THEN RETURN
+  IF ~MAKE_SURE_FILES_EXIST(div,kDecPlace,outFilePref,tmpDir) THEN RETURN
 
   strtK = N_ELEMENTS(start_k) GT 0 ? start_k : 0
 
@@ -170,7 +183,7 @@ PRO STITCH_TOGETHER_ESPEC_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,outDir,
 
      outFileSuff = STRING(FORMAT='(I0'+STRCOMPRESS(kDecPlace,/REMOVE_ALL)+')',k)
 
-     fName = outDir+outFilePref+outFileSuff+'.dat'
+     fName = tmpDir+outFilePref+outFileSuff+'.dat'
 
      RESTORE,fName
 
@@ -203,6 +216,46 @@ PRO STITCH_TOGETHER_ESPEC_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,outDir,
   STOP
 END
 
+PRO APPLY_RATIOS_TO_DB,finalMappedDB,finalFile,outDir
+
+  PRINT,'Restoring mapRatio DB ...'
+  RESTORE,outDir+finalFile
+
+  LOAD_NEWELL_ESPEC_DB,eSpec, $
+                       NEWELLDBDIR=NewellDBDir, $
+                       /DONT_LOAD_IN_MEMORY, $
+                       /DONT_CONVERT_TO_STRICT_NEWELL, $
+                       /QUIET
+  
+  STR_ELEMENT,eSpec,'mapFactor',INDEX=index
+
+  IF index EQ -2 THEN BEGIN
+     PRINT,"Something's up, children. There's no eSpec DB to be had ..."
+     RETURN
+  ENDIF
+
+  IF index GE 0 THEN BEGIN
+     PRINT,"Something's up, children. I think we've already updated this DB."
+     RETURN
+  ENDIF
+
+
+
+  IF N_ELEMENTS(mapRatio.mag1) NE N_ELEMENTS(eSpec.je) THEN STOP ELSE BEGIN
+     PRINT,'K, same number of elements at any rate ...'
+     PRINT,"Application!"
+  ENDELSE
+
+  ;; eSpec.Je  * mapRatio.ratio
+  ;; eSpec.Jee * mapRatio.ratio
+
+  eSpec = CREATE_STRUCT(eSpec,'mapFactor',mapRatio.ratio)
+
+  PRINT,'Saving updated eSpec to ' + finalMappedDB + ' ...'
+  SAVE,eSpec,FILENAME=NewellDBDir+finalMappedDB
+
+END
+
 FUNCTION MAKE_SURE_FILES_EXIST,div,kDecPlace,outFilePref,outDir
 
   COMPILE_OPT idl2
@@ -225,3 +278,4 @@ FUNCTION MAKE_SURE_FILES_EXIST,div,kDecPlace,outFilePref,outDir
 
   RETURN,1
 END
+
