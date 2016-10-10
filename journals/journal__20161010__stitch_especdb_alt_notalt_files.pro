@@ -1,10 +1,7 @@
-;;2016/08/27
-;;Please compile AACGM lib before running: IDL> @compile_aacgm.pro
-PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
+;;10/10/16
+PRO JOURNAL__20161010__STITCH_ESPECDB_ALT_NOTALT_FILES
 
   COMPILE_OPT IDL2
-
-  do_conversions    = 0
 
   orig_routineName  = 'JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM'
 
@@ -39,12 +36,6 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
   outFiles         = 'sorted--eSpec_20160607_db--Orbs_500-16361--AACGM_v2_coords' + $
                      ['_1','_2','_3']+'--recalc_for_every_point.sav'
 
-  ;;In case we get cut off--think SNES emulator savestate
-  tmpFiles         = outDir+'TEMP_AACGM--sorted--eSpec_20160607_db--Orbs_500-16361' + $
-                     ['_1','_2','_3']+'--recalc_for_every_point.sav'
-  timeFiles        = outDir+'TEMP_AACGM--sorted--eSpec_20160607_db--Orbs_500-16361' + $
-                     ['_1','_2','_3']+'--recalc_for_every_point--timeStrings.sav'
-
   ;;Convert these var names to standard names
   in_names = {GEOSph       : 'eEphem_GEOSph_arr', $
               AACGMSph     : 'eEphem_AACGMSph_arr', $
@@ -59,28 +50,40 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
               restrictVar : 'restrict_ii', $
               DBInd       : 'DBInds'}
 
-  IF KEYWORD_SET(do_conversions) THEN BEGIN
-     CONVERT_GEO_TO_AACGM, $
-        COORDFILES=coordFiles, $
-        COORDDIR=eSpecDir, $
-        TMPFILES=tmpFiles, $
-        TIMEFILES=timeFiles, $
-        EPHEMFILEINDARR=ephemFileIndArr, $
-        OUTDIR=outDir, $
-        OUTFILES=outFiles, $
-        ORIG_ROUTINENAME=orig_routineName, $
-        R_E=R_E, $
-        ALTITUDE_MAX=altitude_max, $
-        ALLOW_FL_TRACE=allow_FL_trace, $
-        CHECK_IF_EXISTS=check_IF_exists, $
-        CREATE_NOTALTITUDE_FILE=create_notAltitude_file, $
-        NOTALTITUDE_SUFF=notAltitude_suff, $
-        CONVERT_VARNAMES_AND_RESAVE_OUTFILES=convert_varNames_and_resave_outFiles, $
-        FORCE_NEWCHECKITVL=force_newCheckItvl, $
-        IN_NAMES=in_names, $
-        DEFNAMES=defNames
+  smallFile = outDir+outFiles[0]+notAltitude_suff
+  RESTORE,smallFile
 
-  ENDIF
+  aacgmSph_small = AACGMSph
+  AACGMStruct_small = AACGMStruct
+  ;; notRestrict_ii = TEMPORARY(notRestrict_ii)
+  nSmall    = N_ELEMENTS(notRestrict_ii)
 
+  RESTORE,outDir+outFiles[0]
+  ;; restrict_ii = TEMPORARY(restrict_ii)
+  n   = N_ELEMENTS(restrict_ii)
+  nTot = nSmall+n
+
+  IF nTot NE N_ELEMENTS(eSpec_i) THEN STOP
+
+  combInds = [restrict_ii,notRestrict_ii]
+  
+  combInds = combInds[SORT(combInds)]
+
+  combStruct = {alt:([AACGMStruct.alt,AACGMStruct_small.alt])[combInds], $
+                mlt:([AACGMStruct.mlt,AACGMStruct_small.mlt])[combInds], $
+                lat:([AACGMStruct.lat,AACGMStruct_small.lat])[combInds]}
+
+  AACGMStruct = TEMPORARY(combStruct)
+  combSph    = MAKE_ARRAY(4,nTot)
+  combSph[0,*] = ([REFORM(AACGMSph[0,*]),REFORM(AACGMSph_small[0,*])])[combInds]
+  combSph[1,*] = ([REFORM(AACGMSph[1,*]),REFORM(AACGMSph_small[1,*])])[combInds]
+  combSph[2,*] = ([REFORM(AACGMSph[2,*]),REFORM(AACGMSph_small[2,*])])[combInds]
+  combSph[3,*] = ([REFORM(AACGMSph[3,*]),REFORM(AACGMSph_small[3,*])])[combInds]
+
+  AACGMSph     = TEMPORARY(combSph)
+
+  PRINT,"SAVE,AACGMStruct,AACGMSph,eSpec_i,restrict_ii,notRestrict_ii,n,nSmall,smallFile,outDir+outFiles[0]"
+  SAVE,AACGMStruct,AACGMSph,eSpec_i,restrict_ii,notRestrict_ii,n,nSmall,smallFile,FILENAME=outDir+outFiles[0]
+  
+  STOP
 END
-
