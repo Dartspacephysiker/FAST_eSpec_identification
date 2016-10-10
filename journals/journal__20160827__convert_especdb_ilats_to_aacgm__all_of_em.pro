@@ -16,6 +16,8 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
   notAltitude_suff        = '--missed_indices--' + GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
 
   convert_varnames_and_resave_outFiles = 1
+
+  force_newCheckItvl = 1000
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Input
 
@@ -41,11 +43,13 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
   timeFiles        = outDir+'TEMP_AACGM--sorted--eSpec_20160607_db--Orbs_500-16361' + $
                      ['_1','_2','_3']+'--recalc_for_every_point--timeStrings.sav'
 
+  ;;Convert these var names to standard names
   GEOSphName        = 'eEphem_GEOSph_arr'
   AACGMSphName      = 'eEphem_AACGMSph_arr'
   GEOStructName     = 'eSpec_GEO'
   AACGMStructName   = 'eSpec_AACGM'
   coordStructName   = 'eSpecCoords'
+  timeStrName       = 'eSTTempStr'
 
   TIC
   clock = TIC('warnMe')
@@ -98,6 +102,7 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
                                      R_E=R_E, $
                                      ALLOW_FL_TRACE=allow_fl_trace, $
                                      OUT_TIMETMPSTR=timeTmpStr, $
+                                     TIMESTRNAME=timeStrName, $
                                      CONVERT_VARNAMES_AND_RESAVE_OUTFILES=convert_varnames_and_resave_outFiles) $
      THEN BEGIN
         timeTmpStr = RECALC_TSTAMPS(timeTmp,nTot,timeFiles[i], $
@@ -118,6 +123,11 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
         PRINT,"lastCheck     : " + STRCOMPRESS(lastCheck,/REMOVE_ALL)
         PRINT,"checkInterval : " + STRCOMPRESS(checkInterval,/REMOVE_ALL)
         
+        IF KEYWORD_SET(force_newCheckItvl) THEN BEGIN
+           PRINT,"Forcing new check interval: " + STRCOMPRESS(force_newCheckItvl,/REMOVE_ALL)
+           checkInterval = force_newCheckItvl
+        ENDIF
+
         startK        = k
 
         PRINT,""
@@ -272,19 +282,26 @@ PRO CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,timeTmp,i, $
                                          NAME__GEOSTRUCT=GEOStructName, $
                                          NAME__AACGMSTRUCT=AACGMStructName
 
-  defGeoSphName       = 'GEOSph'
+  defGEOSphName       = 'GEOSph'
   defAACGMSphName     = 'AACGMSph'
   defGEOStructName    = 'GEOStruct'
   defAACGMStructName  = 'AACGMStruct'
 
   RESTORE,outDir+outFiles[i]
 
-  success = (~EXECUTE(defGeoSphName      + ' = TEMPORARY(' + GEOSphName      + ')')) AND $
-            (~EXECUTE(defAACGMSphName    + ' = TEMPORARY(' + AACGMSphName    + ')')) AND $
-            (~EXECUTE(defGEOStructName   + ' = TEMPORARY(' + GEOStructName   + ')')) AND $
-            (~EXECUTE(defAACGMStructName + ' = TEMPORARY(' + AACGMStructName + ')'))
+  varNames    = [GEOSphName,AACGMSphName,GEOStructName,AACGMStructName]
+  defVarNames = [defGEOSphName,defAACGMSphName,defGEOStructName,defAACGMStructName]
 
-  IF ~success THEN STOP
+  ;;Check if they're defined
+  IF ~VARS_EXIST(outDir+outFiles[i],varNames,defVarnames, $
+                 GEOSph,AACGMSph,GEOStruct,AACGMStruct) THEN STOP
+
+  ;; success = (~EXECUTE(defGeoSphName      + ' = TEMPORARY(' + GEOSphName      + ')')) AND $
+  ;;           (~EXECUTE(defAACGMSphName    + ' = TEMPORARY(' + AACGMSphName    + ')')) AND $
+  ;;           (~EXECUTE(defGEOStructName   + ' = TEMPORARY(' + GEOStructName   + ')')) AND $
+  ;;           (~EXECUTE(defAACGMStructName + ' = TEMPORARY(' + AACGMStructName + ')'))
+
+  ;; IF ~success THEN STOP
 
   ;;Yes, the French 'reponse' (not response)
   reponse = ''
@@ -339,6 +356,7 @@ FUNCTION CHECK_NEED_TO_RECALC_TSTAMPS,timeFile,timeTmp,nTot, $
                                       R_E=R_E, $
                                       ALLOW_FL_TRACE=allow_fl_trace, $
                                       OUT_TIMETMPSTR=timeTmpStr, $
+                                      TIMESTRNAME=timeStrName, $
                                       CONVERT_VARNAMES_AND_RESAVE_OUTFILES=convert_varnames_and_resave_outFiles
 
   nTot          = N_ELEMENTS(timeTmp)
@@ -426,3 +444,66 @@ PRO CHOP_UTC_STRINGS_INTO_YMD_HMS,timeTmpStr,year,month,day,hour,min,sec
   sec    = FLOAT(STRMID(timeTmpStr,17,6))
 
 END
+
+;; FUNCTION VARS_EXIST,saveFile,varNames,defVarnames
+
+;;   IF ~FILE_TEST(saveFile) THEN BEGIN
+;;      PRINT,"File doesn't exist: " + saveFile
+;;      PRINT,"Can't check for existence of vars."
+;;      RETURN,0
+;;   ENDIF
+
+;;   fail = 0
+;;   FOR k=0,N_ELEMENTS(varNames)-1 DO BEGIN
+     
+;;      test = EXECUTE('junk = SIZE(' + varNames[k] + ',/TYPE)')
+
+;;      IF ~test THEN BEGIN
+;;         fail = 1
+;;         failNum = k
+;;         BREAK
+;;      ENDIF
+
+;;      IF junk EQ 0 THEN BEGIN
+;;         test = EXECUTE('junk = SIZE(' + defVarNames[k] + ',/TYPE)')        
+
+;;         IF ~test THEN BEGIN
+;;            fail = 2
+;;            failNum = k
+;;            BREAK
+;;         ENDIF
+
+;;         IF junk EQ 0 THEN BEGIN
+;;            fail = 3
+;;            failNum = k
+;;         ENDIF
+
+;;      ENDIF
+
+;;   ENDFOR
+
+;;   IF fail NE 0 THEN BEGIN
+;;      CASE fail OF
+;;         1: BEGIN
+;;            PRINT,"Failed execution of 'junk = SIZE(...' looking for " + varNames[k]
+;;            RETURN,0
+;;         END
+;;         2: BEGIN
+;;            PRINT,"Failed execution of 'junk = SIZE(...' looking for " + defVarNames[k]
+;;            RETURN,0           
+;;         END
+;;         3: BEGIN
+;;            PRINT,FORMAT='(A0,A0,A0,A0,A0)',"Variables ",varNames[k], $
+;;                  " and ", $
+;;                  defVarnames[k], $
+;;                  " dont' exist in this file"
+;;            RETURN,0           
+;;         END
+;;      ENDCASE
+
+;;      RETURN,0
+;;   ENDIF
+
+;;   RETURN,test AND (junk GT 0)
+
+;; END
