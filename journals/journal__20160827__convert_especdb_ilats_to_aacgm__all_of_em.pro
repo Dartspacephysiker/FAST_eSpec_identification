@@ -51,29 +51,29 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
   clock = TIC('warnMe')
   FOR i=0,N_ELEMENTS(coordFiles)-1 DO BEGIN
 
-     esTTemp      = GET_TIMES_AND_DECIDE_ALTITUDE_OR_NOT_ALTITUDE(ephemFileIndArr,eSpec_i,i, $
-                                                                  ALTITUDE_MAX=altitude_max, $
-                                                                  R_E=R_E, $
-                                                                  ALLOW_FL_TRACE=allow_fl_trace, $
-                                                                  COORDFILES=coordFiles, $
-                                                                  ESPECDIR=eSpecDir, $
-                                                                  CREATE_NOTALTITUDE_FILE=create_notAltitude_file, $
-                                                                  NOTALTITUDE_SUFF=notAltitude_suff, $
-                                                                  OUTFILES=outFiles, $
-                                                                  TMPFILES=tmpFiles, $
-                                                                  TIMEFILES=timeFiles, $
-                                                                  RESTRICT_II=restrict_ii, $
-                                                                  NOTRESTRICT_II=notRestrict_ii, $
-                                                                  DOEM_II=doEm_ii, $
-                                                                  NAME__GEOSTRUCT=GEOStructName, $
-                                                                  NAME__COORDSTRUCT=coordStructName, $
-                                                                  GEOSTRUCT=geoStruct)
+     timeTmp = GET_TIMES_AND_DECIDE_ALTITUDE_OR_NOT_ALTITUDE(ephemFileIndArr,eSpec_i,i, $
+                                                             ALTITUDE_MAX=altitude_max, $
+                                                             R_E=R_E, $
+                                                             ALLOW_FL_TRACE=allow_fl_trace, $
+                                                             COORDFILES=coordFiles, $
+                                                             ESPECDIR=eSpecDir, $
+                                                             CREATE_NOTALTITUDE_FILE=create_notAltitude_file, $
+                                                             NOTALTITUDE_SUFF=notAltitude_suff, $
+                                                             OUTFILES=outFiles, $
+                                                             TMPFILES=tmpFiles, $
+                                                             TIMEFILES=timeFiles, $
+                                                             RESTRICT_II=restrict_ii, $
+                                                             NOTRESTRICT_II=notRestrict_ii, $
+                                                             DOEM_II=doEm_ii, $
+                                                             NAME__GEOSTRUCT=GEOStructName, $
+                                                             NAME__COORDSTRUCT=coordStructName, $
+                                                             GEOSTRUCT=geoStruct)
 
      ;;Check if we've already got it
      IF KEYWORD_SET(check_if_exists) THEN BEGIN
-        IF CHECK_EXISTS_AND_COMPLETENESS(outDir,outFiles,eSTTemp,i,NAME__AACGMSTRUCT=AACGMStructName) THEN BEGIN
+        IF CHECK_EXISTS_AND_COMPLETENESS(outDir,outFiles,timeTmp,i,NAME__AACGMSTRUCT=AACGMStructName) THEN BEGIN
            IF KEYWORD_SET(convert_varnames_and_resave_outFiles) THEN BEGIN
-              CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,eSTTemp,i, $
+              CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,timeTmp,i, $
                                                    GEOSPHNAME=GEOSphName, $
                                                    AACGMSPHNAME=AACGMSphName, $
                                                    NAME__GEOSTRUCT=GEOStructName, $
@@ -85,23 +85,28 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Some need-to-knowables
-     nTot                   = N_ELEMENTS(eSTTemp)
-     MAKE_GEO_AND_AACGM_SPHCOORD_ARRAYS,eSTTemp,nTot,GEOSph,AACGMSph,doEm_ii, $
+     nTot = N_ELEMENTS(timeTmp)
+     MAKE_GEO_AND_AACGM_SPHCOORD_ARRAYS,timeTmp,nTot,GEOSph,AACGMSph,doEm_ii, $
                                         GEOSTRUCT=geoStruct, $
                                         /DESTROY_GEOSTRUCT
 
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Times in CDF epoch time
-     IF CHECK_NEED_TO_RECALC_TSTAMPS(timeFiles[i],eSTTemp, altitude_max,ALTITUDE_MAX=altitude_max,R_E=R_E,ALLOW_FL_TRACE=allow_fl_trace,OUT_ESTTEMPSTR=eSTTempStr) $
+     IF CHECK_NEED_TO_RECALC_TSTAMPS(timeFiles[i],timeTmp,altitude_max, $
+                                     ALTITUDE_MAX=altitude_max, $
+                                     R_E=R_E, $
+                                     ALLOW_FL_TRACE=allow_fl_trace, $
+                                     OUT_TIMETMPSTR=timeTmpStr, $
+                                     CONVERT_VARNAMES_AND_RESAVE_OUTFILES=convert_varnames_and_resave_outFiles) $
      THEN BEGIN
-        esTTempStr = RECALC_TSTAMPS(esTTemp,nTot,timeFiles[i], $
+        timeTmpStr = RECALC_TSTAMPS(timeTmp,nTot,timeFiles[i], $
                                     ALTITUDE_MAX=altitude_max, $
                                     R_E=R_E, $
                                     ALLOW_FL_TRACE=allow_fl_trace)
      ENDIF
 
-     CHOP_UTC_STRINGS_INTO_YMD_HMS,esTTempStr,year,month,day,hour,min,sec
+     CHOP_UTC_STRINGS_INTO_YMD_HMS,timeTmpStr,year,month,day,hour,min,sec
 
      PRINT,"Feeding it to AACGM ..."
      IF FILE_TEST(tmpFiles[i]) THEN BEGIN
@@ -130,22 +135,15 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
      runC     = TIC(runCName)
      FOR k=startK,nTot-1 DO BEGIN 
 
-        ;; checkEmOut  = WHERE(( esTTemp GE  time_utc[k]) AND ( esTTemp LE time_utc[k+1]),nCheckEm)
-
-        ;; IF nCheckEm GT 0 THEN BEGIN
-
         e = AACGM_V2_SETDATETIME(year[k],month[k],day[k], $
                                  hour[k],min[k],sec[k])
 
-        ;; tmpAACGM                  = CNVCOORD_V2(geoSph[*,k], $
-        ;;                                         /ALLOW_TRACE)
         tmpAACGM                  = CNVCOORD_V2(geoSph[*,k], $
                                                 ALLOW_TRACE=allow_fl_trace)
         AACGM_MLT                 = MLT_V2(tmpAACGM[1,*])
         AACGMSph[*,k]  = [tmpAACGM,AACGM_MLT]
 
         nGotEm++
-        ;; ENDIF
         
         IF nGotEm GE (lastCheck+checkInterval) THEN BEGIN
            PRINT,"N completed : " + STRCOMPRESS(nGotEm,/REMOVE_ALL)
@@ -229,13 +227,11 @@ FUNCTION GET_TIMES_AND_DECIDE_ALTITUDE_OR_NOT_ALTITUDE,ephemFileIndArr,eSpec_i,i
      STOP
   ENDIF
 
-  ;; eSTTemp      = eSpecCoords.time[restrict_ii]
-
   RETURN,coordStruct.time[doEm_ii]
 
 END
 
-FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,eSTTemp,i, $
+FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,timeTmp,i, $
                                        NAME__AACGMSTRUCT=AACGMStructName
 
   IF FILE_TEST(outDir+outFiles[i]) THEN BEGIN
@@ -250,7 +246,7 @@ FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,eSTTemp,i, $
      IF ~EXECUTE('AACGMStruct = ' + AACGMStructName) THEN STOP
 
      IF N_ELEMENTS(AACGMStruct) GT 0 THEN BEGIN
-        IF N_ELEMENTS(AACGMStruct.alt) EQ N_ELEMENTS(eSTTemp) THEN BEGIN
+        IF N_ELEMENTS(AACGMStruct.alt) EQ N_ELEMENTS(timeTmp) THEN BEGIN
            PRINT,"File already complete:" + outFiles[i]
            PRINT,"Skipping ..."
            RETURN,1
@@ -258,7 +254,7 @@ FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,eSTTemp,i, $
            PRINT,FORMAT='(A0,I0,"/",I0,A0)', $
                  "So file ISN'T complete yet! Vi har ", $
                  N_ELEMENTS(AACGMStruct.alt), $
-                 N_ELEMENTS(eSTTemp), $
+                 N_ELEMENTS(timeTmp), $
                  " so far."
         ENDELSE
      ENDIF ELSE BEGIN
@@ -270,7 +266,7 @@ FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,eSTTemp,i, $
 
 END
 
-PRO CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,eSTTemp,i, $
+PRO CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,timeTmp,i, $
                                          GEOSPHNAME=GEOSphName, $
                                          AACGMSPHNAME=AACGMSphName, $
                                          NAME__GEOSTRUCT=GEOStructName, $
@@ -327,7 +323,7 @@ PRO CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,eSTTemp,i, $
 
 END
 
-PRO MAKE_GEO_AND_AACGM_SPHCOORD_ARRAYS,eSTTemp,nTot,GEOSph,AACGMSph,doEm_ii, $
+PRO MAKE_GEO_AND_AACGM_SPHCOORD_ARRAYS,timeTmp,nTot,GEOSph,AACGMSph,doEm_ii, $
                                        GEOSTRUCT=GEOstruct, $
                                        DESTROY_GEOSTRUCT=destroy_GEOstruct
                                        
@@ -338,18 +334,28 @@ PRO MAKE_GEO_AND_AACGM_SPHCOORD_ARRAYS,eSTTemp,nTot,GEOSph,AACGMSph,doEm_ii, $
   IF KEYWORD_SET(destroy_GEOstruct) THEN GEOstruct = !NULL
 END
 
-FUNCTION CHECK_NEED_TO_RECALC_TSTAMPS,timeFile,esTTemp,nTot, $
+FUNCTION CHECK_NEED_TO_RECALC_TSTAMPS,timeFile,timeTmp,nTot, $
                                       ALTITUDE_MAX=altitude_max, $
                                       R_E=R_E, $
                                       ALLOW_FL_TRACE=allow_fl_trace, $
-                                      OUT_ESTTEMPSTR=eSTTempStr
+                                      OUT_TIMETMPSTR=timeTmpStr, $
+                                      CONVERT_VARNAMES_AND_RESAVE_OUTFILES=convert_varnames_and_resave_outFiles
 
-  nTot          = N_ELEMENTS(esTTemp)
+  nTot          = N_ELEMENTS(timeTmp)
+
+  defTimeStrName = 'timeTmpStr'
 
   ;;Do we already have them?
   IF FILE_TEST(timeFile) THEN BEGIN
      RESTORE,timeFile
-     IF N_ELEMENTS(esTTempStr) NE nTot THEN BEGIN
+
+     IF KEYWORD_SET(convert_varnames_and_resave_outFiles) THEN BEGIN
+        IF ~EXECUTE(defTimeStrName + ' = TEMPORARY(' + timeStrName + ')') THEN STOP
+        PRINT,"Re-saving "  + timeFile + " ..."
+        SAVE,timeTmpStr,savedAltitude_max,savedR_E,savedAllow_fl_trace,FILENAME=timeFile
+     ENDIF
+
+     IF N_ELEMENTS(timeTmpStr) NE nTot THEN BEGIN
         PRINT,'Wrong number of elements!! Re-converting time stamps ...'
         recalcTime       = 1
      ENDIF ELSE BEGIN
@@ -385,38 +391,38 @@ FUNCTION CHECK_NEED_TO_RECALC_TSTAMPS,timeFile,esTTemp,nTot, $
   RETURN,recalcTime
 END
 
-FUNCTION RECALC_TSTAMPS,esTTemp,nTot,timeFile, $                
+FUNCTION RECALC_TSTAMPS,timeTmp,nTot,timeFile, $                
                         ALTITUDE_MAX=altitude_max, $
                         R_E=R_E, $
                         ALLOW_FL_TRACE=allow_fl_trace
 
   ;;Convert
   divFactor           = 10000
-  esTTempStr    = MAKE_ARRAY(nTot,/STRING)
+  timeTmpStr    = MAKE_ARRAY(nTot,/STRING)
   FOR kk=0,(nTot/divFactor) DO BEGIN
      ind1       = kk*divFactor
      ind2       = ( ((kk+1)*divFactor) < (nTot - 1) )
      PRINT,'Inds: ' + STRCOMPRESS(ind1,/REMOVE_ALL) + ', ' + STRCOMPRESS(ind2,/REMOVE_ALL)
      tempI      = [ind1:ind2]
-     esTTempStr[tempI] = TIME_TO_STR(esTTemp[tempI],/MSEC)
+     timeTmpStr[tempI] = TIME_TO_STR(timeTmp[tempI],/MSEC)
   ENDFOR
   PRINT,'Saving time strings to ' + timeFile + ' ...'
   savedAltitude_max   = altitude_max
   savedR_E            = R_E
   savedAllow_fl_trace = allow_fl_trace
-  SAVE,esttempstr,savedAltitude_max,savedR_E,savedAllow_fl_trace,FILENAME=timeFile
+  SAVE,timeTmpstr,savedAltitude_max,savedR_E,savedAllow_fl_trace,FILENAME=timeFile
 
-  RETURN,esTTempStr
+  RETURN,timeTmpStr
 
 END
 
-PRO CHOP_UTC_STRINGS_INTO_YMD_HMS,esTTempStr,year,month,day,hour,min,sec
+PRO CHOP_UTC_STRINGS_INTO_YMD_HMS,timeTmpStr,year,month,day,hour,min,sec
 
-  year   = FIX(STRMID(esTTempStr,0,4))
-  month  = FIX(STRMID(esTTempStr,5,2))
-  day    = FIX(STRMID(esTTempStr,8,2))
-  hour   = FIX(STRMID(esTTempStr,11,2))
-  min    = FIX(STRMID(esTTempStr,14,2))
-  sec    = FLOAT(STRMID(esTTempStr,17,6))
+  year   = FIX(STRMID(timeTmpStr,0,4))
+  month  = FIX(STRMID(timeTmpStr,5,2))
+  day    = FIX(STRMID(timeTmpStr,8,2))
+  hour   = FIX(STRMID(timeTmpStr,11,2))
+  min    = FIX(STRMID(timeTmpStr,14,2))
+  sec    = FLOAT(STRMID(timeTmpStr,17,6))
 
 END
