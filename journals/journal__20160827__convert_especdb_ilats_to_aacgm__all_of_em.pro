@@ -44,16 +44,24 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
                      ['_1','_2','_3']+'--recalc_for_every_point--timeStrings.sav'
 
   ;;Convert these var names to standard names
-  GEOSphName        = 'eEphem_GEOSph_arr'
-  AACGMSphName      = 'eEphem_AACGMSph_arr'
-  GEOStructName     = 'eSpec_GEO'
-  AACGMStructName   = 'eSpec_AACGM'
-  coordStructName   = 'eSpecCoords'
-  timeStrName       = 'eSTTempStr'
+  GEOSph_inName        = 'eEphem_GEOSph_arr'
+  AACGMSph_inName      = 'eEphem_AACGMSph_arr'
+  GEOStruct_inName     = 'eSpec_GEO'
+  AACGMStruct_inName   = 'eSpec_AACGM'
+  coordStruct_inName   = 'eSpecCoords'
+  timeStr_inName       = 'eSTTempStr'
 
   TIC
   clock = TIC('warnMe')
   FOR i=0,N_ELEMENTS(coordFiles)-1 DO BEGIN
+
+     ;;Convert these var names to standard names
+     GEOSphName        =   GEOSph_inName     
+     AACGMSphName      =   AACGMSph_inName   
+     GEOStructName     =   GEOStruct_inName  
+     AACGMStructName   =   AACGMStruct_inName
+     coordStructName   =   coordStruct_inName
+     timeStrName       =   timeStr_inName    
 
      timeTmp = GET_TIMES_AND_DECIDE_ALTITUDE_OR_NOT_ALTITUDE(ephemFileIndArr,eSpec_i,i, $
                                                              ALTITUDE_MAX=altitude_max, $
@@ -75,14 +83,14 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
 
      ;;Check if we've already got it
      IF KEYWORD_SET(check_if_exists) THEN BEGIN
+        IF KEYWORD_SET(convert_varnames_and_resave_outFiles) THEN BEGIN
+           CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,timeTmp,i, $
+                                                ;; GEOSPHNAME=GEOSphName, $
+                                                AACGMSPHNAME=AACGMSphName, $
+                                                ;; NAME__GEOSTRUCT=GEOStructName, $
+                                                NAME__AACGMSTRUCT=AACGMStructName
+        ENDIF
         IF CHECK_EXISTS_AND_COMPLETENESS(outDir,outFiles,timeTmp,i,NAME__AACGMSTRUCT=AACGMStructName) THEN BEGIN
-           IF KEYWORD_SET(convert_varnames_and_resave_outFiles) THEN BEGIN
-              CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,timeTmp,i, $
-                                                   GEOSPHNAME=GEOSphName, $
-                                                   AACGMSPHNAME=AACGMSphName, $
-                                                   NAME__GEOSTRUCT=GEOStructName, $
-                                                   NAME__AACGMSTRUCT=AACGMStructName
-           ENDIF
            CONTINUE
         ENDIF
      ENDIF
@@ -277,66 +285,79 @@ FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,timeTmp,i, $
 END
 
 PRO CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,timeTmp,i, $
-                                         GEOSPHNAME=GEOSphName, $
+                                         ;; GEOSPHNAME=GEOSphName, $
                                          AACGMSPHNAME=AACGMSphName, $
-                                         NAME__GEOSTRUCT=GEOStructName, $
+                                         ;; NAME__GEOSTRUCT=GEOStructName, $
                                          NAME__AACGMSTRUCT=AACGMStructName
 
-  defGEOSphName       = 'GEOSph'
+  ;; defGEOSphName       = 'GEOSph'
   defAACGMSphName     = 'AACGMSph'
-  defGEOStructName    = 'GEOStruct'
+  ;; defGEOStructName    = 'GEOStruct'
   defAACGMStructName  = 'AACGMStruct'
 
-  RESTORE,outDir+outFiles[i]
+  var3 = 'restrict_ii'
+  var4 = 'notRestrict_ii'
+  var5 = 'eSpec_i'
+  defVar3 = 'restrict_ii'
+  defVar4 = 'eSpec_i'
+  defVar5 = 'notRestrict_ii'
+  ;; varNames    = [GEOSphName,AACGMSphName,GEOStructName,AACGMStructName]
+  ;; defVarNames = [defGEOSphName,defAACGMSphName,defGEOStructName,defAACGMStructName]
 
-  varNames    = [GEOSphName,AACGMSphName,GEOStructName,AACGMStructName]
-  defVarNames = [defGEOSphName,defAACGMSphName,defGEOStructName,defAACGMStructName]
+  varNames    = [AACGMSphName,AACGMStructName,var3,var4] ;,var5]
+  defVarNames = [defAACGMSphName,defAACGMStructName,defVar3,defVar4] ;,defVar5]
 
   ;;Check if they're defined
   IF ~VARS_EXIST(outDir+outFiles[i],varNames,defVarnames, $
-                 GEOSph,AACGMSph,GEOStruct,AACGMStruct) THEN STOP
-
-  ;; success = (~EXECUTE(defGeoSphName      + ' = TEMPORARY(' + GEOSphName      + ')')) AND $
-  ;;           (~EXECUTE(defAACGMSphName    + ' = TEMPORARY(' + AACGMSphName    + ')')) AND $
-  ;;           (~EXECUTE(defGEOStructName   + ' = TEMPORARY(' + GEOStructName   + ')')) AND $
-  ;;           (~EXECUTE(defAACGMStructName + ' = TEMPORARY(' + AACGMStructName + ')'))
-
-  ;; IF ~success THEN STOP
+                 ;; GEOSph,AACGMSph,GEOStruct,AACGMStruct, $
+                 AACGMSph,AACGMStruct,restrict_ii,eSpec_i, $ ;notRestrict_ii,
+                 VARNAMES_REQUIRED_UPDATE=varNames_required_update, $
+                 VARNAMES_WERE_NOT_DEFNAMES=varNames_were_not_defNames, $
+                 /UPDATE_VARNAMES) THEN BEGIN
+     RETURN
+  ENDIF
+  
+  ;;Update varNames
+  AACGMSphName    = varNames[0]
+  AACGMStructName = varNames[1]
 
   ;;Yes, the French 'reponse' (not response)
-  reponse = ''
-  cont    = 0
-  PRINT,'About to save renamed vars to ' + outFiles[i] + '. Is this OK?' 
-  READ,reponse
-  WHILE ~cont DO BEGIN
-     CASE 1 OF
-        STRMID(STRUPCASE(reponse),0,1) EQ 'Y': BEGIN
-           saveString = 'SAVE,'+$
-                             defGeoSphName+','+$
-                             defAACGMSphName+','+$
-                             defGEOStructName+','+$
-                             defAACGMStructName+','+$
-                             'FILENAME='+outDir+outFiles[i]
-           PRINT,saveString
-           IF ~EXECUTE(saveString) THEN STOP
-           cont = 1
-        END
-        STRMID(STRUPCASE(reponse),0,1) EQ 'N': BEGIN
-           PRINT,"K, whatever ..."
-           cont = 1 
-        END
-        ELSE: BEGIN
-           PRINT,"I SAID YES OR NO!!!"
-           READ,response
-           cont = 0
-        END
-     ENDCASE
-  ENDWHILE
+  IF varNames_were_not_defNames THEN BEGIN
 
-  GEOSphName      = defGeoSphName       
-  AACGMSphName    = defAACGMSphName     
-  GEOStructName   = defGEOStructName    
-  AACGMStructName = defAACGMStructName  
+     reponse = ''
+     cont    = 0
+     PRINT,'About to save renamed vars to ' + outFiles[i] + '. Is this OK?' 
+     READ,reponse
+     WHILE ~cont DO BEGIN
+        CASE 1 OF
+           STRMID(STRUPCASE(reponse),0,1) EQ 'Y': BEGIN
+              saveString = 'SAVE,'+$
+                           ;; defGeoSphName+','+$
+                           defAACGMSphName+','+$
+                           ;; defGEOStructName+','+$
+                           defAACGMStructName+','+$
+                           defVar3+','+$
+                           defVar4+','+$
+                           'FILENAME="'+outDir+outFiles[i]+'"'
+              PRINT,saveString
+              IF ~EXECUTE(saveString) THEN STOP
+              cont = 1
+           END
+           STRMID(STRUPCASE(reponse),0,1) EQ 'N': BEGIN
+              PRINT,"K, whatever ..."
+              cont = 1 
+           END
+           ELSE: BEGIN
+              PRINT,"I SAID YES OR NO!!!"
+              READ,reponse
+              cont = 0
+           END
+        ENDCASE
+     ENDWHILE
+
+  ENDIF ELSE BEGIN
+     PRINT,"Variables already saved with defNames!"
+  ENDELSE
 
 END
 
@@ -444,66 +465,3 @@ PRO CHOP_UTC_STRINGS_INTO_YMD_HMS,timeTmpStr,year,month,day,hour,min,sec
   sec    = FLOAT(STRMID(timeTmpStr,17,6))
 
 END
-
-;; FUNCTION VARS_EXIST,saveFile,varNames,defVarnames
-
-;;   IF ~FILE_TEST(saveFile) THEN BEGIN
-;;      PRINT,"File doesn't exist: " + saveFile
-;;      PRINT,"Can't check for existence of vars."
-;;      RETURN,0
-;;   ENDIF
-
-;;   fail = 0
-;;   FOR k=0,N_ELEMENTS(varNames)-1 DO BEGIN
-     
-;;      test = EXECUTE('junk = SIZE(' + varNames[k] + ',/TYPE)')
-
-;;      IF ~test THEN BEGIN
-;;         fail = 1
-;;         failNum = k
-;;         BREAK
-;;      ENDIF
-
-;;      IF junk EQ 0 THEN BEGIN
-;;         test = EXECUTE('junk = SIZE(' + defVarNames[k] + ',/TYPE)')        
-
-;;         IF ~test THEN BEGIN
-;;            fail = 2
-;;            failNum = k
-;;            BREAK
-;;         ENDIF
-
-;;         IF junk EQ 0 THEN BEGIN
-;;            fail = 3
-;;            failNum = k
-;;         ENDIF
-
-;;      ENDIF
-
-;;   ENDFOR
-
-;;   IF fail NE 0 THEN BEGIN
-;;      CASE fail OF
-;;         1: BEGIN
-;;            PRINT,"Failed execution of 'junk = SIZE(...' looking for " + varNames[k]
-;;            RETURN,0
-;;         END
-;;         2: BEGIN
-;;            PRINT,"Failed execution of 'junk = SIZE(...' looking for " + defVarNames[k]
-;;            RETURN,0           
-;;         END
-;;         3: BEGIN
-;;            PRINT,FORMAT='(A0,A0,A0,A0,A0)',"Variables ",varNames[k], $
-;;                  " and ", $
-;;                  defVarnames[k], $
-;;                  " dont' exist in this file"
-;;            RETURN,0           
-;;         END
-;;      ENDCASE
-
-;;      RETURN,0
-;;   ENDIF
-
-;;   RETURN,test AND (junk GT 0)
-
-;; END
