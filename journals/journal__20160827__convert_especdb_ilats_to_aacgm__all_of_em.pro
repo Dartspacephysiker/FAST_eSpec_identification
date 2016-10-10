@@ -51,6 +51,13 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
   coordStruct_inName   = 'eSpecCoords'
   timeStr_inName       = 'eSTTempStr'
 
+  defAACGMSphName      = 'AACGMSph'
+  defAACGMStructName   = 'AACGMStruct'
+  defVar3              = 'restrict_ii'
+  defVar4              = 'eSpec_i'
+  ;; defVar5              = 'notRestrict_ii'
+
+
   TIC
   clock = TIC('warnMe')
   FOR i=0,N_ELEMENTS(coordFiles)-1 DO BEGIN
@@ -84,11 +91,15 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
      ;;Check if we've already got it
      IF KEYWORD_SET(check_if_exists) THEN BEGIN
         IF KEYWORD_SET(convert_varnames_and_resave_outFiles) THEN BEGIN
-           CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,timeTmp,i, $
+           CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir+outFiles[i], $
+                                                AACGMSphName,defAACGMSphName, $
+                                                AACGMStructName,defAACGMStructName, $
+                                                defVar3,defVar3, $
+                                                defVar4,defVar4
                                                 ;; GEOSPHNAME=GEOSphName, $
-                                                AACGMSPHNAME=AACGMSphName, $
-                                                ;; NAME__GEOSTRUCT=GEOStructName, $
-                                                NAME__AACGMSTRUCT=AACGMStructName
+                                                ;; AACGMSPHNAME=AACGMSphName, $
+                                                ;; ;; NAME__GEOSTRUCT=GEOStructName, $
+                                                ;; NAME__AACGMSTRUCT=AACGMStructName
         ENDIF
         IF CHECK_EXISTS_AND_COMPLETENESS(outDir,outFiles,timeTmp,i,NAME__AACGMSTRUCT=AACGMStructName) THEN BEGIN
            CONTINUE
@@ -281,83 +292,6 @@ FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,timeTmp,i, $
   ENDIF
 
   RETURN,0
-
-END
-
-PRO CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,timeTmp,i, $
-                                         ;; GEOSPHNAME=GEOSphName, $
-                                         AACGMSPHNAME=AACGMSphName, $
-                                         ;; NAME__GEOSTRUCT=GEOStructName, $
-                                         NAME__AACGMSTRUCT=AACGMStructName
-
-  ;; defGEOSphName       = 'GEOSph'
-  defAACGMSphName     = 'AACGMSph'
-  ;; defGEOStructName    = 'GEOStruct'
-  defAACGMStructName  = 'AACGMStruct'
-
-  var3 = 'restrict_ii'
-  var4 = 'notRestrict_ii'
-  var5 = 'eSpec_i'
-  defVar3 = 'restrict_ii'
-  defVar4 = 'eSpec_i'
-  defVar5 = 'notRestrict_ii'
-  ;; varNames    = [GEOSphName,AACGMSphName,GEOStructName,AACGMStructName]
-  ;; defVarNames = [defGEOSphName,defAACGMSphName,defGEOStructName,defAACGMStructName]
-
-  varNames    = [AACGMSphName,AACGMStructName,var3,var4] ;,var5]
-  defVarNames = [defAACGMSphName,defAACGMStructName,defVar3,defVar4] ;,defVar5]
-
-  ;;Check if they're defined
-  IF ~VARS_EXIST(outDir+outFiles[i],varNames,defVarnames, $
-                 ;; GEOSph,AACGMSph,GEOStruct,AACGMStruct, $
-                 AACGMSph,AACGMStruct,restrict_ii,eSpec_i, $ ;notRestrict_ii,
-                 VARNAMES_REQUIRED_UPDATE=varNames_required_update, $
-                 VARNAMES_WERE_NOT_DEFNAMES=varNames_were_not_defNames, $
-                 /UPDATE_VARNAMES) THEN BEGIN
-     RETURN
-  ENDIF
-  
-  ;;Update varNames
-  AACGMSphName    = varNames[0]
-  AACGMStructName = varNames[1]
-
-  ;;Yes, the French 'reponse' (not response)
-  IF varNames_were_not_defNames THEN BEGIN
-
-     reponse = ''
-     cont    = 0
-     PRINT,'About to save renamed vars to ' + outFiles[i] + '. Is this OK?' 
-     READ,reponse
-     WHILE ~cont DO BEGIN
-        CASE 1 OF
-           STRMID(STRUPCASE(reponse),0,1) EQ 'Y': BEGIN
-              saveString = 'SAVE,'+$
-                           ;; defGeoSphName+','+$
-                           defAACGMSphName+','+$
-                           ;; defGEOStructName+','+$
-                           defAACGMStructName+','+$
-                           defVar3+','+$
-                           defVar4+','+$
-                           'FILENAME="'+outDir+outFiles[i]+'"'
-              PRINT,saveString
-              IF ~EXECUTE(saveString) THEN STOP
-              cont = 1
-           END
-           STRMID(STRUPCASE(reponse),0,1) EQ 'N': BEGIN
-              PRINT,"K, whatever ..."
-              cont = 1 
-           END
-           ELSE: BEGIN
-              PRINT,"I SAID YES OR NO!!!"
-              READ,reponse
-              cont = 0
-           END
-        ENDCASE
-     ENDWHILE
-
-  ENDIF ELSE BEGIN
-     PRINT,"Variables already saved with defNames!"
-  ENDELSE
 
 END
 
