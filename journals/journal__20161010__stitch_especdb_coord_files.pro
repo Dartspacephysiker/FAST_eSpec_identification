@@ -124,4 +124,20 @@ PRO PRINT_STATS,eSpec
   PRINT,"N finite AACGM.alt : ",N_ELEMENTS(WHERE(FINITE(eSpec.coords.aacgm.alt))) 
   PRINT,"N finite AACGM.lat : ",N_ELEMENTS(WHERE(FINITE(eSpec.coords.aacgm.lat)))
 
+  notFinite_i = WHERE(~FINITE(eSpec.coords.aacgm.mlt),nNotFinite)
+
+  IF nNotFinite GT 0 THEN BEGIN
+     sub_i = [0:100]
+     sub_i = INDGEN(nNotFinite)
+     PRINT,'Bad MLTs:'
+     PRINT,eSpec.coords.sdt.mlt[notFinite_i[sub_i]]
+     PRINT,''
+     PRINT,'Bad altitudes:'
+     PRINT,eSpec.coords.sdt.alt[notFinite_i[sub_i]]
+     PRINT,''
+     PRINT,'Bad latitudes:'
+     PRINT,eSpec.coords.sdt.ilat[notFinite_i[sub_i]]
+     PRINT,''
+  ENDIF
+
 END
