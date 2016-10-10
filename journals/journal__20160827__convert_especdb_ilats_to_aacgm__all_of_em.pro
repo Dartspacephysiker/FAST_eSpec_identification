@@ -15,35 +15,37 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
   create_notAltitude_file = 1
   notAltitude_suff        = '--missed_indices--' + GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
 
+  convert_varnames_and_resave_outFiles = 1
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Input
 
   ;;This is the eSpec DB being referenced, o'course
-  eSpecDir          = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
-  
-  ;; defNewellDBFile   = 'eSpec_20160607_db--PARSED--Orbs_500-16361.sav' 
-  ;; realFile          = 'sorted--' + defNewellDBFile ;;This file does not need to be cleaned
+  eSpecDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
   
   ;;Just for reference--we don't actually use these here
-  ephemFileIndArr   = [[      0,10000000,20000000], $
-                       [9999999,19999999,28604344]]
+  ephemFileIndArr  = [[      0,10000000,20000000], $
+                      [9999999,19999999,28604344]]
 
-  coordFiles        = 'sorted--eSpec_20160607_db--PARSED--Orbs_500-16361--GEO_and_MAG_coords' + $
-                      ['_1','_2','_3']+'.sav'
+  coordFiles       = 'sorted--eSpec_20160607_db--PARSED--Orbs_500-16361--GEO_and_MAG_coords' + $
+                     ['_1','_2','_3']+'.sav'
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;output
-  outDir            = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
-  outFiles          = 'sorted--eSpec_20160607_db--Orbs_500-16361--AACGM_v2_coords' + $
-                      ['_1','_2','_3']+'--recalc_for_every_point.sav'
+  outDir           = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
+  outFiles         = 'sorted--eSpec_20160607_db--Orbs_500-16361--AACGM_v2_coords' + $
+                     ['_1','_2','_3']+'--recalc_for_every_point.sav'
 
   ;;In case we get cut off--think SNES emulator savestate
-  tmpFiles          = outDir+'TEMP_AACGM--sorted--eSpec_20160607_db--Orbs_500-16361' + $
-                      ['_1','_2','_3']+'--recalc_for_every_point.sav'
-  timeFiles         = outDir+'TEMP_AACGM--sorted--eSpec_20160607_db--Orbs_500-16361' + $
-                      ['_1','_2','_3']+'--recalc_for_every_point--timeStrings.sav'
+  tmpFiles         = outDir+'TEMP_AACGM--sorted--eSpec_20160607_db--Orbs_500-16361' + $
+                     ['_1','_2','_3']+'--recalc_for_every_point.sav'
+  timeFiles        = outDir+'TEMP_AACGM--sorted--eSpec_20160607_db--Orbs_500-16361' + $
+                     ['_1','_2','_3']+'--recalc_for_every_point--timeStrings.sav'
 
-  geoArrName        = 'eSpec_GEO'
+  GEOSphName        = 'eEphem_GEOSph_arr'
+  AACGMSphName      = 'eEphem_AACGMSph_arr'
+  GEOStructName     = 'eSpec_GEO'
+  AACGMStructName   = 'eSpec_AACGM'
+  coordStructName   = 'eSpecCoords'
 
   TIC
   clock = TIC('warnMe')
@@ -62,22 +64,36 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
                                                                   TIMEFILES=timeFiles, $
                                                                   RESTRICT_II=restrict_ii, $
                                                                   NOTRESTRICT_II=notRestrict_ii, $
-                                                                  DOEM_II=doEm_ii)
+                                                                  DOEM_II=doEm_ii, $
+                                                                  NAME__GEOSTRUCT=GEOStructName, $
+                                                                  NAME__COORDSTRUCT=coordStructName, $
+                                                                  GEOSTRUCT=geoStruct)
 
      ;;Check if we've already got it
      IF KEYWORD_SET(check_if_exists) THEN BEGIN
-        IF CHECK_EXISTS_AND_COMPLETENESS(outDir,outFiles,eSTTemp,i) THEN CONTINUE
+        IF CHECK_EXISTS_AND_COMPLETENESS(outDir,outFiles,eSTTemp,i,NAME__AACGMSTRUCT=AACGMStructName) THEN BEGIN
+           IF KEYWORD_SET(convert_varnames_and_resave_outFiles) THEN BEGIN
+              CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,eSTTemp,i, $
+                                                   GEOSPHNAME=GEOSphName, $
+                                                   AACGMSPHNAME=AACGMSphName, $
+                                                   NAME__GEOSTRUCT=GEOStructName, $
+                                                   NAME__AACGMSTRUCT=AACGMStructName
+           ENDIF
+           CONTINUE
+        ENDIF
      ENDIF
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Some need-to-knowables
      nTot                   = N_ELEMENTS(eSTTemp)
      MAKE_GEO_AND_AACGM_SPHCOORD_ARRAYS,eSTTemp,nTot,GEOSph,AACGMSph,doEm_ii, $
-                                        GEOARRNAME=geoArrName
+                                        GEOSTRUCT=geoStruct, $
+                                        /DESTROY_GEOSTRUCT
+
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Times in CDF epoch time
-     IF CHECK_NEED_TO_RECALC_TSTAMPS(timeFiles[i],eSTTemp, altitude_max,ALTITUDE_MAX=altitude_max,R_E=R_E,ALLOW_FL_TRACE=allow_fl_trace) $
+     IF CHECK_NEED_TO_RECALC_TSTAMPS(timeFiles[i],eSTTemp, altitude_max,ALTITUDE_MAX=altitude_max,R_E=R_E,ALLOW_FL_TRACE=allow_fl_trace,OUT_ESTTEMPSTR=eSTTempStr) $
      THEN BEGIN
         esTTempStr = RECALC_TSTAMPS(esTTemp,nTot,timeFiles[i], $
                                     ALTITUDE_MAX=altitude_max, $
@@ -121,12 +137,12 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
         e = AACGM_V2_SETDATETIME(year[k],month[k],day[k], $
                                  hour[k],min[k],sec[k])
 
-        ;; tmpAACGM                  = CNVCOORD_V2(eEphem_GEOSph_arr[*,k], $
+        ;; tmpAACGM                  = CNVCOORD_V2(geoSph[*,k], $
         ;;                                         /ALLOW_TRACE)
-        tmpAACGM                  = CNVCOORD_V2(eEphem_GEOSph_arr[*,k], $
+        tmpAACGM                  = CNVCOORD_V2(geoSph[*,k], $
                                                 ALLOW_TRACE=allow_fl_trace)
         AACGM_MLT                 = MLT_V2(tmpAACGM[1,*])
-        eEphem_AACGMSph_arr[*,k]  = [tmpAACGM,AACGM_MLT]
+        AACGMSph[*,k]  = [tmpAACGM,AACGM_MLT]
 
         nGotEm++
         ;; ENDIF
@@ -136,22 +152,22 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
            TOC,runC
            lastCheck += checkInterval
 
-           SAVE,eEphem_AACGMSph_arr,lastCheck,checkInterval,nGotEm,k,FILENAME=tmpFiles[i]
+           SAVE,AACGMSph,lastCheck,checkInterval,nGotEm,k,FILENAME=tmpFiles[i]
         ENDIF
 
      ENDFOR
      TOC
 
-     eEphem_AACGMSph_arr[2,*]     = (eEphem_AACGMSph_arr[2,*]*R_E-R_E) ;convert back to altitude above sea level
+     AACGMSph[2,*]     = (AACGMSph[2,*]*R_E-R_E) ;convert back to altitude above sea level
 
-     eSpec_AACGM   = {ALT:REFORM(eEphem_AACGMSph_arr[2,*]), $
-                      MLT:REFORM(eEphem_AACGMSph_arr[3,*]), $
-                      LAT:REFORM(eEphem_AACGMSph_arr[0,*])}
+     AACGMStruct   = {ALT:REFORM(AACGMSph[2,*]), $
+                      MLT:REFORM(AACGMSph[3,*]), $
+                      LAT:REFORM(AACGMSph[0,*])}
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Save it
      PRINT,'Saving ' + outDir + outFiles[i] + '...'
-     SAVE,eSpec_AACGM,eEphem_AACGMSph_arr,restrict_ii,notRestrict_ii,eSpec_i,FILENAME=outDir+outFiles[i]
+     SAVE,AACGMStruct,AACGMSph,restrict_ii,notRestrict_ii,eSpec_i,FILENAME=outDir+outFiles[i]
 
      PRINT,"Did it! Finished with loop " + STRCOMPRESS(i+1,/REMOVE_ALL) + '/' + $
            STRCOMPRESS(N_ELEMENTS(coordFiles),/REMOVE_ALL)
@@ -176,14 +192,18 @@ FUNCTION GET_TIMES_AND_DECIDE_ALTITUDE_OR_NOT_ALTITUDE,ephemFileIndArr,eSpec_i,i
    RESTRICT_II=restrict_ii, $
    NOTRESTRICT_II=notRestrict_ii, $
    DOEM_II=doEm_ii, $
-   GEOARRNAME=geoArrName
+   NAME__GEOSTRUCT=GEOStructName, $
+   NAME__COORDSTRUCT=coordStructName, $
+   GEOSTRUCT=geoStruct
 
   ;;Load the stuff we need (has GEO coords)
   PRINT,"Restoring " + coordFiles[i] + ' ...'
   RESTORE,eSpecDir+coordFiles[i]
 
-  restrictString = 'GEOstruct = ' + geoArrName
-  IF ~EXECUTE(restrictString) THEN STOP
+  ;;Convert varname, if necessary
+  geoString   = 'GEOstruct   = TEMPORARY(' + GEOStructName   + ')'
+  coordString = 'coordStruct = TEMPORARY(' + coordStructName + ')'
+  IF ~(EXECUTE(geoString) AND EXECUTE(coordString)) THEN STOP
 
   restrict_ii  = WHERE(GEOstruct.alt LE altitude_max,nAltitude, $
                        COMPLEMENT=notRestrict_ii,NCOMPLEMENT=nNotAltitude)
@@ -211,30 +231,33 @@ FUNCTION GET_TIMES_AND_DECIDE_ALTITUDE_OR_NOT_ALTITUDE,ephemFileIndArr,eSpec_i,i
 
   ;; eSTTemp      = eSpecCoords.time[restrict_ii]
 
-  RETURN,eSpecCoords.time[doEm_ii]
+  RETURN,coordStruct.time[doEm_ii]
 
 END
 
-FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,eSTTemp,i
+FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,eSTTemp,i, $
+                                       NAME__AACGMSTRUCT=AACGMStructName
 
   IF FILE_TEST(outDir+outFiles[i]) THEN BEGIN
 
      PRINT,"File exists:" + outFiles[i]
      PRINT,"Checking for completeness ..."
 
-     eSpec_AACGM  = !NULL
+     AACGMStruct  = !NULL
 
      RESTORE,outDir+outFiles[i]
 
-     IF N_ELEMENTS(eSpec_AACGM) GT 0 THEN BEGIN
-        IF N_ELEMENTS(eSpec_AACGM.alt) EQ N_ELEMENTS(eSTTemp) THEN BEGIN
+     IF ~EXECUTE('AACGMStruct = ' + AACGMStructName) THEN STOP
+
+     IF N_ELEMENTS(AACGMStruct) GT 0 THEN BEGIN
+        IF N_ELEMENTS(AACGMStruct.alt) EQ N_ELEMENTS(eSTTemp) THEN BEGIN
            PRINT,"File already complete:" + outFiles[i]
            PRINT,"Skipping ..."
            RETURN,1
         ENDIF ELSE BEGIN
            PRINT,FORMAT='(A0,I0,"/",I0,A0)', $
                  "So file ISN'T complete yet! Vi har ", $
-                 N_ELEMENTS(eSpec_AACGM.alt), $
+                 N_ELEMENTS(AACGMStruct.alt), $
                  N_ELEMENTS(eSTTemp), $
                  " so far."
         ENDELSE
@@ -247,22 +270,79 @@ FUNCTION CHECK_EXISTS_AND_COMPLETENESS,outDir,outFiles,eSTTemp,i
 
 END
 
+PRO CONVERT_VARNAMES_AND_RESAVE_OUTFILES,outDir,outFiles,eSTTemp,i, $
+                                         GEOSPHNAME=GEOSphName, $
+                                         AACGMSPHNAME=AACGMSphName, $
+                                         NAME__GEOSTRUCT=GEOStructName, $
+                                         NAME__AACGMSTRUCT=AACGMStructName
+
+  defGeoSphName       = 'GEOSph'
+  defAACGMSphName     = 'AACGMSph'
+  defGEOStructName    = 'GEOStruct'
+  defAACGMStructName  = 'AACGMStruct'
+
+  RESTORE,outDir+outFiles[i]
+
+  success = (~EXECUTE(defGeoSphName      + ' = TEMPORARY(' + GEOSphName      + ')')) AND $
+            (~EXECUTE(defAACGMSphName    + ' = TEMPORARY(' + AACGMSphName    + ')')) AND $
+            (~EXECUTE(defGEOStructName   + ' = TEMPORARY(' + GEOStructName   + ')')) AND $
+            (~EXECUTE(defAACGMStructName + ' = TEMPORARY(' + AACGMStructName + ')'))
+
+  IF ~success THEN STOP
+
+  ;;Yes, the French 'reponse' (not response)
+  reponse = ''
+  cont    = 0
+  PRINT,'About to save renamed vars to ' + outFiles[i] + '. Is this OK?' 
+  READ,reponse
+  WHILE ~cont DO BEGIN
+     CASE 1 OF
+        STRMID(STRUPCASE(reponse),0,1) EQ 'Y': BEGIN
+           saveString = 'SAVE,'+$
+                             defGeoSphName+','+$
+                             defAACGMSphName+','+$
+                             defGEOStructName+','+$
+                             defAACGMStructName+','+$
+                             'FILENAME='+outDir+outFiles[i]
+           PRINT,saveString
+           IF ~EXECUTE(saveString) THEN STOP
+           cont = 1
+        END
+        STRMID(STRUPCASE(reponse),0,1) EQ 'N': BEGIN
+           PRINT,"K, whatever ..."
+           cont = 1 
+        END
+        ELSE: BEGIN
+           PRINT,"I SAID YES OR NO!!!"
+           READ,response
+           cont = 0
+        END
+     ENDCASE
+  ENDWHILE
+
+  GEOSphName      = defGeoSphName       
+  AACGMSphName    = defAACGMSphName     
+  GEOStructName   = defGEOStructName    
+  AACGMStructName = defAACGMStructName  
+
+END
+
 PRO MAKE_GEO_AND_AACGM_SPHCOORD_ARRAYS,eSTTemp,nTot,GEOSph,AACGMSph,doEm_ii, $
-                                       GEOARRNAME=geoArrName
+                                       GEOSTRUCT=GEOstruct, $
+                                       DESTROY_GEOSTRUCT=destroy_GEOstruct
+                                       
 
-  callString = 'GEOSph = TRANSPOSE([[' + geoArrName + '.lat[doEm_ii]],[' + geoArrName + '.lon[doEm_ii]],[' + geoArrName + '.alt[doEm_ii]]])'
-
-  ;; GEOSph   = TRANSPOSE([[eSpec_GEO.lat[doEm_ii]],[eSpec_GEO.lon[doEm_ii]],[eSpec_GEO.alt[doEm_ii]]])
-  ;; AACGMSph = MAKE_ARRAY(4,nTot,/FLOAT) ;;One more for MLT at end
-
-  bro      = EXECUTE(callString)
+  GEOSph   = TRANSPOSE([[GEOstruct.lat[doEm_ii]],[GEOstruct.lon[doEm_ii]],[GEOstruct.alt[doEm_ii]]])
   AACGMSph = MAKE_ARRAY(4,nTot,/FLOAT) ;;One more for MLT at end
+
+  IF KEYWORD_SET(destroy_GEOstruct) THEN GEOstruct = !NULL
 END
 
 FUNCTION CHECK_NEED_TO_RECALC_TSTAMPS,timeFile,esTTemp,nTot, $
                                       ALTITUDE_MAX=altitude_max, $
                                       R_E=R_E, $
-                                      ALLOW_FL_TRACE=allow_fl_trace
+                                      ALLOW_FL_TRACE=allow_fl_trace, $
+                                      OUT_ESTTEMPSTR=eSTTempStr
 
   nTot          = N_ELEMENTS(esTTemp)
 
