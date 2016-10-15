@@ -7,6 +7,7 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                                           MINI=minI, $
                                           MAXI=maxI, $
                                           BINI=binI, $
+                                          EQUAL_AREA_BINNING=EA_binning, $
                                           NEWELL_PLOTRANGE=newell_plotRange, $
                                           LOG_NEWELLPLOT=log_newellPlot, $
                                           NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
@@ -106,6 +107,7 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                              BINM=binM, $
                              SHIFTM=shiftM, $
                              MINI=minI,MAXI=maxI,BINI=binI, $
+                             EQUAL_AREA_BINNING=EA_binning, $
                              DO_LSHELL=do_lShell, MINL=minL,MAXL=maxL,BINL=binL, $
                              NEWELL_PLOTRANGE=newell_plotRange, $
                              LOG_NEWELLPLOT=log_newellPlot, $
