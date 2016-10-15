@@ -42,7 +42,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             MINILAT=minI, $
                             MAXILAT=maxI, $
                             BINILAT=binI, $
-                            ;; EQUAL_AREA_BINNING=equal_area_binning, $
+                            EQUAL_AREA_BINNING=equal_area_binning, $
                             ;; DO_LSHELL=do_lshell, $
                             ;; MINLSHELL=minL, $
                             ;; MAXLSHELL=maxL, $
@@ -139,7 +139,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                             MINILAT=minI, $
                                             MAXILAT=maxI, $
                                             BINILAT=binI, $
-                                            ;; EQUAL_AREA_BINNING=equal_area_binning, $
+                                            EQUAL_AREA_BINNING=equal_area_binning, $
                                             ;; DO_LSHELL=do_lshell, $
                                             ;; MINLSHELL=minL, $
                                             ;; MAXLSHELL=maxL, $
@@ -193,7 +193,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                           MINILAT=minI, $
                                           MAXILAT=maxI, $
                                           BINILAT=binI, $
-                                          ;; EQUAL_AREA_BINNING=equal_area_binning, $
+                                          EQUAL_AREA_BINNING=equal_area_binning, $
                                           ;; DO_LSHELL=do_lshell, $
                                           ;; MINLSHELL=minL, $
                                           ;; MAXLSHELL=maxL, $
@@ -287,7 +287,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                                                       MINILAT=minI, $
                                                                       MAXILAT=maxI, $
                                                                       BINI=binI, $
-                                                                      ;; EQUAL_AREA_BINNING=equal_area_binning, $
+                                                                      EQUAL_AREA_BINNING=equal_area_binning, $
                                                                       DO_LSHELL=do_lshell, $
                                                                       MINLSHELL=minL, $
                                                                       MAXLSHELL=maxL, $
@@ -354,7 +354,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                                                MINILAT=minI, $
                                                                MAXILAT=maxI, $
                                                                BINI=binI, $
-                                                               ;; EQUAL_AREA_BINNING=equal_area_binning, $
+                                                               EQUAL_AREA_BINNING=equal_area_binning, $
                                                                DO_LSHELL=do_lshell, $
                                                                MINLSHELL=minL, $
                                                                MAXLSHELL=maxL, $

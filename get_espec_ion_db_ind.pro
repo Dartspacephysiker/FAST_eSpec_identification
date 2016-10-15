@@ -20,6 +20,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                               MINILAT=minI, $
                               MAXILAT=maxI, $
                               BINILAT=binI, $
+                              EQUAL_AREA_BINNING=EA_binning, $
                               ;; DO_LSHELL=do_lshell, $
                               ;; MINLSHELL=minL, $
                               ;; MAXLSHELL=maxL, $
@@ -37,21 +38,6 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
   COMPILE_OPT idl2
   
   @common__mlt_ilat_magc_etc.pro
-  ;; COMMON MLT_ILAT_MAGC_ETC,MIMC__RECALCULATE, $
-  ;;    MIMC__minMLT,MIMC__maxMLT, $
-  ;;    MIMC__minILAT,MIMC__maxILAT,MIMC__binILAT, $
-  ;;    MIMC__DO_lShell,MIMC__minLSHELL,MIMC__maxLSHELL,MIMC__binLSHELL, $
-  ;;    MIMC__minMC,MIMC__maxNegMC, $
-  ;;    MIMC__sample_t_restriction, $
-  ;;    MIMC__hemi, $
-  ;;    MIMC__orbRange, $
-  ;;    MIMC__altitudeRange, $
-  ;;    MIMC__charERange, $
-  ;;    MIMC__poyntRange, $
-  ;;    MIMC__despunDB,MIMC__chastDB, $
-  ;;    MIMC__north,MIMC__south,MIMC__both_hemis, $
-  ;;    MIMC__HwMAurOval, $
-  ;;    MIMC__HwMKpInd
 
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      
@@ -110,27 +96,27 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
   ;;Check whether this is a maximus or fastloc struct
   IF KEYWORD_SET(dbStruct) THEN BEGIN
      IF KEYWORD_SET(get_eSpec_i) THEN BEGIN
-        is_ion                                = 0
+        is_ion     = 0
      ENDIF ELSE BEGIN
         IF KEYWORD_SET(get_ion_i) THEN BEGIN
-           is_ion                             = 1
+           is_ion  = 1
         ENDIF ELSE BEGIN
            IS_STRUCT_ION_OR_ESPEC,dbStruct,is_ion
         ENDELSE
      ENDELSE
   ENDIF ELSE BEGIN
      IF KEYWORD_SET(get_eSpec_i) THEN BEGIN
-        is_ion                                = 0
+        is_ion     = 0
      ENDIF ELSE BEGIN
         IF KEYWORD_SET(get_ion_i) THEN BEGIN
-           is_ion                             = 1
+           is_ion  = 1
         ENDIF
      ENDELSE
   ENDELSE
 
   IF ~KEYWORD_SET(get_ion_i) AND ~KEYWORD_SET(get_eSpec_i) AND ~KEYWORD_SET(dbStruct) THEN BEGIN
      PRINTF,lun,"Assuming this is an ion DB ..."
-     is_ion                                   = 1 ;We assume this is maximus
+     is_ion  = 1 ;We assume this is maximus
   ENDIF
 
   ;;Get the databases if they're already in mem
@@ -167,9 +153,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         END
         ELSE: BEGIN
            IF N_ELEMENTS(NEWELL_I__ion) NE 0 THEN BEGIN
-              dbStruct                                  = NEWELL_I__ion
-              dbFile                                    = NEWELL_I__dbFile
-              dbDir                                     = NEWELL_I__dbDir
+              dbStruct  = NEWELL_I__ion
+              dbFile    = NEWELL_I__dbFile
+              dbDir     = NEWELL_I__dbDir
            ENDIF ELSE BEGIN
               LOAD_NEWELL_ION_DB,ion, $
                                  NEWELLDBDIR=dbDir, $
@@ -189,9 +175,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      CASE 1 OF
         KEYWORD_SET(for_alfven_db): BEGIN
            IF N_ELEMENTS(NWLL_ALF__eSpec) NE 0 THEN BEGIN
-              dbStruct                                  = NWLL_ALF__eSpec
-              dbFile                                    = NWLL_ALF__dbFile
-              dbDir                                     = NWLL_ALF__dbDir
+              dbStruct  = NWLL_ALF__eSpec
+              dbFile    = NWLL_ALF__dbFile
+              dbDir     = NWLL_ALF__dbDir
            ENDIF ELSE BEGIN
               LOAD_ALF_NEWELL_ESPEC_DB,dbStruct,alf_i__good_eSpec,good_eSpec_i, $
                                    FAILCODES=failCodes, $
@@ -203,21 +189,21 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                    ;; OUT_GOOD_I=good_i, $
                                    LUN=lun
               IF ~KEYWORD_SET(nonMem) THEN BEGIN
-                 NWLL_ALF__eSpec                         = dbStruct
-                 NWLL_ALF__failCodes                     = failCodes
-                 NWLL_ALF__good_eSpec_i                  = good_eSpec_i
-                 NWLL_ALF__good_alf_i                    = alf_i__good_eSpec
-                 NWLL_ALF__despun                        = KEYWORD_SET(despun_alf_db)
-                 NWLL_ALF__dbFile                        = dbFile
-                 NWLL_ALF__dbDir                         = dbDir
+                 NWLL_ALF__eSpec         = dbStruct
+                 NWLL_ALF__failCodes     = failCodes
+                 NWLL_ALF__good_eSpec_i  = good_eSpec_i
+                 NWLL_ALF__good_alf_i    = alf_i__good_eSpec
+                 NWLL_ALF__despun        = KEYWORD_SET(despun_alf_db)
+                 NWLL_ALF__dbFile        = dbFile
+                 NWLL_ALF__dbDir         = dbDir
               ENDIF
            ENDELSE
         END
         ELSE: BEGIN
            IF N_ELEMENTS(NEWELL__eSpec) NE 0 THEN BEGIN
-              dbStruct                                  = NEWELL__eSpec
-              dbFile                                    = NEWELL__dbFile
-              dbDir                                     = NEWELL__dbDir
+              dbStruct                   = NEWELL__eSpec
+              dbFile                     = NEWELL__dbFile
+              dbDir                      = NEWELL__dbDir
            ENDIF ELSE BEGIN
               LOAD_NEWELL_ESPEC_DB,eSpec, $
                                    FAILCODES=failCodes, $
@@ -228,12 +214,12 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                    ;; OUT_GOOD_I=good_i, $
                                    LUN=lun
               IF ~KEYWORD_SET(nonMem) THEN BEGIN
-                 NEWELL__eSpec                         = dbStruct
+                 NEWELL__eSpec         = dbStruct
                  IF N_ELEMENTS(failCodes) GT 0 THEN BEGIN
-                    NEWELL__failCodes                  = failCodes
+                    NEWELL__failCodes  = failCodes
                  ENDIF
-                 NEWELL__dbFile                        = dbFile
-                 NEWELL__dbDir                         = dbDir
+                 NEWELL__dbFile        = dbFile
+                 NEWELL__dbDir         = dbDir
               ENDIF
            ENDELSE
         END
@@ -245,12 +231,12 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
   IF ~is_ion THEN BEGIN
      CASE 1 OF
         KEYWORD_SET(for_alfven_db): BEGIN
-           have_em = KEYWORD_SET(NWLL_ALF__HAVE_GOOD_I)
-           goodIStr                               = 'NWLL_ALF__good_i'
+           have_em                        = KEYWORD_SET(NWLL_ALF__HAVE_GOOD_I)
+           goodIStr                       = 'NWLL_ALF__good_i'
         END
         ELSE: BEGIN
-           have_em = KEYWORD_SET(NEWELL__HAVE_GOOD_I)
-           goodIStr                               = 'NEWELL__good_i'
+           have_em                        = KEYWORD_SET(NEWELL__HAVE_GOOD_I)
+           goodIStr                       = 'NEWELL__good_i'
         END
      ENDCASE
 
@@ -258,14 +244,14 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         IF KEYWORD_SET(reset_good_inds) THEN BEGIN
            PRINT,'Resetting ' + goodIStr + ' ...'
         ENDIF
-        calculate                                 = 1
+        calculate                         = 1
      ENDIF ELSE BEGIN
         CASE 1 OF
            KEYWORD_SET(for_alfven_db): BEGIN
-              nonzero_good_i                      = N_ELEMENTS(NWLL_ALF__good_i)
+              nonzero_good_i              = N_ELEMENTS(NWLL_ALF__good_i)
            END
            ELSE: BEGIN
-              nonzero_good_i                      = N_ELEMENTS(NEWELL__good_i)
+              nonzero_good_i              = N_ELEMENTS(NEWELL__good_i)
            END
         ENDCASE
         IF nonzero_good_i NE 0 THEN BEGIN
@@ -286,6 +272,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                              MINILAT=minILAT, $
                                              MAXILAT=maxILAT, $
                                              BINILAT=binILAT, $
+                                             EQUAL_AREA_BINNING=EA_binning, $
                                              ;; DO_LSHELL=do_lshell, $
                                              ;; MINLSHELL=minLshell, $
                                              ;; MAXLSHELL=maxLshell, $
@@ -294,15 +281,15 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                              NIGHTSIDE=nightside, $
                                              HAVE_GOOD_I=have_good_i, $
                                              LUN=lun
-           calculate                             = KEYWORD_SET(for_alfven_db) ? NWLL_ALF__RECALCULATE : NEWELL__RECALCULATE
+           calculate                      = KEYWORD_SET(for_alfven_db) ? NWLL_ALF__RECALCULATE : NEWELL__RECALCULATE
            CASE 1 OF
               KEYWORD_SET(for_alfven_db): BEGIN
-                 NWLL_ALF__HAVE_GOOD_I           = have_good_i
-                 NWLL_ALF_I__RECALCULATE         = calculate
+                 NWLL_ALF__HAVE_GOOD_I    = have_good_i
+                 NWLL_ALF_I__RECALCULATE  = calculate
               END
               ELSE: BEGIN
-                 NEWELL__HAVE_GOOD_I             = have_good_i
-                 NEWELL_I__RECALCULATE           = calculate ;;reset other DB too
+                 NEWELL__HAVE_GOOD_I      = have_good_i
+                 NEWELL_I__RECALCULATE    = calculate ;;reset other DB too
               END
            ENDCASE
         ENDIF ELSE BEGIN
@@ -313,12 +300,12 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
   ENDIF ELSE BEGIN
      CASE 1 OF
         KEYWORD_SET(for_alfven_db): BEGIN
-           have_em = KEYWORD_SET(NWLL_ALF_I_HAVE_GOOD_I)
-           goodIStr                              = 'NWLL_ALF_I__good_i'
+           have_em                        = KEYWORD_SET(NWLL_ALF_I_HAVE_GOOD_I)
+           goodIStr                       = 'NWLL_ALF_I__good_i'
         END
         ELSE: BEGIN
-           have_em = KEYWORD_SET(NEWELL_I_HAVE_GOOD_I)
-           goodIStr                              = 'NEWELL_I__good_i'
+           have_em                        = KEYWORD_SET(NEWELL_I_HAVE_GOOD_I)
+           goodIStr                       = 'NEWELL_I__good_i'
         END
      ENDCASE
 
@@ -326,14 +313,14 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         IF KEYWORD_SET(reset_good_inds) THEN BEGIN
            PRINT,'Resetting good ' + goodIStr + '...'
         ENDIF
-        calculate                                = 1
+        calculate                         = 1
      ENDIF ELSE BEGIN
         CASE 1 OF
            KEYWORD_SET(for_alfven_db): BEGIN
-              nonzero_good_i                     = N_ELEMENTS(NWLL_ALF_I__good_i)
+              nonzero_good_i              = N_ELEMENTS(NWLL_ALF_I__good_i)
            END
            ELSE: BEGIN
-              nonzero_good_i                     = N_ELEMENTS(NEWELL_I__good_i)
+              nonzero_good_i              = N_ELEMENTS(NEWELL_I__good_i)
               
            END
         ENDCASE
@@ -364,15 +351,15 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                              NIGHTSIDE=nightside, $
                                              HAVE_GOOD_I=have_good_i, $
                                              LUN=lun
-           calculate                              = KEYWORD_SET(for_alfven_db) ? NWLL_ALF_I__RECALCULATE : NEWELL_I__RECALCULATE
+           calculate                      = KEYWORD_SET(for_alfven_db) ? NWLL_ALF_I__RECALCULATE : NEWELL_I__RECALCULATE
            CASE 1 OF
               KEYWORD_SET(for_alfven_db): BEGIN
-                 NWLL_ALF_I__HAVE_GOOD_I          = have_good_i
-                 NWLL_ALF__RECALCULATE            = calculate
+                 NWLL_ALF_I__HAVE_GOOD_I  = have_good_i
+                 NWLL_ALF__RECALCULATE    = calculate
               END
               ELSE: BEGIN
-                 NEWELL_I__HAVE_GOOD_I            = have_good_i
-                 NEWELL__RECALCULATE              = calculate ;;make sure to recalculate other DB too
+                 NEWELL_I__HAVE_GOOD_I    = have_good_i
+                 NEWELL__RECALCULATE      = calculate ;;make sure to recalculate other DB too
               END
            ENDCASE
         ENDIF ELSE BEGIN
@@ -396,35 +383,36 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
      ;;;;;;;;;;;;
      ;;Handle longitudes
-     MIMC__minMLT                                 = minM
-     MIMC__maxMLT                                 = maxM
-     MIMC__binMLT                                 = binM
-     MIMC__dayside                                = KEYWORD_SET(dayside)
-     MIMC__nightside                              = KEYWORD_SET(nightside)
-     mlt_i                                        = GET_MLT_INDS(dbStruct,MIMC__minMLT,MIMC__maxMLT, $
-                                                                 DAYSIDE=MIMC__dayside,NIGHTSIDE=MIMC__nightside, $
-                                                                 N_MLT=n_mlt,N_OUTSIDE_MLT=n_outside_MLT,LUN=lun)
+     MIMC__minMLT         = minM
+     MIMC__maxMLT         = maxM
+     MIMC__binMLT         = binM
+     MIMC__dayside        = KEYWORD_SET(dayside)
+     MIMC__nightside      = KEYWORD_SET(nightside)
+     mlt_i                = GET_MLT_INDS(dbStruct,MIMC__minMLT,MIMC__maxMLT, $
+                                         DAYSIDE=MIMC__dayside,NIGHTSIDE=MIMC__nightside, $
+                                         N_MLT=n_mlt,N_OUTSIDE_MLT=n_outside_MLT,LUN=lun)
      
      ;;;;;;;;;;;;
      ;;Handle latitudes, combine with mlt
-     MIMC__hemi                                   = hemi
-     MIMC__north                                  = KEYWORD_SET(north)
-     MIMC__south                                  = KEYWORD_SET(south)
-     MIMC__both_hemis                             = KEYWORD_SET(both_hemis)
+     MIMC__hemi           = hemi
+     MIMC__north          = KEYWORD_SET(north)
+     MIMC__south          = KEYWORD_SET(south)
+     MIMC__both_hemis     = KEYWORD_SET(both_hemis)
      IF KEYWORD_SET(do_lShell) THEN BEGIN
-        MIMC__minLshell                           = minL
-        MIMC__maxLshell                           = maxL
-        MIMC__binLshell                           = binL
-        lshell_i                                  = GET_LSHELL_INDS(dbStruct,MIMC__minLshell,MIMC__maxLshell,MIMC__hemi, $
-                                                                    N_LSHELL=n_lshell,N_NOT_LSHELL=n_not_lshell,LUN=lun)
-        region_i                                  = CGSETINTERSECTION(lshell_i,mlt_i)
+        MIMC__minLshell   = minL
+        MIMC__maxLshell   = maxL
+        MIMC__binLshell   = binL
+        lshell_i          = GET_LSHELL_INDS(dbStruct,MIMC__minLshell,MIMC__maxLshell,MIMC__hemi, $
+                                            N_LSHELL=n_lshell,N_NOT_LSHELL=n_not_lshell,LUN=lun)
+        region_i          = CGSETINTERSECTION(lshell_i,mlt_i)
      ENDIF ELSE BEGIN
-        MIMC__minILAT                             = minI
-        MIMC__maxILAT                             = maxI
-        MIMC__binILAT                             = binI
-        ilat_i                                    = GET_ILAT_INDS(dbStruct,MIMC__minILAT,MIMC__maxILAT,MIMC__hemi, $
-                                                                  N_ILAT=n_ilat,N_NOT_ILAT=n_not_ilat,LUN=lun)
-        region_i                                  = CGSETINTERSECTION(ilat_i,mlt_i)
+        MIMC__minILAT     = minI
+        MIMC__maxILAT     = maxI
+        MIMC__binILAT     = binI
+        MIMC__EA_binning  = KEYWORD_SET(EA_binning)
+        ilat_i            = GET_ILAT_INDS(dbStruct,MIMC__minILAT,MIMC__maxILAT,MIMC__hemi, $
+                                          N_ILAT=n_ilat,N_NOT_ILAT=n_not_ilat,LUN=lun)
+        region_i          = CGSETINTERSECTION(ilat_i,mlt_i)
      ENDELSE
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -441,13 +429,13 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
   ;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Limits on orbits to use?
      IF KEYWORD_SET(orbRange) THEN BEGIN
-        MIMC__orbRange                            = orbRange
+        MIMC__orbRange        = orbRange
         CASE N_ELEMENTS(orbRange) OF
            1: BEGIN
-              MIMC__orbRange                      = [orbRange,orbRange]
+              MIMC__orbRange  = [orbRange,orbRange]
            END
            2: BEGIN
-              MIMC__orbRange                      = orbRange
+              MIMC__orbRange  = orbRange
            END
            ELSE: BEGIN
               printf,lun,"Incorrect input for keyword 'orbRange'!!"
@@ -456,8 +444,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
            END
         ENDCASE
         ;; IF N_ELEMENTS(orbRange) EQ 2 THEN BEGIN
-        orb_i                                     = GET_ORBRANGE_INDS(dbStruct,MIMC__orbRange[0],MIMC__orbRange[1],LUN=lun)
-        region_i                                  = CGSETINTERSECTION(region_i,orb_i)
+        orb_i                 = GET_ORBRANGE_INDS(dbStruct,MIMC__orbRange[0],MIMC__orbRange[1],LUN=lun)
+        region_i              = CGSETINTERSECTION(region_i,orb_i)
         ;; ENDIF ELSE BEGIN
         ;; ENDELSE
      ENDIF
@@ -465,10 +453,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
      ;;limits on altitudes to use?
      IF KEYWORD_SET(altitudeRange) THEN BEGIN
-        MIMC__altitudeRange                       = altitudeRange
+        MIMC__altitudeRange  = altitudeRange
         IF N_ELEMENTS(altitudeRange) EQ 2 THEN BEGIN
-           alt_i                                  = GET_ALTITUDE_INDS(dbStruct,MIMC__altitudeRange[0],MIMC__altitudeRange[1],LUN=lun)
-           region_i                               = CGSETINTERSECTION(region_i,alt_i)
+           alt_i             = GET_ALTITUDE_INDS(dbStruct,MIMC__altitudeRange[0],MIMC__altitudeRange[1],LUN=lun)
+           region_i          = CGSETINTERSECTION(region_i,alt_i)
         ENDIF ELSE BEGIN
            printf,lun,"Incorrect input for keyword 'altitudeRange'!!"
            printf,lun,"Please use altitudeRange=[minAlt maxAlt]"
@@ -480,15 +468,15 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      ;;limits on characteristic electron energies to use?
      IF KEYWORD_SET (charERange) AND ~is_ion THEN BEGIN
         IF N_ELEMENTS(charERange) EQ 2 THEN BEGIN
-           MIMC__charERange                    = charERange
+           MIMC__charERange  = charERange
            
-           chare                               = ABS(dbStruct.jee/dbStruct.je)*6.242*1.0e11
-           ;; chare_i                             = WHERE(dbStruct.max_chare_losscone GE MIMC__charERange[0] AND $
+           chare             = ABS(dbStruct.jee/dbStruct.je)*6.242*1.0e11
+           ;; chare_i        = WHERE(dbStruct.max_chare_losscone GE MIMC__charERange[0] AND $
            ;;                                             dbStruct.max_chare_losscone LE MIMC__charERange[1])
-           chare_i                             = WHERE(chare GE MIMC__charERange[0] AND $
+           chare_i           = WHERE(chare GE MIMC__charERange[0] AND $
                                                        chare LE MIMC__charERange[1])
 
-           region_i                            = CGSETINTERSECTION(region_i,chare_i)
+           region_i          = CGSETINTERSECTION(region_i,chare_i)
         ENDIF ELSE BEGIN
            printf,lun,"Incorrect input for keyword 'charERange'!!"
            printf,lun,"Please use charERange=[minCharE maxCharE]"
@@ -500,18 +488,18 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         IF N_ELEMENTS(charIERange) EQ 2 THEN BEGIN
            CASE 1 OF
               KEYWORD_SET(for_alfven_db): BEGIN
-                 NWLL_ALF_I__charIERange       = charIERange
+                 NWLL_ALF_I__charIERange  = charIERange
               END
               ELSE: BEGIN
-                 NEWELL_I__charIERange         = charIERange
+                 NEWELL_I__charIERange    = charIERange
               END
            ENDCASE
            
-           charie                              = ABS(dbStruct.jei/dbStruct.ji)*6.242*1.0e11
-           charie_i                            = WHERE(charie GE charIERange[0] AND $
+           charie                         = ABS(dbStruct.jei/dbStruct.ji)*6.242*1.0e11
+           charie_i                       = WHERE(charie GE charIERange[0] AND $
                                                        charie LE charIERange[1])
 
-           region_i                            = CGSETINTERSECTION(region_i,charie_i)
+           region_i                       = CGSETINTERSECTION(region_i,charie_i)
         ENDIF ELSE BEGIN
            printf,lun,"Incorrect input for keyword 'charIERange'!!"
            printf,lun,"Please use charIERange=[minCharIE maxCharIE]"
@@ -527,30 +515,30 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      ;;    good_i                                    = region_i[where(region_i GE sat_i,nGood,complement=lost,ncomplement=nlost)]
      ;;    lost                                      = region_i[lost]
      ;; ENDIF ELSE BEGIN
-        good_i                                    = region_i
+        good_i          = region_i
      ;; ENDELSE
 
      ;;Now, clear out all the garbage (NaNs & Co.)
      IF is_ion THEN BEGIN
         CASE 1 OF
            KEYWORD_SET(for_alfven_db): BEGIN
-              nClean_i            = N_ELEMENTS(NWLL_ALF_I__cleaned_i)
+              nClean_i  = N_ELEMENTS(NWLL_ALF_I__cleaned_i)
            END
            ELSE: BEGIN
-              nClean_i            = N_ELEMENTS(NEWELL_I__cleaned_i)
+              nClean_i  = N_ELEMENTS(NEWELL_I__cleaned_i)
            END
         ENDCASE
 
         IF nClean_i EQ 0 THEN BEGIN
            
            ;; IF  THEN BEGIN
-           tempDir                = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
+           tempDir                      = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
         CASE 1 OF
            KEYWORD_SET(for_alfven_db): BEGIN
-              defNewellDBCleanInds   = 'alf_iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
+              defNewellDBCleanInds      = 'alf_iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
            END
            ELSE: BEGIN
-              defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
+              defNewellDBCleanInds      = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
            END
         ENDCASE
            
@@ -558,14 +546,14 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                  RESTORE,tempDir+defNewellDBCleanInds
               ENDIF ELSE BEGIN        
                  PRINT,'Making NaN- and INF-less ion DB inds in ' + defNewellDBCleanInds + '...'
-                 cleaned_i = BASIC_ESPEC_ION_DB_CLEANER(dbStruct,/CLEAN_NANS_AND_INFINITIES)
+                 cleaned_i              = BASIC_ESPEC_ION_DB_CLEANER(dbStruct,/CLEAN_NANS_AND_INFINITIES)
                  PRINT,'Saving NaN- and INF-less ion DB inds to ' + defNewellDBCleanInds + '...'
                  SAVE,cleaned_i,FILENAME=tempDir+defNewellDBCleanInds
               ENDELSE
 
            CASE 1 OF
               KEYWORD_SET(for_alfven_db): BEGIN
-                 NWLL_ALF_I__cleaned_i             = cleaned_i
+                 NWLL_ALF_I__cleaned_i  = cleaned_i
                  IF NWLL_ALF_I__cleaned_i EQ !NULL THEN BEGIN
                     PRINTF,lun,"Couldn't clean Alfvén DB! Sup with that?"
                     STOP
@@ -573,7 +561,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                  ENDELSE
               END
               ELSE: BEGIN
-                 NEWELL_I__cleaned_i               = cleaned_i
+                 NEWELL_I__cleaned_i    = cleaned_i
                  IF NEWELL_I__cleaned_i EQ !NULL THEN BEGIN
                     PRINTF,lun,"Couldn't clean Alfvén DB! Sup with that?"
                     STOP
@@ -582,8 +570,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
               END
            ENDCASE
         ENDIF
-        good_i                                    = CGSETINTERSECTION(good_i, $
-        KEYWORD_SET(for_alfven_db) ? NWLL_ALF_I__cleaned_i : NEWELL_I__cleaned_i) 
+        good_i  = CGSETINTERSECTION(good_i, $
+                                    KEYWORD_SET(for_alfven_db) ? $
+                                    NWLL_ALF_I__cleaned_i : $
+                                    NEWELL_I__cleaned_i) 
      ENDIF ELSE BEGIN
         PRINT,"eSpec DB needs no cleaning. She's clean as a whistle, you know."
         ;; IF N_ELEMENTS(NWLL_ALF__cleaned_i) EQ 0 THEN BEGIN
@@ -616,6 +606,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                    MINILAT=minI, $
                                    MAXILAT=maxI, $
                                    BINILAT=binI, $
+                                   EQUAL_AREA_BINNING=EA_binning, $
                                    ;; DO_LSHELL=do_lShell,MINLSHELL=minL,MAXLSHELL=maxL,BINLSHELL=binL, $
                                    ;; MIN_MAGCURRENT=minMC,MAX_NEGMAGCURRENT=maxNegMC, $
                                    HWMAUROVAL=HwMAurOval,HWMKPIND=HwMKpInd, $
@@ -639,17 +630,17 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      printf,lun,""
 
      IF is_ion THEN BEGIN
-        NEWELL_I__good_i                          = good_i
-        NEWELL_I__HAVE_GOOD_I                     = 1
+        NEWELL_I__good_i       = good_i
+        NEWELL_I__HAVE_GOOD_I  = 1
      ENDIF ELSE BEGIN
-        NWLL_ALF__good_i                           = good_i
-        NWLL_ALF__HAVE_GOOD_I                      = 1
+        NWLL_ALF__good_i       = good_i
+        NWLL_ALF__HAVE_GOOD_I  = 1
      ENDELSE
 
   ENDIF ELSE BEGIN
      IF is_ion THEN BEGIN
-        good_i                                    = NEWELL_I__good_i 
-        NEWELL_I__HAVE_GOOD_I                     = 1
+        good_i                 = NEWELL_I__good_i 
+        NEWELL_I__HAVE_GOOD_I  = 1
         ;; IF ARG_PRESENT(out_maximus) THEN BEGIN
         ;;    PRINT,'Giving you maximus...'
         ;;    out_maximus = NEWELL_I__maximus
@@ -659,8 +650,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         ;;    out_cdbTime = NEWELL_I__times
         ;; ENDIF
      ENDIF ELSE BEGIN
-        good_i                                    = NWLL_ALF__good_i
-        NWLL_ALF__HAVE_GOOD_I                       = 1
+        good_i                 = NWLL_ALF__good_i
+        NWLL_ALF__HAVE_GOOD_I  = 1
         ;; IF ARG_PRESENT(out_fastLoc) AND N_ELEMENTS(out_fastLoc) EQ 0 THEN BEGIN
         ;;    PRINT,'Giving you fastLoc...'
         ;;    out_fastLoc = NWLL_ALF__eSpec
@@ -669,6 +660,6 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      ENDELSE
   ENDELSE
 
-  RETURN, good_i
+  RETURN,good_i
 
 END

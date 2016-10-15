@@ -1,27 +1,29 @@
-PRO CHECK_FOR_NEW_ESPEC_ION_IND_CONDS,is_ion,who_recalculate, $
-                            ORBRANGE=orbRange, $
-                            ALTITUDERANGE=altitudeRange, $
-                            CHARERANGE=charERange, $
-                            BOTH_HEMIS=both_hemis, $
-                            NORTH=north, $
-                            SOUTH=south, $
-                            HEMI=hemi, $
-                            HWMAUROVAL=HwMAurOval, $
-                            HWMKPIND=HwMKpInd, $
-                            MINMLT=minMLT, $
-                            MAXMLT=maxMLT, $
-                            BINM=binMLT, $
-                            MINILAT=minILAT, $
-                            MAXILAT=maxILAT, $
-                            BINILAT=binILAT, $
-                            ;; DO_LSHELL=do_lshell, $
-                            ;; MINLSHELL=minLshell, $
-                            ;; MAXLSHELL=maxLshell, $
-                            ;; BINLSHELL=binLshell, $
-                            DAYSIDE=dayside, $
-                            NIGHTSIDE=nightside, $
-                            HAVE_GOOD_I=have_good_i, $
-                            LUN=lun
+PRO CHECK_FOR_NEW_ESPEC_ION_IND_CONDS, $
+   is_ion,who_recalculate, $
+   ORBRANGE=orbRange, $
+   ALTITUDERANGE=altitudeRange, $
+   CHARERANGE=charERange, $
+   BOTH_HEMIS=both_hemis, $
+   NORTH=north, $
+   SOUTH=south, $
+   HEMI=hemi, $
+   HWMAUROVAL=HwMAurOval, $
+   HWMKPIND=HwMKpInd, $
+   MINMLT=minMLT, $
+   MAXMLT=maxMLT, $
+   BINM=binMLT, $
+   MINILAT=minILAT, $
+   MAXILAT=maxILAT, $
+   BINILAT=binILAT, $
+   EQUAL_AREA_BINNING=EA_binning, $
+   ;; DO_LSHELL=do_lshell, $
+   ;; MINLSHELL=minLshell, $
+   ;; MAXLSHELL=maxLshell, $
+   ;; BINLSHELL=binLshell, $
+   DAYSIDE=dayside, $
+   NIGHTSIDE=nightside, $
+   HAVE_GOOD_I=have_good_i, $
+   LUN=lun
 
   COMPILE_OPT idl2
 
@@ -166,6 +168,16 @@ PRO CHECK_FOR_NEW_ESPEC_ION_IND_CONDS,is_ion,who_recalculate, $
      IF N_ELEMENTS(MIMC__do_lshell) GT 0 THEN BEGIN
         IF MIMC__do_lshell NE do_lshell THEN BEGIN
            who_recalculate   = 1
+           have_good_i       = 0
+           RETURN
+        ENDIF
+     ENDIF
+  ENDIF
+
+  IF N_ELEMENTS(EA_binning) GT 0 THEN BEGIN
+     IF N_ELEMENTS(MIMC__EA_binning) GT 0 THEN BEGIN
+        IF MIMC__EA_binning NE EA_binning THEN BEGIN
+           MIMC__RECALCULATE = 1
            have_good_i       = 0
            RETURN
         ENDIF
