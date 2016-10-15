@@ -4,6 +4,7 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES, $
    MAINPHASE_I=mp_i, $
    RECOVERYPHASE_I=rp_i, $
    DSTCUTOFF=dstCutoff, $
+   SMOOTH_DST=smooth_dst, $
    STORM_DST_I=s_dst_i, $
    NONSTORM_DST_I=ns_dst_i, $
    MAINPHASE_DST_I=mp_dst_i, $
@@ -43,6 +44,7 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES, $
 
   GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_PERIODS,dst, $
      DSTCUTOFF=dstCutoff, $
+     SMOOTH_DST=smooth_dst, $
      STORM_DST_I=s_dst_i, $
      NONSTORM_DST_I=ns_dst_i, $
      MAINPHASE_DST_I=mp_dst_i, $
@@ -59,7 +61,8 @@ PRO GET_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES, $
   strings=["nonstorm","mainphase","recoveryphase"]
 
   todaysFile = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES(SUFFIX=indFileSuff, $
-                                                                       DSTCUTOFF=dstCutoff)
+                                                                       DSTCUTOFF=dstCutoff, $
+                                                                       SMOOTH_DST=smooth_dst)
 
   IF FILE_TEST(todaysFile) THEN BEGIN
      PRINTF,lun,"Already have nonstorm and storm ion inds! Restoring today's file..."
