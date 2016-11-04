@@ -1,8 +1,8 @@
 ;2016/06/04
 FUNCTION TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES, $
    SUFFIX=suffix, $
-   DSTCUTOFF=dstCutoff, $
    MOST_RECENT=most_recent, $
+   DSTCUTOFF=dstCutoff, $
    SMOOTH_DST=smooth_dst
 
   COMPILE_OPT idl2

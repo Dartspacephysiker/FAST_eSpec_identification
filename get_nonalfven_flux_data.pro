@@ -72,7 +72,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             RESET_OMNI_INDS=reset_omni_inds, $
                             CLOCKSTR=clockStr, $
                             DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
-                            RESTRICT_WITH_THESE_I=restrict_with_these_i, $
+                            RESTRICT_WITH_THESE_ESPEC_I=restrict_with_these_eSpec_i, $
+                            RESTRICT_WITH_THESE_ION_I=restrict_with_these_ion_i, $
                             BX_OVER_BYBZ=Bx_over_ByBz_Lim, $
                             DELAY=delay, $
                             MULTIPLE_DELAYS=multiple_delays, $
@@ -109,13 +110,13 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
         worst                = WHERE(eSpec_delta_t LT 0,nWorst)
         IF nWorst GT 0 THEN BEGIN
            PRINT,'The worst!'
-           eSpec_delta_t[worst] = 2.0
+           eSpec_delta_t[worst] = 2.5
            ;; STOP
         ENDIF
 
         fixme                = WHERE(eSpec_delta_t GT 2,nFix)
         IF nFix GT 0 THEN BEGIN
-           eSpec_delta_t[fixme] = 2.0
+           eSpec_delta_t[fixme] = 2.5
         ENDIF
      ENDIF
 
@@ -316,7 +317,6 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                                                       RESET_OMNI_INDS=reset_omni_inds, $
                                                                       CLOCKSTR=clockStr, $
                                                                       DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
-                                                                      RESTRICT_WITH_THESE_I=restrict_with_these_i, $
                                                                       DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                                                                       BX_OVER_BYBZ=Bx_over_ByBz_Lim, $
                                                                       MULTIPLE_DELAYS=multiple_delays, $
@@ -331,6 +331,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                                                       HWMAUROVAL=HwMAurOval, $
                                                                       HWMKPIND=HwMKpInd, $
                                                                       /FOR_ESPEC_OR_ION_DB, $
+                                                                      RESTRICT_WITH_THESE_I=restrict_with_these_eSpec_i, $
                                                                       RESET_GOOD_INDS=reset_good_inds, $
                                                                       DONT_LOAD_IN_MEMORY=nonMem) ;; , $
            ;; NO_BURSTDATA=no_burstData)
@@ -383,7 +384,6 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                                                RESET_OMNI_INDS=reset_omni_inds, $
                                                                CLOCKSTR=clockStr, $
                                                                DONT_CONSIDER_CLOCKANGLES=dont_consider_clockAngles, $
-                                                               RESTRICT_WITH_THESE_I=restrict_with_these_i, $
                                                                DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                                                                BX_OVER_BYBZ=Bx_over_ByBz_Lim, $
                                                                MULTIPLE_DELAYS=multiple_delays, $
@@ -398,6 +398,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                                                HWMAUROVAL=HwMAurOval, $
                                                                HWMKPIND=HwMKpInd, $
                                                                /FOR_ESPEC_OR_ION_DB, $
+                                                               RESTRICT_WITH_THESE_I=restrict_with_these_ion_i, $
                                                                RESET_GOOD_INDS=reset_good_inds, $
                                                                DONT_LOAD_IN_MEMORY=nonMem) ;; , $
            ;; NO_BURSTDATA=no_burstData)

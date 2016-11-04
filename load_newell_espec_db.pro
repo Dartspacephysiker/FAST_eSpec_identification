@@ -92,6 +92,11 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
   NEWELL__dbFile         = NewellDBFile
   ;; ENDIF
+
+  ;;If just getting times, at this point we've populated other variables
+  ;;that might be of interest to user, so JET
+  IF KEYWORD_SET(just_times) THEN RETURN
+
   IF N_ELEMENTS(specType) EQ 0 THEN specType = ''
   IF N_ELEMENTS(eSpec) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
      IF KEYWORD_SET(force_load_db) THEN BEGIN
@@ -102,7 +107,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
 
      ;;Correct fluxes
      IF ~KEYWORD_SET(dont_perform_correction) THEN BEGIN
-        IF ~quiet THEN PRINT,"Correcting eSpec fluxes..."
+        IF ~quiet THEN PRINT,"Correcting eSpec fluxes so that earthward is positive in SH..."
         eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
         eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
         
@@ -144,9 +149,9 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
 
   ;; ENDIF
 
-  IF KEYWORD_SET(just_times) THEN BEGIN
-     out_times              = TEMPORARY(eSpec.x)
-  ENDIF
+  ;; IF KEYWORD_SET(just_times) THEN BEGIN
+  ;;    out_times              = TEMPORARY(eSpec.x)
+  ;; ENDIF
 
   IF KEYWORD_SET(nonMem) THEN BEGIN
      CLEAR_ESPEC_DB_VARS,QUIET=quiet
