@@ -9,6 +9,10 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          DONT_LOAD_IN_MEMORY=nonMem, $
                          DONT_PERFORM_CORRECTION=dont_perform_correction, $
                          DONT_CONVERT_TO_STRICT_NEWELL=dont_convert_to_strict_newell, $
+                         COORDINATE_SYSTEM=coordinate_system, $
+                         USE_AACGM_COORDS=use_aacgm, $
+                         USE_GEO_COORDS=use_geo, $
+                         USE_MAG_COORDS=use_mag, $
                          JUST_TIMES=just_times, $
                          OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
@@ -95,7 +99,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
 
   ;;If just getting times, at this point we've populated other variables
   ;;that might be of interest to user, so JET
-  IF KEYWORD_SET(just_times) THEN RETURN
+  IF KEYWORD_SET(just_times) AND N_ELEMENTS(out_times) GT 0 THEN RETURN
 
   IF N_ELEMENTS(specType) EQ 0 THEN specType = ''
   IF N_ELEMENTS(eSpec) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
@@ -106,7 +110,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      RESTORE,NewellDBDir+NewellDBFile
 
      ;;Correct fluxes
-     IF ~KEYWORD_SET(dont_perform_correction) THEN BEGIN
+     IF ~(KEYWORD_SET(dont_perform_correction) OR (KEYWORD_SET(just_times) AND KEYWORD_SET(dont_perform_correction))) THEN BEGIN
         IF ~quiet THEN PRINT,"Correcting eSpec fluxes so that earthward is positive in SH..."
         eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
         eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
@@ -137,21 +141,71 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      IF ~quiet THEN PRINTF,lun,'eSpec DB already loaded! Not restoring ' + NewellDBFile + '...'
   ENDELSE
 
-  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-  NEWELL__eSpec          = eSpec
+  IF KEYWORD_SET(coordinate_system) THEN BEGIN
+     CASE STRUPCASE(coordinate_system) OF
+        'AACGM': BEGIN
+           use_aacgm = 1
+           use_geo   = 0
+           use_mag   = 0
+        END
+        'GEO'  : BEGIN
+           use_aacgm = 0
+           use_geo   = 1
+           use_mag   = 0
+        END
+        'MAG'  : BEGIN
+           use_aacgm = 0
+           use_geo   = 0
+           use_mag   = 1
+        END
+     ENDCASE
+  ENDIF
 
-  IF N_ELEMENTS(failCode) NE 0 THEN BEGIN
-     NEWELL__failCodes   = failCode
-  ENDIF ELSE BEGIN
-     NEWELL__failCodes   = !NULL
-     IF ~quiet THEN PRINT,'This Newell DB file doesn''t have fail codes!'
-  ENDELSE
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  PRINT,"UNDER CONSTRUCTION"
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  IF KEYWORD_SET(use_aacgm) THEN BEGIN
+     PRINT,'Using AACGM lat, MLT, and alt ...'
 
-  ;; ENDIF
+     RESTORE,defCoordDir+AACGM_file
 
-  ;; IF KEYWORD_SET(just_times) THEN BEGIN
-  ;;    out_times              = TEMPORARY(eSpec.x)
-  ;; ENDIF
+     ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_AACGM,'AACGM'
+
+  ENDIF
+
+  IF KEYWORD_SET(use_geo) THEN BEGIN
+     PRINT,'Using GEO lat and alt ...'
+
+     RESTORE,defCoordDir+GEO_file
+
+     ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_GEO,'GEO'
+
+  ENDIF
+
+  IF KEYWORD_SET(use_mag) THEN BEGIN
+     PRINT,'Using MAG lat and alt ...'
+
+     RESTORE,defCoordDir+MAG_file
+
+     ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_MAG,'MAG'
+
+  ENDIF
+
+  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+     NEWELL__eSpec          = eSpec
+
+     IF N_ELEMENTS(failCode) NE 0 THEN BEGIN
+        NEWELL__failCodes   = failCode
+     ENDIF ELSE BEGIN
+        NEWELL__failCodes   = !NULL
+        IF ~quiet THEN PRINT,'This Newell DB file doesn''t have fail codes!'
+     ENDELSE
+
+  ENDIF
+
+  IF KEYWORD_SET(just_times) THEN BEGIN
+     out_times              = (TEMPORARY(eSpec)).x
+  ENDIF
 
   IF KEYWORD_SET(nonMem) THEN BEGIN
      CLEAR_ESPEC_DB_VARS,QUIET=quiet

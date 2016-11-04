@@ -6,6 +6,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             NONALFVEN__ALL_FLUXES=nonalfven__all_fluxes, $
                             NONALFVEN__NEWELLPLOT_PROBOCCURRENCE=nonAlfven__newellPlot_probOccurrence, $
                             DESPUN_ALF_DB=despun_alf_db, $
+                            USE_AACGM=use_AACGM, $
+                            USE_MAG_COORDS=use_MAG, $
                             T1_ARR=t1_arr,T2_ARR=t2_arr, $
                             EPLOTS=ePlots, $
                             EFLUXPLOTTYPE=eFluxPlotType, $
@@ -102,7 +104,9 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
   IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) $
      OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
 
-     LOAD_NEWELL_ESPEC_DB,eSpec,/DONT_LOAD_IN_MEMORY
+     LOAD_NEWELL_ESPEC_DB,eSpec,/DONT_LOAD_IN_MEMORY, $
+                          /DONT_CONVERT_TO_STRICT_NEWELL
+                          
 
      IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
         eSpec_delta_t          = [FLOAT(eSpec.x[1:-1]-eSpec.x[0:-2]),1.0]
