@@ -105,7 +105,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
      OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
 
      LOAD_NEWELL_ESPEC_DB,eSpec,/DONT_LOAD_IN_MEMORY, $
-                          /DONT_CONVERT_TO_STRICT_NEWELL
+                          /DONT_CONVERT_TO_STRICT_NEWELL, $
+                          /DONT_PERFORM_CORRECTION
                           
 
      IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
