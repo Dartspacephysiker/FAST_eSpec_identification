@@ -4,6 +4,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             FOR_IMF_SCREENING=for_IMF_screening, $
                             NONALFVEN__JUNK_ALFVEN_CANDIDATES=nonAlfven__junk_alfven_candidates, $
                             NONALFVEN__ALL_FLUXES=nonalfven__all_fluxes, $
+                            NONALFVEN__NEWELL_2009_INTERPRETATION=nonAlfven__newell_2009_interpretation, $
                             NONALFVEN__NEWELLPLOT_PROBOCCURRENCE=nonAlfven__newellPlot_probOccurrence, $
                             DESPUN_ALF_DB=despun_alf_db, $
                             USE_AACGM=use_AACGM, $
@@ -105,7 +106,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
      OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
 
      LOAD_NEWELL_ESPEC_DB,eSpec,/DONT_LOAD_IN_MEMORY, $
-                          /DONT_CONVERT_TO_STRICT_NEWELL, $
+                          DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(nonAlfven__newell_2009_interpretation), $
                           /DONT_PERFORM_CORRECTION
                           
 
@@ -559,13 +560,17 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
   ;;Now get the data
   IF KEYWORD_SET(ePlots) THEN BEGIN
-     eFluxPlotType           = 'eFlux_nonAlfven'
+     eFluxPlotType           = 'eFlux_nonAlfven' + $
+                               ( KEYWORD_SET(nonAlfven__newell_2009_interpretation) ? $
+                                 '--2009_interp' : '' )
      ;; eFlux_data           = eSpec.jee[eSpec_i]
      eFlux_data              = eSpec.jee
   ENDIF
 
   IF KEYWORD_SET(eNumFlPlots) THEN BEGIN
-     eNumFlPlotType          = 'eNumFlux_nonAlfven'
+     eNumFlPlotType          = 'eNumFlux_nonAlfven' + $
+                               ( KEYWORD_SET(nonAlfven__newell_2009_interpretation) ? $
+                                 '--2009_interp' : '' )
      ;; eNumFlux_data        = eSpec.je[eSpec_i]
      eNumFlux_data           = eSpec.je
   ENDIF
@@ -573,12 +578,16 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
   IF KEYWORD_SET(ionPlots) THEN BEGIN
      CASE 1 OF
         STRUPCASE(iFluxPlotType) EQ 'ENERGY': BEGIN
-           iFluxPlotType     = 'JEi_nonAlfven'
+           iFluxPlotType     = 'JEi_nonAlfven' + $
+                               ( KEYWORD_SET(nonAlfven__newell_2009_interpretation) ? $
+                                 '--2009_interp' : '' )
            ;; iFlux_data     = ion.jei[ion_i]
            iFlux_data        = ion.jei
         END
         ELSE: BEGIN
-           iFluxPlotType     = 'Ji_nonAlfven'
+           iFluxPlotType     = 'Ji_nonAlfven' + $
+                               ( KEYWORD_SET(nonAlfven__newell_2009_interpretation) ? $
+                                 '--2009_interp' : '' )
            ;; iNumFlux_data  = ion.ji[ion_i]
            iNumFlux_data     = ion.ji
         END
