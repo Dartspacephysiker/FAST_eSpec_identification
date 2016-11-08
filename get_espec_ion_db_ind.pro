@@ -33,6 +33,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                               RESET_GOOD_INDS=reset_good_inds, $
                               DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                               DONT_LOAD_IN_MEMORY=nonMem, $
+                              NEWELL_2009_INTERPRETATION=Newell_2009_interpretation, $
                               PRINT_PARAM_SUMMARY=print_param_summary
   
   COMPILE_OPT idl2
@@ -211,6 +212,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                    NEWELLDBFILE=dbFile, $
                                    FORCE_LOAD_DB=force_load_db, $
                                    DONT_LOAD_IN_MEMORY=nonMem, $
+                                   DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(Newell_2009_interpretation), $
                                    ;; OUT_GOOD_I=good_i, $
                                    LUN=lun
               IF ~KEYWORD_SET(nonMem) THEN BEGIN
