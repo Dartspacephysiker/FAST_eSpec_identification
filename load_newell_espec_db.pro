@@ -39,6 +39,11 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   defSortNewellDBFile    =  "sorted--" + defNewellDBFile
 
 
+  ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
+  ;; GEO_file             = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--GEO_coords.sav'
+  ;; MAG_file             = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--MAG_coords.sav'
+
+
   IF N_ELEMENTS(quiet) EQ 0 THEN quiet = 0
 
   IF N_ELEMENTS(lun) EQ 0 THEN BEGIN

@@ -472,11 +472,16 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         IF N_ELEMENTS(charERange) EQ 2 THEN BEGIN
            MIMC__charERange  = charERange
            
-           chare             = ABS(dbStruct.jee/dbStruct.je)*6.242*1.0e11
-           ;; chare_i        = WHERE(dbStruct.max_chare_losscone GE MIMC__charERange[0] AND $
-           ;;                                             dbStruct.max_chare_losscone LE MIMC__charERange[1])
-           chare_i           = WHERE(chare GE MIMC__charERange[0] AND $
-                                                       chare LE MIMC__charERange[1])
+           chare_i           = GET_CHARE_INDS(dbStruct,minCharE,maxCharE, $
+                                              charERange[0], $
+                                              charERange[1], $
+                                              /FOR_ESPEC_DB, $
+                                              LUN=lun)
+           ;; chare             = ABS(dbStruct.jee/dbStruct.je)*6.242*1.0e11
+           ;; ;; chare_i        = WHERE(dbStruct.max_chare_losscone GE MIMC__charERange[0] AND $
+           ;; ;;                                             dbStruct.max_chare_losscone LE MIMC__charERange[1])
+           ;; chare_i           = WHERE(chare GE MIMC__charERange[0] AND $
+           ;;                                             chare LE MIMC__charERange[1])
 
            region_i          = CGSETINTERSECTION(region_i,chare_i)
         ENDIF ELSE BEGIN
@@ -497,9 +502,15 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
               END
            ENDCASE
            
-           charie                         = ABS(dbStruct.jei/dbStruct.ji)*6.242*1.0e11
-           charie_i                       = WHERE(charie GE charIERange[0] AND $
-                                                       charie LE charIERange[1])
+           charie_i                       = GET_CHARE_INDS(dbStruct, $
+                                                           charIERange[0], $
+                                                           charIERange[1], $
+                                                           /FOR_ION_DB, $
+                                                           LUN=lun)
+
+           ;; charie                         = ABS(dbStruct.jei/dbStruct.ji)*6.242*1.0e11
+           ;; charie_i                       = WHERE(charie GE charIERange[0] AND $
+           ;;                                             charie LE charIERange[1])
 
            region_i                       = CGSETINTERSECTION(region_i,charie_i)
         ENDIF ELSE BEGIN
