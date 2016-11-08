@@ -112,8 +112,10 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      ;;Correct fluxes
      IF ~(KEYWORD_SET(dont_perform_correction) OR (KEYWORD_SET(just_times) AND KEYWORD_SET(dont_perform_correction))) THEN BEGIN
         IF ~quiet THEN PRINT,"Correcting eSpec fluxes so that earthward is positive in SH..."
-        eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
-        eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
+        IF FLOAT(N_ELEMENTS(WHERE(eSpec.jee LT 0 AND eSpec.ilat LT 0)))/N_ELEMENTS(WHERE(eSpec.ilat LT 0)) GT 0.1 THEN BEGIN
+           eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
+           eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
+        ENDIF
         
         ;;Convert to strict Newell interpretation
         
