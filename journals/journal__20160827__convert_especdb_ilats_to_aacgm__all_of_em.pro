@@ -4,7 +4,7 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
 
   COMPILE_OPT IDL2
 
-  do_conversions    = 0
+  do_conversions    = 1
 
   orig_routineName  = 'JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM'
 
@@ -14,10 +14,10 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
   allow_fl_trace    = 1         ;Allow fieldline tracing for AACGM_v2?
   check_if_exists   = 1
 
-  create_notAltitude_file = 1
+  create_notAltitude_file = 0
   notAltitude_suff        = '--missed_indices--' + GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
 
-  convert_varnames_and_resave_outFiles = 1
+  convert_varnames_and_resave_outFiles = 0
 
   force_newCheckItvl = 1000
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -39,6 +39,9 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
   outFiles         = 'sorted--eSpec_20160607_db--Orbs_500-16361--AACGM_v2_coords' + $
                      ['_1','_2','_3']+'--recalc_for_every_point.sav'
 
+  ;; outFiles         = 'sorted--eSpec_20160607_db--Orbs_500-16361--AACGM_v2_coords' + $
+  ;;                    ['_1','_2','_3']+'--recalc_for_every_point.sav--mydude'
+
   ;;In case we get cut off--think SNES emulator savestate
   tmpFiles         = outDir+'TEMP_AACGM--sorted--eSpec_20160607_db--Orbs_500-16361' + $
                      ['_1','_2','_3']+'--recalc_for_every_point.sav'
@@ -57,7 +60,8 @@ PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
   defNames = {AACGMSph    : 'AACGMSph', $
               AACGMStruct : 'AACGMStruct', $
               restrictVar : 'restrict_ii', $
-              DBInd       : 'DBInds'}
+              DBInd       : 'DBInds', $
+              DBIndName   : 'db_i'}
 
   IF KEYWORD_SET(do_conversions) THEN BEGIN
      CONVERT_GEO_TO_AACGM, $
