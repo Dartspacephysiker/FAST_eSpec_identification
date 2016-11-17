@@ -36,6 +36,7 @@ PRO JOURNAL__20161010__STITCH_ESPECDB_ALT_NOTALT_FILES
   outFiles         = 'sorted--eSpec_20160607_db--Orbs_500-16361--AACGM_v2_coords' + $
                      ['_1','_2','_3']+'--recalc_for_every_point.sav'
 
+  endSuff          = '--combined_with_notAlt'
   ;;Convert these var names to standard names
   in_names = {GEOSph       : 'eEphem_GEOSph_arr', $
               AACGMSph     : 'eEphem_AACGMSph_arr', $
@@ -83,7 +84,7 @@ PRO JOURNAL__20161010__STITCH_ESPECDB_ALT_NOTALT_FILES
   AACGMSph     = TEMPORARY(combSph)
 
   PRINT,"SAVE,AACGMStruct,AACGMSph,eSpec_i,restrict_ii,notRestrict_ii,n,nSmall,smallFile,outDir+outFiles[0]"
-  SAVE,AACGMStruct,AACGMSph,eSpec_i,restrict_ii,notRestrict_ii,n,nSmall,smallFile,FILENAME=outDir+outFiles[0]
+  SAVE,AACGMStruct,AACGMSph,eSpec_i,restrict_ii,notRestrict_ii,n,nSmall,smallFile,FILENAME=outDir+outFiles[0]+endSuff
   
   STOP
 END
