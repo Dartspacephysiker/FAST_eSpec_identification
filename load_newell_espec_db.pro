@@ -27,6 +27,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   ;; ENDIF
   
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
+  defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
 
   ;;The file with failcodes
   defNewellDBFile        = 'eSpec_failCodes_20160609_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
@@ -34,12 +35,20 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   ;;The file without failcodes
   defNewellDBFile        = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav' ;;This file does not need to be cleaned
 
-  ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
-
   defSortNewellDBFile    =  "sorted--" + defNewellDBFile
 
+  ;;the 2000 km file
+  defNewellDBFile        = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords__mapping_factors__strict_Newell_interp.sav'
+  defNewellDBFile        = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords__mapping_factors__strict_Newell_interp.sav'
+  defSortNewellDBFile    =  defNewellDBFile
 
+
+  ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
+
+
+  defCoordDir            = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
   ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
+
   ;; GEO_file             = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--GEO_coords.sav'
   ;; MAG_file             = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--MAG_coords.sav'
 
@@ -114,6 +123,18 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      IF ~quiet THEN PRINTF,lun,'Loading ' + specType + ' eSpec DB: ' + NewellDBFile + '...'
      RESTORE,NewellDBDir+NewellDBFile
 
+     eSpec    = {x        : eSpec.x, $
+                 orbit    : eSpec.orbit, $
+                 mlt      : eSpec.coords.aacgm.mlt, $
+                 ilat     : eSpec.coords.aacgm.lat, $
+                 alt      : eSpec.coords.aacgm.alt, $
+                 je       : eSpec.je, $
+                 jee      : eSpec.jee, $
+                 mono     : eSpec.mono, $
+                 broad    : eSpec.broad, $
+                 diffuse  : eSpec.diffuse, $
+                 info     : eSpec.info}
+
      ;;Correct fluxes
      IF ~(KEYWORD_SET(dont_perform_correction) OR (KEYWORD_SET(just_times) AND KEYWORD_SET(dont_perform_correction))) THEN BEGIN
         IF ~quiet THEN PRINT,"Correcting eSpec fluxes so that earthward is positive in SH..."
@@ -172,31 +193,33 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   PRINT,"UNDER CONSTRUCTION"
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   IF KEYWORD_SET(use_aacgm) THEN BEGIN
-     PRINT,'Using AACGM lat, MLT, and alt ...'
+     PRINT,"I know. I already did."
 
-     RESTORE,defCoordDir+AACGM_file
+     ;; PRINT,'Using AACGM lat, MLT, and alt ...'
 
-     ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_AACGM,'AACGM'
+     ;; RESTORE,defCoordDir+AACGM_file
 
-  ENDIF
-
-  IF KEYWORD_SET(use_geo) THEN BEGIN
-     PRINT,'Using GEO lat and alt ...'
-
-     RESTORE,defCoordDir+GEO_file
-
-     ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_GEO,'GEO'
+     ;; ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_AACGM,'AACGM'
 
   ENDIF
 
-  IF KEYWORD_SET(use_mag) THEN BEGIN
-     PRINT,'Using MAG lat and alt ...'
+  ;; IF KEYWORD_SET(use_geo) THEN BEGIN
+  ;;    PRINT,'Using GEO lat and alt ...'
 
-     RESTORE,defCoordDir+MAG_file
+  ;;    RESTORE,defCoordDir+GEO_file
 
-     ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_MAG,'MAG'
+  ;;    ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_GEO,'GEO'
 
-  ENDIF
+  ;; ENDIF
+
+  ;; IF KEYWORD_SET(use_mag) THEN BEGIN
+  ;;    PRINT,'Using MAG lat and alt ...'
+
+  ;;    RESTORE,defCoordDir+MAG_file
+
+  ;;    ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_MAG,'MAG'
+
+  ;; ENDIF
 
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      NEWELL__eSpec          = eSpec

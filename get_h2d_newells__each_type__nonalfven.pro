@@ -61,8 +61,8 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                                             broad:eSpec.broad[eSpec_i], $
                                             diffuse:eSpec.diffuse[eSpec_i], $
                                             Je:eSpec.Je[eSpec_i], $
-                                            Jee:eSpec.Jee[eSpec_i], $
-                                            nBad_eSpec:eSpec.nBad_eSpec[eSpec_i]}
+                                            Jee:eSpec.Jee[eSpec_i]};; , $
+                                            ;; nBad_eSpec:eSpec.nBad_eSpec[eSpec_i]}
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Indices
