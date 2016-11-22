@@ -16,10 +16,25 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          JUST_TIMES=just_times, $
                          OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
+                         USE_2000KM_FILE=use_2000km_file, $
+                         NO_MEMORY_LOAD=noMem, $
                          LUN=lun, $
                          QUIET=quiet
 
   COMPILE_OPT idl2
+
+  ;;DONT_LOAD_IN_MEMORY is kept so that other routines don't make a mistake,
+  ;;but I've included the keyword NO_MEMORY_LOAD from LOAD_MAXIMUS and LOAD_FASTLOC for the sake of my poor memory
+  IF N_ELEMENTS(noMem) EQ 0 THEN BEGIN
+     IF N_ELEMENTS(nonMem) EQ 0 THEN BEGIN
+        nonMem = noMem
+     ENDIF ELSE BEGIN
+        IF nonMem NE noMem THEN BEGIN
+           PRINT,"Ludicrosity. Tell me to do one thing and then the other."
+           STOP
+        ENDIF
+     ENDELSE
+  ENDIF
 
   ;;This common block is defined ONLY here and in GET_ESPEC_ION_DB_IND
   ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
@@ -38,10 +53,11 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   defSortNewellDBFile    =  "sorted--" + defNewellDBFile
 
   ;;the 2000 km file
-  defNewellDBFile        = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords__mapping_factors__strict_Newell_interp.sav'
-  defNewellDBFile        = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords__mapping_factors__strict_Newell_interp.sav'
-  defSortNewellDBFile    =  defNewellDBFile
-
+  IF KEYWORD_SET(use_2000km_file) THEN BEGIN
+     PRINT,'Using 2000 km eSpec DB ...'
+     defNewellDBFile     = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords__mapping_factors__strict_Newell_interp.sav'
+     defSortNewellDBFile =  defNewellDBFile
+  ENDIF
 
   ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
 
@@ -123,17 +139,19 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      IF ~quiet THEN PRINTF,lun,'Loading ' + specType + ' eSpec DB: ' + NewellDBFile + '...'
      RESTORE,NewellDBDir+NewellDBFile
 
-     eSpec    = {x        : eSpec.x, $
-                 orbit    : eSpec.orbit, $
-                 mlt      : eSpec.coords.aacgm.mlt, $
-                 ilat     : eSpec.coords.aacgm.lat, $
-                 alt      : eSpec.coords.aacgm.alt, $
-                 je       : eSpec.je, $
-                 jee      : eSpec.jee, $
-                 mono     : eSpec.mono, $
-                 broad    : eSpec.broad, $
-                 diffuse  : eSpec.diffuse, $
-                 info     : eSpec.info}
+     IF KEYWORD_SET(use_2000km_file) THEN BEGIN
+        eSpec    = {x        : eSpec.x, $
+                    orbit    : eSpec.orbit, $
+                    mlt      : eSpec.coords.aacgm.mlt, $
+                    ilat     : eSpec.coords.aacgm.lat, $
+                    alt      : eSpec.coords.aacgm.alt, $
+                    je       : eSpec.je, $
+                    jee      : eSpec.jee, $
+                    mono     : eSpec.mono, $
+                    broad    : eSpec.broad, $
+                    diffuse  : eSpec.diffuse, $
+                    info     : eSpec.info}
+     ENDIF
 
      ;;Correct fluxes
      IF ~(KEYWORD_SET(dont_perform_correction) OR (KEYWORD_SET(just_times) AND KEYWORD_SET(dont_perform_correction))) THEN BEGIN
