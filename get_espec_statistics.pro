@@ -6,6 +6,7 @@ FUNCTION GET_ESPEC_STATISTICS, $
    eSpec_i, $
    ENUMFLUX=Je, $
    EFLUX=Jee, $
+   CHARE=charE, $
    POS_ONLY=pos_only, $
    NEG_ONLY=neg_only, $
    LOG_DATA=log_data, $
@@ -38,8 +39,12 @@ FUNCTION GET_ESPEC_STATISTICS, $
         eDat = eSpec.jee
         stats_name = 'Jee'
      END
+     KEYWORD_SET(charE): BEGIN
+        eDat = eSpec.je/eSpec.jee
+        stats_name = 'charE'
+     END
      ELSE: BEGIN
-        PRINT,"No request for either Je or Jee. I'll do Je."
+        PRINT,"No request for Je, Jee, or charE. I'll do Je."
         eDat = eSpec.je
         stats_name = 'Je'
      END

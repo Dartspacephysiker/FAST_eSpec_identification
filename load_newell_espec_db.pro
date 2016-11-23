@@ -18,6 +18,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          ;; OUT_GOOD_I=good_i, $
                          USE_2000KM_FILE=use_2000km_file, $
                          NO_MEMORY_LOAD=noMem, $
+                         REDUCED_DB=reduce_dbSize, $
                          LUN=lun, $
                          QUIET=quiet
 
@@ -25,7 +26,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
 
   ;;DONT_LOAD_IN_MEMORY is kept so that other routines don't make a mistake,
   ;;but I've included the keyword NO_MEMORY_LOAD from LOAD_MAXIMUS and LOAD_FASTLOC for the sake of my poor memory
-  IF N_ELEMENTS(noMem) EQ 0 THEN BEGIN
+  IF N_ELEMENTS(noMem) NE 0 THEN BEGIN
      IF N_ELEMENTS(nonMem) EQ 0 THEN BEGIN
         nonMem = noMem
      ENDIF ELSE BEGIN
@@ -151,6 +152,24 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                     broad    : eSpec.broad, $
                     diffuse  : eSpec.diffuse, $
                     info     : eSpec.info}
+     ENDIF
+
+     IF KEYWORD_SET(reduce_dbSize) THEN BEGIN
+        PRINT,"Reducing eSpec DB size, tossing out possibly extraneous members ..."
+
+        IF MAX(eSpec.orbit) GT 65534 THEN STOP
+
+        eSpec   = {x           : eSpec.x           , $
+                   orbit       : UINT(eSpec.orbit) , $
+                   mlt         : FLOAT(eSpec.mlt)  , $
+                   ilat        : FLOAT(eSpec.ilat) , $
+                   alt         : FLOAT(eSpec.alt)  , $
+                   mono        : eSpec.mono        , $
+                   broad       : eSpec.broad       , $
+                   diffuse     : eSpec.diffuse     , $
+                   je          : eSpec.je          , $
+                   jee         : eSpec.jee         , $
+                   is_reduced  : BYTE(1)           }
      ENDIF
 
      ;;Correct fluxes
