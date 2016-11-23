@@ -33,6 +33,9 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             ALTITUDERANGE=altitudeRange, $
                             CHARERANGE=charERange, $
                             CHARIERANGE=charIERange, $
+                            SAMPLE_T_RESTRICTION=sample_t_restriction, $
+                            INCLUDE_32HZ=include_32Hz, $
+                            DISREGARD_SAMPLE_T=disregard_sample_t, $
                             BOTH_HEMIS=both_hemis, $
                             NORTH=north, $
                             SOUTH=south, $
@@ -228,9 +231,10 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
         ;;Electrons?
         IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
-           todaysEspecFile   = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES(SUFFIX=indFileSuff, $
-                                                                                         DSTCUTOFF=dstCutoff, $
-                                                                                         /MOST_RECENT)
+           todaysEspecFile   = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES( $
+                               SUFFIX=indFileSuff, $
+                               DSTCUTOFF=dstCutoff, $
+                               /MOST_RECENT)
            PRINT,'Getting ' + STRUPCASE(for_storms) + ' nonAlfven electron data ...'
            RESTORE,todaysEspecFile
            CASE 1 OF
@@ -289,6 +293,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                CHARERANGE=charERange, $
                                ;; CHARIERANGE=charIERange, $ ;Only for non-Alfvén ions
                                SAMPLE_T_RESTRICTION=sample_t_restriction, $
+                               INCLUDE_32HZ=include_32Hz, $
+                               DISREGARD_SAMPLE_T=disregard_sample_t, $
                                MINMLT=minM, $
                                MAXMLT=maxM, $
                                BINM=binM, $
@@ -358,6 +364,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                         ;; CHARERANGE=charERange, $
                         CHARIERANGE=charIERange, $ ;Only for non-Alfvén ions
                         SAMPLE_T_RESTRICTION=sample_t_restriction, $
+                        INCLUDE_32HZ=include_32Hz, $
+                        DISREGARD_SAMPLE_T=disregard_sample_t, $
                         MINMLT=minM, $
                         MAXMLT=maxM, $
                         BINM=binM, $

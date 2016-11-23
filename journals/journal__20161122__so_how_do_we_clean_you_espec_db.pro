@@ -11,6 +11,8 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
    ENUMFLUX=je, $
    EFLUX=jee, $
    CHARE=charE, $
+   POS_ONLY=pos_only, $
+   NEG_ONLY=neg_only, $
    LOG_PLOTS=log_plots, $
    LOG_DATA=log_data, $
    WINDOW_INDEX=winInd, $
@@ -126,7 +128,8 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                 LOG_DATA=log_data, $
                 BPD__OUTLIERS=BPDOutliers, $
                 BPD__SUSPECTED_OUTLIERS=BPDSusOutliers, $
-                STATS_NAME_SUFF=(KEYWORD_SET(stats_name_suff) ? stats_name_suff : '' ) + names[k], $
+                STATS_NAME_SUFF=(KEYWORD_SET(stats_name_suff) ? stats_name_suff : '' ) + $
+                names[k], $
                 OUT_STATS_NAME=out_stats_name, $
                 OUT_I=out_i)
 
@@ -165,10 +168,12 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
 
         CASE 1 OF
            KEYWORD_SET(log_plots): BEGIN
-              CGHISTOPLOT,(ALOG10(( KEYWORD_SET(charE) ? $
-                                    NEWELL__eSpec.(structInd[1]) / $
-                                    NEWELL__eSpec.(structInd[0]) * 6.242 * 1.0e11 : $
-                                    NEWELL__eSpec.(structInd[0]) )))[out_i], $
+              eDat = KEYWORD_SET(charE) ? $
+                     NEWELL__eSpec.(structInd[1]) / $
+                     NEWELL__eSpec.(structInd[0]) * 6.242 * 1.0e11 : $
+                     NEWELL__eSpec.(structInd[0])
+              IF KEYWORD_SET(neg_only) THEN eDat = ABS(eDat)
+              CGHISTOPLOT,(ALOG10( eDat ))[out_i], $
                           ;; TITLE='Log(Je) ' + names[k] + ' dist'
                           ;; TITLE=out_stats_name + ' dist', $
                           TITLE=names[k] + ' ' + stats_title + ' Dist.', $

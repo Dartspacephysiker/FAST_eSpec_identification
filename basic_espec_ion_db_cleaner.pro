@@ -23,6 +23,14 @@ FUNCTION BASIC_ESPEC_ION_DB_CLEANER,dbStruct,LUN=lun, $
      ENDIF ELSE BEGIN
         ;; clean_these_inds = [2,3,7,8]
         ;; clean_these_inds=INDGEN(N_ELEMENTS(TAG_NAMES(dbStruct)))
+        cleanNames = ['je','jee','x']
+        clean_these_inds = !NULL
+        FOR k=0,N_ELEMENTS(cleanNames)-1 DO BEGIN
+           STR_ELEMENT,dbStruct,cleannames[k],INDEX=tmpInd
+           IF tmpInd GE 0 THEN BEGIN
+              clean_these_inds = [clean_these_inds,tmpInd]
+           ENDIF
+        ENDFOR
      ENDELSE
 
 

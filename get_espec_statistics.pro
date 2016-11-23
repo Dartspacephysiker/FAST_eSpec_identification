@@ -73,7 +73,7 @@ FUNCTION GET_ESPEC_STATISTICS, $
   ENDCASE
 
   IF KEYWORD_SET(log_data) THEN BEGIN
-     eDat[discret_inds] = ALOG10(eDat[discret_inds])
+     eDat[discret_inds] = ALOG10( ( KEYWORD_SET(neg_only) ? ABS(eDat) : eDat )[discret_inds])
      stats_name = 'Log_' + stats_name
   ENDIF
 

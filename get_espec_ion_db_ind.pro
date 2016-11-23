@@ -378,10 +378,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
 
      ;;Welcome message
-     printf,lun,""
-     printf,lun,"****From GET_ESPEC_ION_DB_IND****"
-     printf,lun,FORMAT='("DBFile                        :",T35,A0)',dbFile
-     printf,lun,""
+     PRINTF,lun,""
+     PRINTF,lun,"****From GET_ESPEC_ION_DB_IND****"
+     PRINTF,lun,FORMAT='("DBFile                        :",T35,A0)',dbFile
+     PRINTF,lun,""
 
      ;;;;;;;;;;;;
      ;;Handle longitudes
@@ -440,8 +440,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
               MIMC__orbRange  = orbRange
            END
            ELSE: BEGIN
-              printf,lun,"Incorrect input for keyword 'orbRange'!!"
-              printf,lun,"Please use orbRange=[minOrb maxOrb] or a single element"
+              PRINTF,lun,"Incorrect input for keyword 'orbRange'!!"
+              PRINTF,lun,"Please use orbRange=[minOrb maxOrb] or a single element"
               RETURN, -1
            END
         ENDCASE
@@ -460,8 +460,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
            alt_i             = GET_ALTITUDE_INDS(dbStruct,MIMC__altitudeRange[0],MIMC__altitudeRange[1],LUN=lun)
            region_i          = CGSETINTERSECTION(region_i,alt_i)
         ENDIF ELSE BEGIN
-           printf,lun,"Incorrect input for keyword 'altitudeRange'!!"
-           printf,lun,"Please use altitudeRange=[minAlt maxAlt]"
+           PRINTF,lun,"Incorrect input for keyword 'altitudeRange'!!"
+           PRINTF,lun,"Please use altitudeRange=[minAlt maxAlt]"
            RETURN, -1
         ENDELSE
      ENDIF
@@ -485,8 +485,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
            region_i          = CGSETINTERSECTION(region_i,chare_i)
         ENDIF ELSE BEGIN
-           printf,lun,"Incorrect input for keyword 'charERange'!!"
-           printf,lun,"Please use charERange=[minCharE maxCharE]"
+           PRINTF,lun,"Incorrect input for keyword 'charERange'!!"
+           PRINTF,lun,"Please use charERange=[minCharE maxCharE]"
            RETURN, -1
         ENDELSE
      ENDIF
@@ -514,8 +514,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
            region_i                       = CGSETINTERSECTION(region_i,charie_i)
         ENDIF ELSE BEGIN
-           printf,lun,"Incorrect input for keyword 'charIERange'!!"
-           printf,lun,"Please use charIERange=[minCharIE maxCharIE]"
+           PRINTF,lun,"Incorrect input for keyword 'charIERange'!!"
+           PRINTF,lun,"Please use charIERange=[minCharIE maxCharIE]"
            RETURN, -1
         ENDELSE
      ENDIF
@@ -528,7 +528,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      ;;    good_i                                    = region_i[where(region_i GE sat_i,nGood,complement=lost,ncomplement=nlost)]
      ;;    lost                                      = region_i[lost]
      ;; ENDIF ELSE BEGIN
-        good_i          = region_i
+        good_i          = TEMPORARY(region_i)
      ;; ENDELSE
 
      ;;Now, clear out all the garbage (NaNs & Co.)
@@ -588,7 +588,30 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                     NWLL_ALF_I__cleaned_i : $
                                     NEWELL_I__cleaned_i) 
      ENDIF ELSE BEGIN
-        PRINT,"eSpec DB needs no cleaning. She's clean as a whistle, you know."
+        ;; PRINT,"eSpec DB needs no cleaning. She's clean as a whistle, you know."
+        PRINT,'" … See, in my day we never cleaned eSpec … "'
+
+        je_lims  = [0,3e11]
+        jee_lims = [0,1e3]
+
+        ;;Now Je
+        good_je_i  = WHERE(dbStruct.je GE je_lims[0] AND $
+                           dbStruct.je LE je_lims[1],nGoodJe, $
+                           NCOMPLEMENT=nBadJe)
+
+        nGood      = N_ELEMENTS(good_i)
+        good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_je_i),COUNT=nKept)
+        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Je screening ...'
+
+        ;;Now Jee
+        good_jee_i = WHERE(dbStruct.jee GE jee_lims[0] AND $
+                           dbStruct.jee LE jee_lims[1],nGoodJee, $
+                           NCOMPLEMENT=nBadJee)
+
+        nGood      = N_ELEMENTS(good_i)
+        good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_jee_i),COUNT=nKept)
+        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
+
         ;; IF N_ELEMENTS(NWLL_ALF__cleaned_i) EQ 0 THEN BEGIN
            ;; NWLL_ALF__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)
         ;;    NWLL_ALF__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)
@@ -637,10 +660,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                    LUN=lun
      ENDIF
      
-     printf,lun,"There are " + strtrim(n_elements(good_i),2) + " total indices making the cut." 
+     PRINTF,lun,"There are " + STRTRIM(N_ELEMENTS(good_i),2) + " total indices making the cut." 
      PRINTF,lun,''
-     printf,lun,"****END GET_ESPEC_ION_DB_IND****"
-     printf,lun,""
+     PRINTF,lun,"****END GET_ESPEC_ION_DB_IND****"
+     PRINTF,lun,""
 
      IF is_ion THEN BEGIN
         NEWELL_I__good_i       = good_i
