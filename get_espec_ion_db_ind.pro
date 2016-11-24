@@ -33,7 +33,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                               RESET_GOOD_INDS=reset_good_inds, $
                               DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                               DONT_LOAD_IN_MEMORY=nonMem, $
-                              NEWELL_2009_INTERPRETATION=Newell_2009_interpretation, $
+                              ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
+                              ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
                               PRINT_PARAM_SUMMARY=print_param_summary
   
   COMPILE_OPT idl2
@@ -172,7 +173,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         END
      ENDCASE
 
-  ENDIF ELSE BEGIN
+  ENDIF ELSE BEGIN ;;'Cause if ~is_ion, then it must is_electron!
      CASE 1 OF
         KEYWORD_SET(for_alfven_db): BEGIN
            IF N_ELEMENTS(NWLL_ALF__eSpec) NE 0 THEN BEGIN
@@ -206,15 +207,17 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
               dbFile                     = NEWELL__dbFile
               dbDir                      = NEWELL__dbDir
            ENDIF ELSE BEGIN
-              LOAD_NEWELL_ESPEC_DB,eSpec, $
+              LOAD_NEWELL_ESPEC_DB,dbStruct, $
                                    FAILCODES=failCodes, $
                                    NEWELLDBDIR=dbDir, $
                                    NEWELLDBFILE=dbFile, $
                                    FORCE_LOAD_DB=force_load_db, $
                                    DONT_LOAD_IN_MEMORY=nonMem, $
-                                   DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(Newell_2009_interpretation), $
+                                   DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(eSpec__Newell_2009_interp), $
+                                   USE_2000KM_FILE=eSpec__use_2000km_file, $
                                    ;; OUT_GOOD_I=good_i, $
                                    LUN=lun
+
               IF ~KEYWORD_SET(nonMem) THEN BEGIN
                  NEWELL__eSpec         = dbStruct
                  IF N_ELEMENTS(failCodes) GT 0 THEN BEGIN
@@ -223,6 +226,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                  NEWELL__dbFile        = dbFile
                  NEWELL__dbDir         = dbDir
               ENDIF
+
            ENDELSE
         END
      ENDCASE
@@ -620,6 +624,21 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         nGood      = N_ELEMENTS(good_i)
         good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_jee_i),COUNT=nKept)
         PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
+
+        ;;Now get the file for which I feel better about the removal of the first 10 points
+        safed_eSpecIndsFile = GET_NEWELL_ESPEC_SAFED_INDS_FILE(dbStruct, $
+                                                          NEWELLDBDIR=dbDir, $
+                                                          /STOP_IF_NOEXIST)
+
+        RESTORE,safed_eSpecIndsFile
+
+        IF N_ELEMENTS(dbStruct.orbit) NE eSpec_clean_info.totChecked THEN BEGIN
+           PRINT,"Is there a database mix-up here? The answer is apparently yes."
+           STOP
+        ENDIF
+        nGood       = N_ELEMENTS(good_i)
+        good_i      = CGSETINTERSECTION(good_i,TEMPORARY(cleaned_eSpec_i),COUNT=nKept)
+        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the safety ind thing ...'
 
         ;; IF N_ELEMENTS(NWLL_ALF__cleaned_i) EQ 0 THEN BEGIN
            ;; NWLL_ALF__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)

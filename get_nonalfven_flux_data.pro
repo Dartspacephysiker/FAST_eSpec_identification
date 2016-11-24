@@ -4,7 +4,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             FOR_IMF_SCREENING=for_IMF_screening, $
                             NONALFVEN__JUNK_ALFVEN_CANDIDATES=nonAlfven__junk_alfven_candidates, $
                             NONALFVEN__ALL_FLUXES=nonalfven__all_fluxes, $
-                            NONALFVEN__NEWELL_2009_INTERPRETATION=newell_2009_interpretation, $
+                            ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
+                            ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
                             NONALFVEN__NEWELLPLOT_PROBOCCURRENCE=nonAlfven__newellPlot_probOccurrence, $
                             DESPUN_ALF_DB=despun_alf_db, $
                             USE_AACGM=use_AACGM, $
@@ -109,7 +110,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
      OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
 
      LOAD_NEWELL_ESPEC_DB,eSpec,/DONT_LOAD_IN_MEMORY, $
-                          DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(newell_2009_interpretation), $
+                          DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(eSpec__Newell_2009_interp), $
+                          USE_2000KM_FILE=eSpec__use_2000km_file, $
                           /DONT_PERFORM_CORRECTION
                           
 
@@ -120,11 +122,11 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                        ( eSpec_delta_t GT 2.6 ),nWorst, $
                                        COMPLEMENT=best_i, $
                                        NCOMPLEMENT=nBest)
-        IF nWorst GT 0 THEN BEGIN
-           PRINT,'The worst!'
-           eSpec_delta_t[worst_i] = 2.5
-           ;; STOP
-        ENDIF
+        ;; IF nWorst GT 0 THEN BEGIN
+        ;;    PRINT,'The worst!'
+        ;;    eSpec_delta_t[worst_i] = 2.5
+        ;;    ;; STOP
+        ;; ENDIF
 
         best_i__i  = VALUE_CLOSEST2(eSpec.x[best_i],eSpec.x[worst_i])
         
@@ -183,7 +185,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                             DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                                             ;; /DONT_LOAD_IN_MEMORY, $
                                             DONT_LOAD_IN_MEMORY=nonMem, $
-                                            NEWELL_2009_INTERPRETATION=newell_2009_interpretation, $
+                                            ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
+                                            ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
                                             /PRINT_PARAM_SUMMARY)
 
         nBef_eSpec           = N_ELEMENTS(good_eSpec_i)
@@ -366,7 +369,8 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                HWMAUROVAL=HwMAurOval, $
                                HWMKPIND=HwMKpInd, $
                                /FOR_ESPEC_OR_ION_DB, $
-                               ESPEC__NEWELL_2009_INTERPRETATION=newell_2009_interpretation, $
+                               ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
+                               ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
                                RESTRICT_WITH_THESE_I=restrict_with_these_eSpec_i, $
                                RESET_GOOD_INDS=reset_good_inds, $
                                DONT_LOAD_IN_MEMORY=nonMem) ;; , $
@@ -594,7 +598,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
   ;;Now get the data
   IF KEYWORD_SET(ePlots) THEN BEGIN
      eFluxPlotType           = 'eFlux_nonAlfven' + $
-                               ( KEYWORD_SET(Newell_2009_interpretation) ? $
+                               ( KEYWORD_SET(eSpec__Newell_2009_interp) ? $
                                  '--2009_interp' : '' )
      ;; eFlux_data           = eSpec.jee[eSpec_i]
      eFlux_data              = eSpec.jee
@@ -602,7 +606,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
   IF KEYWORD_SET(eNumFlPlots) THEN BEGIN
      eNumFlPlotType          = 'eNumFlux_nonAlfven' + $
-                               ( KEYWORD_SET(Newell_2009_interpretation) ? $
+                               ( KEYWORD_SET(eSpec__Newell_2009_interp) ? $
                                  '--2009_interp' : '' )
      ;; eNumFlux_data        = eSpec.je[eSpec_i]
      eNumFlux_data           = eSpec.je
@@ -612,14 +616,14 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
      CASE 1 OF
         STRUPCASE(iFluxPlotType) EQ 'ENERGY': BEGIN
            iFluxPlotType     = 'JEi_nonAlfven' + $
-                               ( KEYWORD_SET(Newell_2009_interpretation) ? $
+                               ( KEYWORD_SET(ion__Newell_2009_interp) ? $
                                  '--2009_interp' : '' )
            ;; iFlux_data     = ion.jei[ion_i]
            iFlux_data        = ion.jei
         END
         ELSE: BEGIN
            iFluxPlotType     = 'Ji_nonAlfven' + $
-                               ( KEYWORD_SET(Newell_2009_interpretation) ? $
+                               ( KEYWORD_SET(ion__Newell_2009_interp) ? $
                                  '--2009_interp' : '' )
            ;; iNumFlux_data  = ion.ji[ion_i]
            iNumFlux_data     = ion.ji
