@@ -13,6 +13,7 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                                           NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
                                           NEWELLPLOT_NORMALIZE=newellPlot_normalize, $
                                           NEWELLPLOT_PROBOCCURRENCE=newellPlot_probOccurrence, $
+                                          NEWELL_2009_INTERP=newell_2009_interp, $
                                           TMPLT_H2DSTR=tmplt_h2dStr, $
                                           H2DSTRS=h2dStrs, $
                                           ;; H2DMASKSTR=h2dMaskStr, $
@@ -38,6 +39,13 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
      ;; eSpec  = TEMPORARY(NEWELL__eSpec)
      eSpec     = NEWELL__eSpec
   ENDELSE
+
+  IF KEYWORD_SET(newell_2009_interp) THEN BEGIN
+     IF ~eSpec.info.Newell2009interp THEN BEGIN
+        PRINT,"Well you've got yourself a mismatch. Figure it out."
+        STOP
+     ENDIF
+  ENDIF
 
   tmp_eSpec    = { $
                  ;;x       : eSpec.x[eSpec_i]         , $
