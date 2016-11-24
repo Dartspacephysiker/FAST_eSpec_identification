@@ -55,6 +55,7 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
 
   ;;The main body
   GET_H2D_NEWELLS__BODY,tmp_eSpec, $
+                        /NONALFVEN, $
                         MINM=minM, $
                         MAXM=maxM, $
                         BINM=binM, $

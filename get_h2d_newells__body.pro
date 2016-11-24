@@ -1,5 +1,6 @@
 ;;11/24/16
 PRO GET_H2D_NEWELLS__BODY,eSpec, $
+                          NONALFVEN=nonAlf, $
                           MINM=minM, $
                           MAXM=maxM, $
                           BINM=binM, $
