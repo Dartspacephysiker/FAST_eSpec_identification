@@ -30,51 +30,39 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
   COMPILE_OPT idl2
 
   ;;This common block is defined ONLY here, in GET_ESPEC_ION_DB_IND, and in LOAD_NEWELL_ESPEC_DB
-  COMMON NEWELL,NEWELL__eSpec, $
-     NEWELL__HAVE_GOOD_I, $
-     NEWELL__failCode, $
-     NEWELL__good_i, $
-     NEWELL__charERange, $
-     ;; NEWELL__cleaned_i, $
-     NEWELL__dbFile, $
-     NEWELL__dbDir, $
-     NEWELL__RECALCULATE
+  @common__newell_espec.pro
   
-  ;; LOAD_MAXIMUS_AND_CDBTIME,!NULL,!NULL,DO_DESPUNDB=despun,/CHECK_DB,/QUIET
-
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
      LOAD_NEWELL_ESPEC_DB,espec ;,/DONT_LOAD_IN_MEMORY
   ENDIF ELSE BEGIN
-     ;; eSpec                              = TEMPORARY(NEWELL__eSpec)
-     eSpec                              = NEWELL__eSpec
+     ;; eSpec  = TEMPORARY(NEWELL__eSpec)
+     eSpec     = NEWELL__eSpec
   ENDELSE
 
-  ;; plot_i__good_espec                 = CGSETINTERSECTION(plot_i,good_alf_i,INDICES_B=temp_eSpec_indices)
-
-
-  tmp_eSpec                             = { x:eSpec.x[eSpec_i], $
-                                            orbit:eSpec.orbit[eSpec_i], $
-                                            MLT:eSpec.mlt[eSpec_i], $
-                                            ILAT:eSpec.ilat[eSpec_i], $
-                                            ALT:eSpec.alt[eSpec_i], $
-                                            mono:eSpec.mono[eSpec_i], $
-                                            broad:eSpec.broad[eSpec_i], $
-                                            diffuse:eSpec.diffuse[eSpec_i], $
-                                            Je:eSpec.Je[eSpec_i], $
-                                            Jee:eSpec.Jee[eSpec_i]};; , $
-                                            ;; nBad_eSpec:eSpec.nBad_eSpec[eSpec_i]}
+  tmp_eSpec    = { $
+                 ;;x       : eSpec.x[eSpec_i]         , $
+                 ;;orbit   : eSpec.orbit[eSpec_i]     , $
+                 MLT     : eSpec.mlt[eSpec_i]       , $
+                 ILAT    : eSpec.ilat[eSpec_i]      , $
+                 ;;ALT     : eSpec.alt[eSpec_i]       , $
+                 mono    : eSpec.mono[eSpec_i]      , $
+                 broad   : eSpec.broad[eSpec_i]     , $
+                 diffuse : eSpec.diffuse[eSpec_i]} ; , $
+  ;; Je:eSpec.Je[eSpec_i]            , $
+  ;; Jee:eSpec.Jee[eSpec_i]};;       , $
+  ;; nBad_eSpec:eSpec.nBad_eSpec[eSpec_i]}
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Indices
-  mono_i                                = WHERE((tmp_eSpec.mono   EQ 1) OR (tmp_eSpec.mono  EQ 2),nMono)
-  broad_i                               = WHERE((tmp_eSpec.broad  EQ 1) OR (tmp_eSpec.broad EQ 2),nBroad)
-  diffuse_i                             = WHERE(tmp_eSpec.diffuse EQ 1,nDiffuse)
+  mono_i       = WHERE((tmp_eSpec.mono   EQ 1) OR (tmp_eSpec.mono  EQ 2),nMono)
+  broad_i      = WHERE((tmp_eSpec.broad  EQ 1) OR (tmp_eSpec.broad EQ 2),nBroad)
+  diffuse_i    = WHERE(tmp_eSpec.diffuse EQ 1,nDiffuse)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MLTs
-  mlt_mono                              = tmp_eSpec.mlt[mono_i]-shiftM
-  mlt_broad                             = tmp_eSpec.mlt[broad_i]-shiftM
-  mlt_diffuse                           = tmp_eSpec.mlt[diffuse_i]-shiftM
+  mlt_mono     = tmp_eSpec.mlt[mono_i]-shiftM
+  mlt_broad    = tmp_eSpec.mlt[broad_i]-shiftM
+  mlt_diffuse  = tmp_eSpec.mlt[diffuse_i]-shiftM
 
   ;;Screen 'em for negs
   mNegMLT = WHERE(mlt_mono LT 0)
@@ -100,13 +88,17 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Bonus
-  titles                     = ['Monoenergetic','Broadband'   ,'Diffuse'       ]
-  dataNames                  = ['mono_nonAlf'  ,'broad_nonAlf','diffuse_nonAlf']
+  titles                    = ['Monoenergetic','Broadband'   ,'Diffuse'       ]
+  dataNames                 = ['mono_nonAlf'  ,'broad_nonAlf','diffuse_nonAlf']
 
-  h2dStrs                    = !NULL
-  dataRawPtrs                = !NULL
-  newell_nonzero_nev_i_list  = LIST()  
-  nPlots                     = 3
+  IF KEYWORD_SET(eSpec.info.Newell2009interp) THEN BEGIN
+     dataNames             += '__2009_interp'
+  ENDIF
+
+  h2dStrs                   = !NULL
+  dataRawPtrs               = !NULL
+  newell_nonzero_nev_i_list = LIST()  
+  nPlots                    = 3
   FOR i=0,nPlots-1 DO BEGIN
      tmpDataName             = dataNames[i]
 
@@ -219,7 +211,6 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
            h2dStrs[i].data[newell_nonzero_nev_i_list[i]]  = ALOG10(h2dStrs[i].data[newell_nonzero_nev_i_list[i]])
            h2dStrs[i].lim        = [(h2dStrs[i].lim[0] LT 1e-5) ? -5 : ALOG10(h2dStrs[i].lim[0]),ALOG10(h2dStrs[i].lim[1])] ;lower bound must be one
            h2dStrs[i].title      = 'Log ' + h2dStrs[i].title
-           h2dStrs[i].name       = dataNames[i]
            h2dStrs[i].is_logged  = 1
         ENDIF
 
@@ -229,8 +220,9 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
            h2dStrs[i].data       = h2dStrs[i].data/maxNEv
            h2dStrs[i].lim        = [0.0,1.0]
            h2dStrs[i].title     += STRING(FORMAT='(" (norm: ",G0.3,")")',maxNEv)
-           h2dStrs[i].name       = dataNames[i]
         ENDIF
+
+        h2dStrs[i].name          = dataNames[i]
 
      ENDIF ELSE BEGIN
 
@@ -281,8 +273,5 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
 
 
   ENDFOR
-
-
-  eSpec = !NULL
 
 END

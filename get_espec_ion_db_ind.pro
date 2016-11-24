@@ -591,8 +591,17 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         ;; PRINT,"eSpec DB needs no cleaning. She's clean as a whistle, you know."
         PRINT,'" … See, in my day we never cleaned eSpec … "'
 
-        je_lims  = [0,3e11]
-        jee_lims = [0,1e3]
+        ;; je_lims  = [0,3e10]
+        ;; jee_lims = [0,3e2]
+
+        je_lims  = [0,2.855e10] ;Drop 0.25% of the broadbands
+        jee_lims = [0,1.043e2]  ;Drop 0.25% of the broadbands
+
+        ;; percentToDrop = N_ELEMENTS(WHERE( ( (espec.broad EQ 1) OR (eSpec.broad EQ 2) ) AND $
+        ;;                                   ( eSpec.je GT 4e10 ) ) ) / $
+        ;;                 FLOAT(N_ELEMENTS(WHERE( ( (espec.broad EQ 1) OR $
+        ;;                                           (eSpec.broad EQ 2) )  ) )) $
+        ;;                 * 100.
 
         ;;Now Je
         good_je_i  = WHERE(dbStruct.je GE je_lims[0] AND $

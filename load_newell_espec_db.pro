@@ -47,9 +47,15 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
 
   ;;The file with failcodes
   defNewellDBFile        = 'eSpec_failCodes_20160609_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+  DB_date                = '20160609'
+  DB_version             = 'v0.0'
+  DB_extras              = 'failcodes'
 
   ;;The file without failcodes
   defNewellDBFile        = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+  DB_date                = '20160607'
+  DB_version             = 'v0.0'
+  DB_extras              = 'with_mapping_factors'
 
   defSortNewellDBFile    =  "sorted--" + defNewellDBFile
 
@@ -58,6 +64,9 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      PRINT,'Using 2000 km eSpec DB ...'
      defNewellDBFile     = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords__mapping_factors__strict_Newell_interp.sav'
      defSortNewellDBFile =  defNewellDBFile
+     DB_date             = '20160607'
+     DB_version          = 'v0.0'
+     DB_extras           = 'Below_2000km/with_alternate_coords/with_mapping_factors/strict_Newell_interp'
   ENDIF
 
   ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
@@ -168,9 +177,14 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                    broad       : eSpec.broad       , $
                    diffuse     : eSpec.diffuse     , $
                    je          : eSpec.je          , $
-                   jee         : eSpec.jee         , $
-                   is_reduced  : BYTE(1)           }
+                   jee         : eSpec.jee         }
      ENDIF
+
+     NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
+                                  DB_DATE=DB_date, $
+                                  DB_VERSION=DB_version, $
+                                  DB_EXTRAS=DB_extras, $
+                                  REDUCE_DBSIZE=reduce_dbSize
 
      ;;Correct fluxes
      IF ~(KEYWORD_SET(dont_perform_correction) OR (KEYWORD_SET(just_times) AND KEYWORD_SET(dont_perform_correction))) THEN BEGIN
@@ -180,8 +194,10 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
            eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
         ENDIF
         
-        ;;Convert to strict Newell interpretation
-        
+        ;;Book keeping
+        eSpec.info.correctedFluxes = 1B
+
+        ;;Convert to strict Newell interpretation        
         IF ~KEYWORD_SET(dont_convert_to_strict_newell) THEN BEGIN
            IF ~quiet THEN PRINT,"Converting eSpec DB to strict Newell interpretation ..."
            CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec,/HUGE_STRUCTURE,/VERBOSE

@@ -12,6 +12,30 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
    
    COMPILE_OPT idl2
 
+   ;;Check to see whether conversion has already happened
+   STR_ELEMENT,eSpec,"info",INDEX=infoIndex
+   IF infoIndex GE 0 THEN BEGIN
+      IF eSpec.info.converted THEN BEGIN
+         PRINT,"This DB appears to already have been interpreted!"
+         PRINT,FORMAT='("eSpec.info.converted",T30,": ",I0)', $
+               eSpec.info.converted
+         PRINT,FORMAT='("eSpec.info.Newell2009interp",T30,": ",I0)', $
+               eSpec.info.Newell2009interp
+         PRINT,'Not converting eSpec DB ...'
+         RETURN
+      ENDIF
+
+   ENDIF ELSE BEGIN
+      
+      PRINT,"How did you come to CONVERT_ESPEC_TO_STRICT[...] without having an info struct?"
+      STOP
+      info  = {converted        : 0B, $
+               Newell2009interp : 0B, $
+               correctedFluxes  : 0B}
+      eSpec = CREATE_STRUCT(eSpec,"info",info)
+
+   ENDELSE
+
   ;;The goods
   monoGood              = WHERE(eSpec.mono     EQ 1  ,nMG  )
   monoGoodStrict        = WHERE(eSpec.mono     EQ 2  ,nMG_S)
@@ -82,6 +106,11 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
      ENDELSE
   ENDIF
 
+  ;;Let everyone know what you did
+  eSpec_interpreted.info.converted        = 1
+  eSpec_interpreted.info.Newell2009interp = BYTE(~KEYWORD_SET(favor_broadStrict_over_mono))
+
+  ;;Details
   IF KEYWORD_SET(verbose) THEN BEGIN
      monoGood              = WHERE(eSpec_interpreted.mono     EQ 1  ,nMG  )
      monoGoodStrict        = WHERE(eSpec_interpreted.mono     EQ 2  ,nMG_S)

@@ -114,19 +114,40 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                           
 
      IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
-        eSpec_delta_t          = [FLOAT(eSpec.x[1:-1]-eSpec.x[0:-2]),1.0]
+        eSpec_delta_t          = [FLOAT(eSpec.x[1:-1]-eSpec.x[0:-2]),-1.0]
 
-        worst                = WHERE(eSpec_delta_t LT 0,nWorst)
+        worst_i                = WHERE(( eSpec_delta_t LT 0   ) OR $
+                                       ( eSpec_delta_t GT 2.6 ),nWorst, $
+                                       COMPLEMENT=best_i, $
+                                       NCOMPLEMENT=nBest)
         IF nWorst GT 0 THEN BEGIN
            PRINT,'The worst!'
-           eSpec_delta_t[worst] = 2.5
+           eSpec_delta_t[worst_i] = 2.5
            ;; STOP
         ENDIF
 
-        fixme                = WHERE(eSpec_delta_t GT 2,nFix)
-        IF nFix GT 0 THEN BEGIN
-           eSpec_delta_t[fixme] = 2.5
-        ENDIF
+        best_i__i  = VALUE_CLOSEST2(eSpec.x[best_i],eSpec.x[worst_i])
+        
+        best_i__ii = WHERE( ( ABS(eSpec.x[best_i[best_i__i]] - $
+                                     eSpec.x[worst_i]) LT 2.6 ) AND $
+                            ( espec_delta_t[best_i[best_i__i]] LT 2.6 ) AND $
+                            ( espec_delta_t[best_i[best_i__i]] GT 0 ), $
+                           nBest_i__i, $
+                           COMPLEMENT=best_i__badii, $
+                           NCOMPLEMENT=nBest_i__badii)
+
+        PRINT,"Salvaged " + STRCOMPRESS(nBest_i__i,/REMOVE_ALL) + $
+              " eSpec delta-Ts from a cruel fate"
+        PRINT,STRCOMPRESS(nBest_i__badii,/REMOVE_ALL) + $
+              " are going to the pit (=0.0)"
+
+        eSpec_delta_t[worst_i[best_i__ii]]    = espec_delta_t[best_i[best_i__i[best_i__ii]]]
+        eSpec_delta_t[worst_i[best_i__badii]] = 0.0 ;;Just have to discard them, because what are they?
+        
+        ;; fixme                = WHERE(eSpec_delta_t GT 2,nFix)
+        ;; IF nFix GT 0 THEN BEGIN
+        ;;    eSpec_delta_t[fixme] = 2.5
+        ;; ENDIF
      ENDIF
 
      IF ~KEYWORD_SET(for_IMF_screening) THEN BEGIN ;If doing IMF stuff, GET_RESTRICTED_AND_INTERPED_DB_INDICES will handle this
