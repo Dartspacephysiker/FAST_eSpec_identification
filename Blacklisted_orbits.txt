@@ -5,6 +5,9 @@ Spence
 
 Happy Thanksgiving
 
+*********************************
+*ROUND 1: ~13:10 on 2016/11/24  *
+*********************************
 
 *THE BLACKBALLS (on the basis of output from JOURNAL__20161124__POKE_AROUND_SOME_OF_THESE_DAYSIDE_ORBITS_WHERE_BROADBAND_FLUXES_ARE_CRAZY_HUGE)*
 1031
@@ -34,5 +37,21 @@ COND 2: Median of the log distribution of diffuse energy fluxes lies above
 If two suspect marks, discard the orbit
 
 
+*********************************
+*ROUND 2: ~13:55 on 2016/11/24  *
+*********************************
+
+*KILL EM*
+1002 Utter, total garbage
+1028 Makes me want to junk the first many many. They are problematique.
+1055 Holy trash
+3461 Like 7925, the signs of bogus
+7822 Also pretty huge energy fluxes. Over 1000 mW/m2
+7836 HUGE energy fluxes, like over 1000 mW/m2 (Some data is good, but do I want to pick through it? No way)
+7891 Contamination of some kind. What is it?
+7925 Looks like it could be salvaged, but it has many appearances of bogus
 
 
+*REVISIT EM*
+1028 Distribution is questionable
+10527 wants to be addressed, but I'm not sure what to do

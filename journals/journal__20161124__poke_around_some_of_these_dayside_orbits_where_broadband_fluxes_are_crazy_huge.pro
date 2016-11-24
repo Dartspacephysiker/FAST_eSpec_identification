@@ -5,6 +5,8 @@ PRO JOURNAL__20161124__POKE_AROUND_SOME_OF_THESE_DAYSIDE_ORBITS_WHERE_BROADBAND_
 
   COMPILE_OPT IDL2
 
+  boxingRound = 2
+
   indDir  = '/SPENCEdata/Research/Satellites/FAST/espec_identification/saves_output_etc/'
   indFile = '20161123--nonalfven_espec_i_and_paramstrings--journal_20161103_zhang_2014--each_clockangle.sav'
 
@@ -36,7 +38,14 @@ PRO JOURNAL__20161124__POKE_AROUND_SOME_OF_THESE_DAYSIDE_ORBITS_WHERE_BROADBAND_
   i_list    = TEMPORARY(indices__nonalfven_espec_list) 
   pStr_list = TEMPORARY(paramstring_list)
 
-  listthis  = [0,6,7] ;the one with dawn-north
+  CASE boxingRound OF
+     1: BEGIN
+        listthis  = [0,6,7] ;the one with dawn-north
+     END
+     2: BEGIN
+        listthis  = [1,2,3,5]   ;the one with dusk-south
+     END
+  ENDCASE
 
   orb_jerks = LIST()
   final_i_list = LIST()
@@ -112,7 +121,9 @@ PRO JOURNAL__20161124__POKE_AROUND_SOME_OF_THESE_DAYSIDE_ORBITS_WHERE_BROADBAND_
         /SAVE_PLOTS, $
         OUT_ESTATS=eStats, $
         USER_INDS=WHERE(Newell__eSpec.orbit EQ huge_jee_orbs[k]), $
-        USER_PLOTSUFF='--' + STRCOMPRESS(huge_jee_orbs[k],/REMOVE_ALL)
+        USER_PLOTSUFF='--round_' + $
+        STRCOMPRESS(boxingRound,/REMOVE_ALL) + '__orb_' $
+        + STRCOMPRESS(huge_jee_orbs[k],/REMOVE_ALL)
   ENDFOR
 
   STOP
