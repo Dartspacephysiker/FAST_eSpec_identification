@@ -75,30 +75,55 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
   mlt_mono                              = tmp_eSpec.mlt[mono_i]-shiftM
   mlt_broad                             = tmp_eSpec.mlt[broad_i]-shiftM
   mlt_diffuse                           = tmp_eSpec.mlt[diffuse_i]-shiftM
-  mlt_mono[WHERE(mlt_mono LT 0)]        = mlt_mono[WHERE(mlt_mono LT 0)] + 24
-  mlt_broad[WHERE(mlt_broad LT 0)]      = mlt_broad[WHERE(mlt_broad LT 0)] + 24
-  mlt_diffuse[WHERE(mlt_diffuse LT 0)]  = mlt_diffuse[WHERE(mlt_diffuse LT 0)] + 24
 
-  mlt_list                              = LIST(TEMPORARY(mlt_mono),TEMPORARY(mlt_broad),TEMPORARY(mlt_diffuse))
+  ;;Screen 'em for negs
+  mNegMLT = WHERE(mlt_mono LT 0)
+  bNegMLT = WHERE(mlt_broad LT 0)
+  dNegMLT = WHERE(mlt_diffuse LT 0)
+  IF mNegMLT[0] NE -1 THEN BEGIN
+     mlt_mono[mNegMLT]    = mlt_mono[mNegMLT] + 24
+  ENDIF
+  IF bNegMLT[0] NE -1 THEN BEGIN
+     mlt_broad[bNegMLT]   = mlt_broad[bNegMLT] + 24
+  ENDIF
+  IF dNegMLT[0] NE -1 THEN BEGIN
+     mlt_diffuse[dNegMLT] = mlt_diffuse[dNegMLT] + 24
+  ENDIF
+  mlt_list      = LIST(TEMPORARY(mlt_mono),TEMPORARY(mlt_broad),TEMPORARY(mlt_diffuse))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;ILATs
-  ilat_mono                             = tmp_eSpec.ilat[mono_i]
-  ilat_broad                            = tmp_eSpec.ilat[broad_i]
-  ilat_diffuse                          = tmp_eSpec.ilat[diffuse_i]
-  ilat_list                             = LIST(TEMPORARY(ilat_mono),TEMPORARY(ilat_broad),TEMPORARY(ilat_diffuse))
+  ilat_mono     = tmp_eSpec.ilat[mono_i]
+  ilat_broad    = tmp_eSpec.ilat[broad_i]
+  ilat_diffuse  = tmp_eSpec.ilat[diffuse_i]
+  ilat_list     = LIST(TEMPORARY(ilat_mono),TEMPORARY(ilat_broad),TEMPORARY(ilat_diffuse))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Bonus
-  titles                                = ['Monoenergetic','Broadband'   ,'Diffuse'       ]
-  dataNames                             = ['mono_nonAlf'  ,'broad_nonAlf','diffuse_nonAlf']
+  titles                     = ['Monoenergetic','Broadband'   ,'Diffuse'       ]
+  dataNames                  = ['mono_nonAlf'  ,'broad_nonAlf','diffuse_nonAlf']
 
-  h2dStrs                               = !NULL
-  dataRawPtrs                           = !NULL
-  newell_nonzero_nev_i_list             = LIST()  
-  nPlots                                = 3
+  h2dStrs                    = !NULL
+  dataRawPtrs                = !NULL
+  newell_nonzero_nev_i_list  = LIST()  
+  nPlots                     = 3
   FOR i=0,nPlots-1 DO BEGIN
-     tmpDataName                        = dataNames[i]
+     tmpDataName             = dataNames[i]
+
+     dims                    = SIZE(newell_plotRange,/DIMENSIONS)
+     CASE N_ELEMENTS(dims) OF 
+        0:   plotRange       = !NULL
+        1: BEGIN
+           CASE dims OF
+              0: plotRange   = !NULL
+              2: plotRange   = Newell_plotRange
+              ELSE: BEGIN
+              END
+           ENDCASE
+        END
+        2:   plotRange       = Newell_plotRange[*,i]
+     ENDCASE
+
      GET_H2D_NEWELL_AND_MASK,tmp_eSpec, $ ;eSpec_i, $
                              TITLE=titles[i], $
                              IN_MLTS=mlt_list[i], $
@@ -109,7 +134,7 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                              MINI=minI,MAXI=maxI,BINI=binI, $
                              EQUAL_AREA_BINNING=EA_binning, $
                              DO_LSHELL=do_lShell, MINL=minL,MAXL=maxL,BINL=binL, $
-                             NEWELL_PLOTRANGE=newell_plotRange, $
+                             NEWELL_PLOTRANGE=plotRange, $
                              LOG_NEWELLPLOT=log_newellPlot, $
                              NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
                              NEWELLPLOT_NORMALIZE=newellPlot_normalize, $
@@ -188,9 +213,6 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
               ENDELSE
            END
         ENDCASE
-        ;; h2dStrs[i].lim                  = KEYWORD_SET(newell_plotRange) AND N_ELEMENTS(newell_plotRange) EQ 2 ? $
-        ;;                                   DOUBLE(newell_plotRange) : $
-        ;;                                   DOUBLE([0,1]) 
 
         IF KEYWORD_SET(log_newellPlot) THEN BEGIN
            dataNames[i]          = 'log_' + dataNames[i]
