@@ -1,0 +1,38 @@
+*HEY, if I have left a comment on the orbit, I have personally inspected it on SDT and know it is trash. Feel free to confirm for yourself, but don't bother asking me about it
+
+2016/11/24
+Spence
+
+Happy Thanksgiving
+
+
+*THE BLACKBALLS (on the basis of output from JOURNAL__20161124__POKE_AROUND_SOME_OF_THESE_DAYSIDE_ORBITS_WHERE_BROADBAND_FLUXES_ARE_CRAZY_HUGE)*
+1031
+1032 (Jee above 1.0e0 is clearly bogus)
+1033 The whole orbit looks bad
+1034 Very little worth salvaging
+1038 Utter garbage
+1039 Garbage
+1042 Complete trash
+1043 
+1044 Beyond garbage
+
+All right, I think I'm junking orbits 1031--1054
+
+****A possible way to automate****
+
+COND 1: Median of the log distribution of broadband energy fluxes lies above 
+
+1a    : 0.5, discard the orbit (or at least the interval)
+1b    : 0.0, mark as suspect
+
+COND 2: Median of the log distribution of diffuse energy fluxes lies above 
+
+2a    : 0.0, discard the orbit (or at least the interval)
+2b    : -0.5, mark as suspect
+
+If two suspect marks, discard the orbit
+
+
+
+

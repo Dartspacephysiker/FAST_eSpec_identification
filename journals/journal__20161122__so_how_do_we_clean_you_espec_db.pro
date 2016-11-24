@@ -14,13 +14,15 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
    POS_ONLY=pos_only, $
    NEG_ONLY=neg_only, $
    LOG_PLOTS=log_plots, $
-   LOG_DATA=log_data, $
+   LOG_STATS=log_stats, $
    WINDOW_INDEX=winInd, $
    OUT_ESTATS=out_eStats, $
    SHOW_PLOTS=show_plots, $
    SAVE_PLOTS=save_plots, $
    ZOOMED_HISTOXRANGE=zoomed_histoXRange, $
-   ZOOMED_HISTOYRANGE=zoomed_histoYRange
+   ZOOMED_HISTOYRANGE=zoomed_histoYRange, $
+   USER_INDS=user_inds, $
+   USER_PLOTSUFF=user_plotSuff
 
   COMPILE_OPT IDL2
 
@@ -75,7 +77,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                       CHARE=charE, $
                       POS_ONLY=pos_only, $
                       NEG_ONLY=neg_only, $
-                      LOG_DATA=log_data
+                      LOG_STATS=log_stats
 
   anc_suff = ''
   IF KEYWORD_SET(zoomed_histoXRange) THEN BEGIN
@@ -99,6 +101,19 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
   m_i = WHERE(NEWELL__eSpec.mono    EQ 1 OR NEWELL__eSpec.mono  EQ 2,N_m)
   b_i = WHERE(NEWELL__eSpec.broad   EQ 1 OR NEWELL__eSpec.broad EQ 2,N_b)
   d_i = WHERE(NEWELL__eSpec.diffuse EQ 1,N_d)
+  skip_me = [0,0,0]
+
+  IF KEYWORD_SET(user_inds) THEN BEGIN
+     m_i = CGSETINTERSECTION(m_i,user_inds,COUNT=mCount,NORESULT=-1)
+     b_i = CGSETINTERSECTION(b_i,user_inds,COUNT=bCount,NORESULT=-1)
+     d_i = CGSETINTERSECTION(d_i,user_inds,COUNT=dCount,NORESULT=-1)
+
+     IF N_ELEMENTS(user_plotSuff) EQ 0 THEN user_plotSuff = ''
+  ENDIF
+
+  IF m_i[0] EQ -1 THEN skip_me[0] = 1
+  IF b_i[0] EQ -1 THEN skip_me[1] = 1
+  IF d_i[0] EQ -1 THEN skip_me[2] = 1
 
   columns   = 3
   rows      = 1
@@ -125,7 +140,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                 CHARE=charE, $
                 POS_ONLY=pos_only, $
                 NEG_ONLY=neg_only, $
-                LOG_DATA=log_data, $
+                LOG_STATS=log_stats, $
                 BPD__OUTLIERS=BPDOutliers, $
                 BPD__SUSPECTED_OUTLIERS=BPDSusOutliers, $
                 STATS_NAME_SUFF=(KEYWORD_SET(stats_name_suff) ? stats_name_suff : '' ) + $
@@ -147,7 +162,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                  ;; @startup
                  ;; POPEN,filename,XSIZE=10,YSIZE=10
 
-                 filNavn = stats_name+anc_suff
+                 filNavn = stats_name+anc_suff + ( KEYWORD_SET(user_inds) ? user_plotSuff : '' )
                  PRINT,'Opening ' + filNavn + ' ...'
 
                  SET_PLOT,'PS'
@@ -160,12 +175,13 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                         /COLOR
               END
               KEYWORD_SET(show_plots): BEGIN
-                 WINDOW,winInd,XSIZE=1000,YSIZE=700
+                 WINDOW,(N_ELEMENTS(winInd) GT 0 ? winInd : 0),XSIZE=1000,YSIZE=700
               END
               ELSE:
            ENDCASE
         ENDIF
 
+        IF skip_me[k] THEN CONTINUE
         CASE 1 OF
            KEYWORD_SET(log_plots): BEGIN
               eDat = KEYWORD_SET(charE) ? $
@@ -246,7 +262,7 @@ PRO ESPEC_STATS_STRINGS,stats_name,stats_title, $
                         CHARE=charE, $
                         POS_ONLY=pos_only, $
                         NEG_ONLY=neg_only, $
-                        LOG_DATA=log_data
+                        LOG_STATS=log_stats
 
   CASE 1 OF
      KEYWORD_SET(je): BEGIN
@@ -264,29 +280,29 @@ PRO ESPEC_STATS_STRINGS,stats_name,stats_title, $
   ENDCASE
 
   ;;Get filename stuff
-  IF KEYWORD_SET(pos_only) OR KEYWORD_SET(neg_only) OR KEYWORD_SET(log_data) THEN BEGIN
+  IF KEYWORD_SET(pos_only) OR KEYWORD_SET(neg_only) OR KEYWORD_SET(log_stats) THEN BEGIN
      stats_title += '('
   ENDIF
 
   CASE 1 OF
      KEYWORD_SET(pos_only): BEGIN
         stats_name  += '--pos'
-        stats_title += 'Positive' + ( KEYWORD_SET(log_data) ? ', ' : '')
+        stats_title += 'Positive' + ( KEYWORD_SET(log_stats) ? ', ' : '')
      END
      KEYWORD_SET(neg_only): BEGIN
         stats_name  += '--neg'
-        stats_title += 'Negative' + ( KEYWORD_SET(log_data) ? ', ' : '')
+        stats_title += 'Negative' + ( KEYWORD_SET(log_stats) ? ', ' : '')
      END
      ELSE:
   ENDCASE
 
-  IF KEYWORD_SET(log_data) THEN BEGIN
+  IF KEYWORD_SET(log_stats) THEN BEGIN
      stats_name   = 'Log_' + stats_name
      stats_title += 'Log'
   ENDIF
 
   ;;Get filename stuff
-  IF KEYWORD_SET(pos_only) OR KEYWORD_SET(neg_only) OR KEYWORD_SET(log_data) THEN BEGIN
+  IF KEYWORD_SET(pos_only) OR KEYWORD_SET(neg_only) OR KEYWORD_SET(log_stats) THEN BEGIN
      stats_title += ')'
   ENDIF
 

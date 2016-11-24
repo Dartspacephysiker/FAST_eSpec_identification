@@ -625,6 +625,59 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_jee_i),COUNT=nKept)
         PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
 
+
+        ;;Now screen based on spectral type
+        eSpec__screen_based_on_spectral_type = 1
+        IF KEYWORD_SET(eSpec__screen_based_on_spectral_type) THEN BEGIN
+           jee_d_lims = [1e-10,10^(0.5)]
+
+        ENDIF
+
+        junk_blackballed_orbits = 1
+        IF KEYWORD_SET(junk_blackballed_orbits) THEN BEGIN
+           ;;Look for Blacklisted_orbits.txt to see the rationale
+           blackballOrb_ranges      = [[1031,1054]]
+
+           FOR k=0,N_ELEMENTS(blackballOrb_ranges[0,*])-1 DO BEGIN
+              PRINT,FORMAT='("Black orbit range: ",I0,", ",I0)',blackballOrb_ranges[0,k],blackballOrb_ranges[1,k]
+
+              blackBall_i = WHERE(dbStruct.orbit GE blackballOrb_ranges[0,k] AND dbStruct.orbit LE blackballOrb_ranges[1,k],nBlackBall)
+
+              IF nBlackBall GT 0 THEN BEGIN
+                 nGood   = N_ELEMENTS(good_i)
+                 good_i  = CGSETDIFFERENCE(good_i,blackBall_i,NORESULT=-1,COUNT=count)
+                 IF good_i[0] EQ -1 THEN BEGIN
+                    PRINT,"We've killed every orbit!"
+                    broken = 1
+                    BREAK
+                 ENDIF
+                 PRINT,'Junked ' + STRCOMPRESS(nGood-count,/REMOVE_ALL) + ' blackballed events ...'
+              ENDIF
+           ENDFOR
+
+           IF KEYWORD_SET(broken) THEN STOP
+
+           ;; individual_blackballOrbs = [0]
+           FOR k=0,N_ELEMENTS(individual_blackballOrbs)-1 DO BEGIN
+              PRINT,FORMAT='("Blackball orbit: ",I0)',individual_blackballOrbs[k]
+
+              blackBall_i = WHERE(dbStruct.orbit EQ individual_blackballOrbs[k],nBlackBall)
+
+              IF nBlackBall GT 0 THEN BEGIN
+                 nGood   = N_ELEMENTS(good_i)
+                 good_i  = CGSETDIFFERENCE(good_i,blackBall_i,NORESULT=-1,COUNT=count)
+                 IF good_i[0] EQ -1 THEN BEGIN
+                    PRINT,"We've killed every orbit!"
+                    broken = 1
+                    BREAK
+                 ENDIF
+                 PRINT,'Junked ' + STRCOMPRESS(nGood-count,/REMOVE_ALL) + ' blackballed events ...'
+              ENDIF
+           ENDFOR
+
+           IF KEYWORD_SET(broken) THEN STOP
+        ENDIF
+
         ;;Now get the file for which I feel better about the removal of the first 10 points
         safed_eSpecIndsFile = GET_NEWELL_ESPEC_SAFED_INDS_FILE(dbStruct, $
                                                           NEWELLDBDIR=dbDir, $

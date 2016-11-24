@@ -9,7 +9,7 @@ FUNCTION GET_ESPEC_STATISTICS, $
    CHARE=charE, $
    POS_ONLY=pos_only, $
    NEG_ONLY=neg_only, $
-   LOG_DATA=log_data, $
+   LOG_STATS=log_stats, $
    BPD__OUTLIERS=BPDOutliers, $
    BPD__SUSPECTED_OUTLIERS=BPDSusOutliers, $
    STATS_NAME_SUFF=stats_name_suff, $
@@ -18,7 +18,7 @@ FUNCTION GET_ESPEC_STATISTICS, $
 
   COMPILE_OPT IDL2
 
-  IF KEYWORD_SET(log_data) THEN BEGIN
+  IF KEYWORD_SET(log_stats) THEN BEGIN
      IF ~(KEYWORD_SET(pos_only) OR KEYWORD_SET(neg_only)) THEN BEGIN
         PRINT,'GET_ESPEC_STATISTICS: Neither POS_ONLY nor NEG_ONLY has been set, and yet you want log stats. I set POS_ONLY for you.'
         pos_only = 1
@@ -72,7 +72,7 @@ FUNCTION GET_ESPEC_STATISTICS, $
      END
   ENDCASE
 
-  IF KEYWORD_SET(log_data) THEN BEGIN
+  IF KEYWORD_SET(log_stats) THEN BEGIN
      eDat[discret_inds] = ALOG10( ( KEYWORD_SET(neg_only) ? ABS(eDat) : eDat )[discret_inds])
      stats_name = 'Log_' + stats_name
   ENDIF
