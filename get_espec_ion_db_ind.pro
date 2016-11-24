@@ -627,11 +627,11 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
 
         ;;Now screen based on spectral type
-        eSpec__screen_based_on_spectral_type = 1
-        IF KEYWORD_SET(eSpec__screen_based_on_spectral_type) THEN BEGIN
-           jee_d_lims = [1e-10,10^(0.5)]
+        ;; eSpec__screen_based_on_spectral_type = 1
+        ;; IF KEYWORD_SET(eSpec__screen_based_on_spectral_type) THEN BEGIN
+        ;;    jee_d_lims = [1e-10,10^(0.5)]
 
-        ENDIF
+        ;; ENDIF
 
         junk_blackballed_orbits = 1
         IF KEYWORD_SET(junk_blackballed_orbits) THEN BEGIN
