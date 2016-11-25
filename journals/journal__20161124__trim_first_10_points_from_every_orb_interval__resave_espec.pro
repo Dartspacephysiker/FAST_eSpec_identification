@@ -6,7 +6,8 @@ PRO JOURNAL__20161124__TRIM_FIRST_10_POINTS_FROM_EVERY_ORB_INTERVAL__RESAVE_ESPE
   routineName = 'JOURNAL__20161124__TRIM_FIRST_10_POINTS_FROM_EVERY_ORB_INTERVAL__RESAVE_ESPEC'
 
   LOAD_NEWELL_ESPEC_DB,eSpec, $
-                       NEWELLDBDIR=NewellDBDir
+                       NEWELLDBDIR=NewellDBDir, $
+                       /USE_2000KM_FILE
 
   safedFile = GET_NEWELL_ESPEC_SAFED_INDS_FILE(eSpec, $
                                                NEWELLDBDIR=NewellDBDir)

@@ -21,6 +21,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
    SAVE_PLOTS=save_plots, $
    ZOOMED_HISTOXRANGE=zoomed_histoXRange, $
    ZOOMED_HISTOYRANGE=zoomed_histoYRange, $
+   NORMALIZE_YRANGE=normalize_yRange, $
    USER_INDS=user_inds, $
    USER_PLOTSUFF=user_plotSuff
 
@@ -32,7 +33,9 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
      je = 1
   ENDIF
 
-  LOAD_NEWELL_ESPEC_DB,/REDUCED_DB
+  IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
+     LOAD_NEWELL_ESPEC_DB,/REDUCED_DB
+  ENDIF
 
   m_name = 'Mono'
   b_name = 'Broad'
@@ -111,6 +114,10 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
      IF N_ELEMENTS(user_plotSuff) EQ 0 THEN user_plotSuff = ''
   ENDIF
 
+  IF KEYWORD_SET(zoomed_histoYRange) AND ~KEYWORD_SET(normalize_yRange) THEN BEGIN
+
+  ENDIF
+
   IF m_i[0] EQ -1 THEN skip_me[0] = 1
   IF b_i[0] EQ -1 THEN skip_me[1] = 1
   IF d_i[0] EQ -1 THEN skip_me[2] = 1
@@ -182,6 +189,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
         ENDIF
 
         IF skip_me[k] THEN CONTINUE
+
         CASE 1 OF
            KEYWORD_SET(log_plots): BEGIN
               eDat = KEYWORD_SET(charE) ? $
@@ -196,7 +204,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                           BINSIZE=0.1, $
                           XRANGE=KEYWORD_SET(zoomed_histoXRange) ? $
                           ALOG10(REFORM(xRange[*,k])) : !NULL, $
-                          FREQUENCY=KEYWORD_SET(zoomed_histoYRange), $
+                          FREQUENCY=KEYWORD_SET(normalize_yRange), $
                           YRANGE=KEYWORD_SET(zoomed_histoYRange) ? $
                           ;; [0,0.1] : !NULL
                           REFORM(yRange[*,k]) : !NULL
@@ -211,7 +219,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                           TITLE=names[k] + ' ' + stats_title + ' Dist.', $
                           XRANGE=KEYWORD_SET(zoomed_histoXRange) ? $
                           REFORM(xRange[*,k]) : !NULL, $
-                          FREQUENCY=KEYWORD_SET(zoomed_histoYRange), $
+                          FREQUENCY=KEYWORD_SET(normalize_yRange), $
                           YRANGE=KEYWORD_SET(zoomed_histoYRange) ? $
                           [0,0.1] : !NULL
               

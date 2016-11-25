@@ -41,9 +41,28 @@ PRO JOURNAL__20161124__POKE_AROUND_SOME_OF_THESE_DAYSIDE_ORBITS_WHERE_BROADBAND_
   CASE boxingRound OF
      1: BEGIN
         listthis  = [0,6,7] ;the one with dawn-north
+        hemi     = 'NORTH'
+        minMLT   = 14
+        maxMLT   = 17.5
+        minILAT  = 60
+        maxILAT  = 70
      END
      2: BEGIN
         listthis  = [1,2,3,5]   ;the one with dusk-south
+        hemi     = 'NORTH'
+        minMLT   = 14
+        maxMLT   = 17.5
+        minILAT  = 60
+        maxILAT  = 70
+
+     END
+     3: BEGIN
+        listthis  = [1,2,3,5]   ;the one with dusk-south
+        hemi     = 'NORTH'
+        minMLT   = 13
+        maxMLT   = 1
+        minILAT  = 60
+        maxILAT  = 75
      END
   ENDCASE
 
@@ -107,7 +126,7 @@ PRO JOURNAL__20161124__POKE_AROUND_SOME_OF_THESE_DAYSIDE_ORBITS_WHERE_BROADBAND_
      USER_INDS=final_i, $
      USER_PLOTSUFF='dawnward_IMF--Pynesfyll'
 
-  huge_jee_i = CGSETINTERSECTION(final_i,WHERE( ( ALOG10(ABS(Newell__eSpec.jee)) GT 1.0 ) AND ( Newell__eSpec.jee GT 0 )),NORESULT=-1)
+  huge_jee_i = CGSETINTERSECTION(final_i,WHERE( ( ALOG10(ABS(Newell__eSpec.jee)) GE 1.0 ) AND ( Newell__eSpec.jee GT 0 )),NORESULT=-1)
   IF huge_jee_i[0] EQ -1 THEN PRINT,"You're lying to me"
 
   uniq_ii       = UNIQ(Newell__eSpec.orbit[huge_jee_i])  
