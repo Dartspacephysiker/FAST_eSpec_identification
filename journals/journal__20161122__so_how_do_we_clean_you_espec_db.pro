@@ -24,7 +24,8 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
    NORMALIZE_YRANGE=normalize_yRange, $
    USER_INDS=user_inds, $
    USER_PLOTSUFF=user_plotSuff, $
-   PLOTDIRSUFF=plotDirSuff, $
+   PLOTDIR=plotDir, $
+   SUFF__PLOTDIR=suff__plotDir, $
    CUSTOM_TITLE=custom_title
 
   COMPILE_OPT IDL2
@@ -158,10 +159,12 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
         IF k EQ 0 THEN BEGIN
            CASE 1 OF
               KEYWORD_SET(save_plots): BEGIN
-                 SET_PLOT_DIR,plotDir, $
-                              /FOR_ESPEC_DB, $
-                              /ADD_TODAY, $
-                              ADD_SUFF=plotDirSuff
+                 IF N_ELEMENTS(plotDir) EQ 0 THEN BEGIN
+                    SET_PLOT_DIR,plotDir, $
+                                 /FOR_ESPEC_DB, $
+                                 /ADD_TODAY, $
+                                 ADD_SUFF=suff__plotDir
+                 ENDIF
 
                  !P.CHARTHICK = 3
                  !P.THICK = 3

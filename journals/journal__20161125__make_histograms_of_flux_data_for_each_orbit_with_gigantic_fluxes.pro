@@ -20,6 +20,13 @@ PRO JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC
   force_load_DB   = 0
 
   ;;Plot options
+  output_fa_crossing  = 0
+  skip_histos         = 1
+
+  ;;txt output
+  output_txtFile      = 1
+
+  ;;Histo plot options (if ~skip_histos)x
   eFlux               = 1
   eNumFlux            = 0
   charE               = 0
@@ -31,7 +38,8 @@ PRO JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC
 
   save_plots          = 1
 
-  plotDirSuff         = '/orbs_with_extremeness'
+  suff__plotDir         = '/orbs_with_extremeness'
+
   ;; show_plots          = 0 ;Not really practical for our purposes here
 
   ;;gjør det en del 
@@ -71,6 +79,19 @@ PRO JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC
                     tipo, $
                     gigantic)
 
+  SET_PLOT_DIR,plotDir, $
+               /FOR_ESPEC_DB, $
+               /ADD_TODAY, $
+               ADD_SUFF=suff__plotDir
+
+  IF KEYWORD_SET(output_txtFile) THEN BEGIN
+     PRINT,"Making txtFile: " + plotSuff + '--orb_list.txt'
+     SET_TXTOUTPUT_DIR,txtOutputDir, $
+                  /FOR_ESPEC_DB, $
+                  /ADD_TODAY, $
+                  ADD_SUFF=suff__plotDir
+     
+  ENDIF
   ;;How many unique orbits here?
   uniq_ii = UNIQ(NEWELL__eSpec.orbit[wild_inds],SORT(NEWELL__eSpec.orbit[wild_inds]))
   orbs    = NEWELL__eSpec.orbit[wild_inds[uniq_ii]]
@@ -85,36 +106,53 @@ PRO JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC
 
      opener = "ORB " + orbStr + ": "
 
-     user_inds = WHERE(NEWELL__eSpec.orbit EQ curOrb,nOrb)
-     
-     IF nOrb EQ 0 THEN BEGIN
-        PRINT,opener + "No inds!! Skipping ..."
-        CONTINUE
+     IF ~KEYWORD_SET(skip_histos) THEN BEGIN
+        user_inds = WHERE(NEWELL__eSpec.orbit EQ curOrb,nOrb)
+        
+        IF nOrb EQ 0 THEN BEGIN
+           PRINT,opener + "No inds!! Skipping ..."
+           CONTINUE
+        ENDIF
+
+        PRINT,opener + STRCOMPRESS(nOrb,/REMOVE_ALL) + ' inds'
+        
+        user_plotSuff = plotSuff + '--orb_' + orbStr
+
+
+        JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
+           ENUMFLUX=je, $
+           EFLUX=eFlux, $
+           CHARE=charE, $
+           POS_ONLY=pos_only, $
+           NEG_ONLY=neg_only, $
+           LOG_PLOTS=log_plots, $
+           LOG_STATS=log_stats, $
+           SHOW_PLOTS=show_plots, $
+           WINDOW_INDEX=safeWinInd, $
+           SAVE_PLOTS=save_plots, $
+           ZOOMED_HISTOXRANGE=zoomed_histoXRange, $
+           ZOOMED_HISTOYRANGE=zoomed_histoYRange, $
+           ;; NORMALIZE_YRANGE=normalize_yRange, $
+           OUT_ESTATS=eStats, $
+           USER_INDS=user_inds, $
+           USER_PLOTSUFF=user_plotSuff, $
+           PLOTDIR=plotDir, $
+           SUFF__PLOTDIR=suff__plotDir, $
+           CUSTOM_TITLE='Orbit ' + orbStr
      ENDIF
 
-     PRINT,opener + STRCOMPRESS(nOrb,/REMOVE_ALL) + ' inds'
-     
-     user_plotSuff = plotSuff + '--orb_' + orbStr
+     IF KEYWORD_SET(output_fa_crossing) THEN BEGIN
+        PLOT_FA_CROSSING,ORBIT=curOrb, $
+                         /MAGPOLE, $
+                         /SSCZONE, $
+                         POST=plotDir + 'FA_crossing--orb_' + orbStr
+        
+        EPS2PDF,plotDir + 'FA_crossing--orb_' + orbStr,/PS
+     ENDIF
 
-     JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
-        ENUMFLUX=je, $
-        EFLUX=eFlux, $
-        CHARE=charE, $
-        POS_ONLY=pos_only, $
-        NEG_ONLY=neg_only, $
-        LOG_PLOTS=log_plots, $
-        LOG_STATS=log_stats, $
-        SHOW_PLOTS=show_plots, $
-        WINDOW_INDEX=safeWinInd, $
-        SAVE_PLOTS=save_plots, $
-        ZOOMED_HISTOXRANGE=zoomed_histoXRange, $
-        ZOOMED_HISTOYRANGE=zoomed_histoYRange, $
-        ;; NORMALIZE_YRANGE=normalize_yRange, $
-        OUT_ESTATS=eStats, $
-        USER_INDS=user_inds, $
-        USER_PLOTSUFF=user_plotSuff, $
-        PLOTDIRSUFF=plotDirSuff, $
-        CUSTOM_TITLE='Orbit ' + orbStr
+     IF KEYWORD_SET(output_txtFile) THEN BEGIN
+        SPAWN,'echo ' + orbStr + ' >> ' + txtOutputDir + plotSuff + '--orb_list.txt'
+     ENDIF
 
   ENDFOR
 END
