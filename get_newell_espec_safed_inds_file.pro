@@ -9,10 +9,7 @@ FUNCTION GET_NEWELL_ESPEC_SAFED_INDS_FILE,eSpec, $
   COMPILE_OPT IDL2
 
   cleanedUpFile = NewellDBDir + $
-                  'eSpecDB_' + $
-                  eSpec.info.DB_DATE + '_' + $
-                  (eSpec.info.DB_version).Replace('.','_') + '--' + $
-                  eSpec.info.DB_extras.Replace('/','--') + $
+                  GET_NEWELL_DB_STRING(eSpec) + $
                   '--cleaned_inds.sav'
 
   IF KEYWORD_SET(stop_if_noExist) THEN BEGIN

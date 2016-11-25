@@ -22,9 +22,6 @@ PRO JOURNAL__20161125__LOOK_AT_NEWELLTYPE_HISTOS_OF_SUPPOSEDLY_REJECT_INDICES
   save_plots          = 1
 
   show_plots          = 0
-  safeWinInd          = KEYWORD_SET(show_plots) ? 5 : !NULL
-  rejectWinInd        = KEYWORD_SET(show_plots) ? 6 : !NULL
-
 
   ;;gjør det en del 
   LOAD_NEWELL_ESPEC_DB, $
@@ -46,6 +43,9 @@ PRO JOURNAL__20161125__LOOK_AT_NEWELLTYPE_HISTOS_OF_SUPPOSEDLY_REJECT_INDICES
   PRINT,"N bad  inds: ",eSpec_clean_info.totLost
 
   ;;NOW PLOTSSSSSSS
+  safeWinInd          = KEYWORD_SET(show_plots) ? 5 : !NULL
+  rejectWinInd        = KEYWORD_SET(show_plots) ? 6 : !NULL
+
   JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
      ENUMFLUX=je, $
      EFLUX=eFlux, $

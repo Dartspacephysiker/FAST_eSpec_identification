@@ -23,7 +23,8 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
    ZOOMED_HISTOYRANGE=zoomed_histoYRange, $
    NORMALIZE_YRANGE=normalize_yRange, $
    USER_INDS=user_inds, $
-   USER_PLOTSUFF=user_plotSuff
+   USER_PLOTSUFF=user_plotSuff, $
+   PLOTDIRSUFF=plotDirSuff
 
   COMPILE_OPT IDL2
 
@@ -100,34 +101,29 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
      structInd = [structInd,tmpStructInd]
   ENDFOR
 
-
-  m_i = WHERE(NEWELL__eSpec.mono    EQ 1 OR NEWELL__eSpec.mono  EQ 2,N_m)
-  b_i = WHERE(NEWELL__eSpec.broad   EQ 1 OR NEWELL__eSpec.broad EQ 2,N_b)
-  d_i = WHERE(NEWELL__eSpec.diffuse EQ 1,N_d)
-  skip_me = [0,0,0]
+  GET_ESPEC_INDS_BY_TYPE,NEWELL__eSpec,m_i,b_i,d_i, $
+                         /LISTPLEASE, $
+                         OUT_I_LIST=i_list, $
+                         N_ARR=NArr, $
+                         ONLY_STRICT=only_strict, $
+                         ONLY_NONSTRICT=only_nonStrict, $
+                         USER_INDS=user_inds, $
+                         NO_INDS_AVAILABLE=skip_me, $
+                         /QUIET
 
   IF KEYWORD_SET(user_inds) THEN BEGIN
-     m_i = CGSETINTERSECTION(m_i,user_inds,COUNT=mCount,NORESULT=-1)
-     b_i = CGSETINTERSECTION(b_i,user_inds,COUNT=bCount,NORESULT=-1)
-     d_i = CGSETINTERSECTION(d_i,user_inds,COUNT=dCount,NORESULT=-1)
-
      IF N_ELEMENTS(user_plotSuff) EQ 0 THEN user_plotSuff = ''
   ENDIF
 
-  IF KEYWORD_SET(zoomed_histoYRange) AND ~KEYWORD_SET(normalize_yRange) THEN BEGIN
+  ;; IF KEYWORD_SET(zoomed_histoYRange) AND ~KEYWORD_SET(normalize_yRange) THEN BEGIN
 
-  ENDIF
-
-  IF m_i[0] EQ -1 THEN skip_me[0] = 1
-  IF b_i[0] EQ -1 THEN skip_me[1] = 1
-  IF d_i[0] EQ -1 THEN skip_me[2] = 1
+  ;; ENDIF
 
   columns   = 3
   rows      = 1
   !P.MULTI  = [0, columns, rows, 0, 0]
 
-  i_list = LIST(TEMPORARY(m_i),TEMPORARY(b_i),TEMPORARY(d_i))
-  NArr   = [N_m,N_b,N_d]
+  ;; i_list = LIST(TEMPORARY(m_i),TEMPORARY(b_i),TEMPORARY(d_i))
   names  = [m_name,b_name,d_name]
 
   eStatsList = LIST()
@@ -161,7 +157,10 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
         IF k EQ 0 THEN BEGIN
            CASE 1 OF
               KEYWORD_SET(save_plots): BEGIN
-                 SET_PLOT_DIR,plotDir,/FOR_ESPEC_DB,/ADD_TODAY
+                 SET_PLOT_DIR,plotDir, $
+                              /FOR_ESPEC_DB, $
+                              /ADD_TODAY, $
+                              ADD_SUFF=plotDirSuff
 
                  !P.CHARTHICK = 3
                  !P.THICK = 3
@@ -204,7 +203,8 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                           BINSIZE=0.1, $
                           XRANGE=KEYWORD_SET(zoomed_histoXRange) ? $
                           ALOG10(REFORM(xRange[*,k])) : !NULL, $
-                          FREQUENCY=KEYWORD_SET(normalize_yRange), $
+                          ;; FREQUENCY=KEYWORD_SET(normalize_yRange), $
+                          FREQUENCY=KEYWORD_SET(zoomed_histoYRange), $
                           YRANGE=KEYWORD_SET(zoomed_histoYRange) ? $
                           ;; [0,0.1] : !NULL
                           REFORM(yRange[*,k]) : !NULL
@@ -219,7 +219,8 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                           TITLE=names[k] + ' ' + stats_title + ' Dist.', $
                           XRANGE=KEYWORD_SET(zoomed_histoXRange) ? $
                           REFORM(xRange[*,k]) : !NULL, $
-                          FREQUENCY=KEYWORD_SET(normalize_yRange), $
+                          ;; FREQUENCY=KEYWORD_SET(normalize_yRange), $
+                          FREQUENCY=KEYWORD_SET(zoomed_histoYRange), $
                           YRANGE=KEYWORD_SET(zoomed_histoYRange) ? $
                           [0,0.1] : !NULL
               
