@@ -11,7 +11,7 @@ PRO JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC
   doCharE = 0
 
   ;;Define "gigantic"
-  gigantic_Jee   = 3e2
+  gigantic_Jee   = 5e2
   gigantic_Je    = '?'
   gigantic_charE = 1e4
 
@@ -113,7 +113,8 @@ PRO JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC
         OUT_ESTATS=eStats, $
         USER_INDS=user_inds, $
         USER_PLOTSUFF=user_plotSuff, $
-        PLOTDIRSUFF=plotDirSuff
+        PLOTDIRSUFF=plotDirSuff, $
+        CUSTOM_TITLE='Orbit ' + orbStr
 
   ENDFOR
 END

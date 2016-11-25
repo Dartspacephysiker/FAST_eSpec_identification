@@ -24,7 +24,8 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
    NORMALIZE_YRANGE=normalize_yRange, $
    USER_INDS=user_inds, $
    USER_PLOTSUFF=user_plotSuff, $
-   PLOTDIRSUFF=plotDirSuff
+   PLOTDIRSUFF=plotDirSuff, $
+   CUSTOM_TITLE=custom_title
 
   COMPILE_OPT IDL2
 
@@ -123,17 +124,17 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
   rows      = 1
   !P.MULTI  = [0, columns, rows, 0, 0]
 
-  ;; i_list = LIST(TEMPORARY(m_i),TEMPORARY(b_i),TEMPORARY(d_i))
-  names  = [m_name,b_name,d_name]
+  names       = [m_name,b_name,d_name]
+
+  ;;work with titles
+  stats_title = REPLICATE(stats_title,3)
+  title       = names + ' ' + stats_title + ' Dist.'
+  IF KEYWORD_SET(custom_title) THEN BEGIN
+     title[0] = custom_title + '(' + names[0] + ')'
+  ENDIF
 
   eStatsList = LIST()
   FOR k=0,2 DO BEGIN
-
-     ;; tmp_i_pos = CGSETINTERSECTION(i_list[k], $
-     ;;                               WHERE(NEWELL__eSpec.(structInd) GT 0),COUNT=nTmp)
-
-     ;; PRINT,STRCOMPRESS(nTmp,/REMOVE_ALL) + ' positive ' + names[k] + ' inds here'
-     ;; PRINT,"(i.e., " + STRCOMPRESS(NArr[k]-nTmp,/REMOVE_ALL) + " are negative)"
 
      tmpStats = GET_ESPEC_STATISTICS( $
                 NEWELL__eSpec, $
@@ -187,7 +188,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
            ENDCASE
         ENDIF
 
-        IF skip_me[k] THEN CONTINUE
+        IF skip_me[k] OR (N_ELEMENTS(out_i) LE 1) THEN CONTINUE
 
         CASE 1 OF
            KEYWORD_SET(log_plots): BEGIN
@@ -199,7 +200,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
               CGHISTOPLOT,(ALOG10( eDat ))[out_i], $
                           ;; TITLE='Log(Je) ' + names[k] + ' dist'
                           ;; TITLE=out_stats_name + ' dist', $
-                          TITLE=names[k] + ' ' + stats_title + ' Dist.', $
+                          TITLE=title[k], $
                           BINSIZE=0.1, $
                           XRANGE=KEYWORD_SET(zoomed_histoXRange) ? $
                           ALOG10(REFORM(xRange[*,k])) : !NULL, $
@@ -216,7 +217,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
                             NEWELL__eSpec.(structInd[0]) * 6.242 * 1.0e11 : $
                             NEWELL__eSpec.(structInd[0]) )[out_i], $
                           ;; TITLE='Je ' + names[k] + ' dist', $
-                          TITLE=names[k] + ' ' + stats_title + ' Dist.', $
+                          TITLE=title[k], $
                           XRANGE=KEYWORD_SET(zoomed_histoXRange) ? $
                           REFORM(xRange[*,k]) : !NULL, $
                           ;; FREQUENCY=KEYWORD_SET(normalize_yRange), $
@@ -239,17 +240,6 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
         out_eStats = eStatsList
      ENDELSE
   ENDIF
-
-  ;; ;;mono
-  ;; CGHISTOPLOT,NEWELL__eSpec.je[m_i], $
-  ;;             TITLE=m_name + ' dist'
-  ;; ;;broad
-  ;; CGHISTOPLOT,NEWELL__eSpec.je[b_i], $
-  ;;             TITLE=b_name + ' dist'
-
-  ;; ;;diffuse
-  ;; CGHISTOPLOT,NEWELL__eSpec.je[d_i], $
-  ;;             TITLE=d_name + ' dist'
 
   CASE 1 OF
      KEYWORD_SET(save_plots): BEGIN
@@ -314,7 +304,5 @@ PRO ESPEC_STATS_STRINGS,stats_name,stats_title, $
   IF KEYWORD_SET(pos_only) OR KEYWORD_SET(neg_only) OR KEYWORD_SET(log_stats) THEN BEGIN
      stats_title += ')'
   ENDIF
-
-
 
 END
