@@ -5,6 +5,14 @@ Spence
 
 Happy Thanksgiving
 
+*CONTENTS*
+**********
+**********
+**********
+ROUND 1: ~13:10 on 2016/11/24
+ROUND 2: ~13:55 on 2016/11/24
+ROUND 2: ~09:07 on 2016/11/25
+
 *********************************
 *ROUND 1: ~13:10 on 2016/11/24  *
 *********************************
@@ -55,3 +63,11 @@ If two suspect marks, discard the orbit
 *REVISIT EM*
 1028 Distribution is questionable
 10527 wants to be addressed, but I'm not sure what to do
+
+
+*********************************
+*ROUND 3: ~13:55 on 2016/11/24  *
+*********************************
+Now there's an SDT batch job for producing summary plots of lists of bad orbits. 
+The lists of bad orbits come from JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC_FLUXES.
+Today I've used Je GE 5e2 as the threshold for coming under suspicion; 77 orbits thus find themselves uncomfortably situated.
