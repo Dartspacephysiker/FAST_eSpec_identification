@@ -16,7 +16,8 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
            DB_date          : '', $
            DB_version       : '', $
            DB_extras        : '', $
-           is_AlfNewell     : BYTE(KEYWORD_SET(is_AlfNewell))}
+           is_AlfNewell     : BYTE(KEYWORD_SET(is_AlfNewell)), $
+           coords           : 'SDT'}
 
 
   IF KEYWORD_SET(DB_date) THEN BEGIN
