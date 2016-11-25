@@ -28,8 +28,10 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             INDICES__NONALFVEN_ION=ion_i, $
                             ESPEC__MLTS=eSpec__mlts, $
                             ESPEC__ILATS=eSpec__ilats, $
+                            ESPEC__INFO=eSpec_info, $
                             ION__MLTS=ion__mlts, $
                             ION__ILATS=ion__ilats, $
+                            ION__INFO=ion_info, $
                             ORBRANGE=orbRange, $
                             ALTITUDERANGE=altitudeRange, $
                             CHARERANGE=charERange, $
@@ -113,38 +115,41 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                           DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(eSpec__Newell_2009_interp), $
                           USE_2000KM_FILE=eSpec__use_2000km_file, $
                           /DONT_PERFORM_CORRECTION
-                          
+     eSpec_info = eSpec.info
 
      IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
-        eSpec_delta_t          = [FLOAT(eSpec.x[1:-1]-eSpec.x[0:-2]),-1.0]
+        eSpec_delta_t = GET_ESPEC_ION_DELTA_T(eSpec, $
+                                              DBNAME='eSpec')
 
-        worst_i                = WHERE(( eSpec_delta_t LT 0   ) OR $
-                                       ( eSpec_delta_t GT 2.6 ),nWorst, $
-                                       COMPLEMENT=best_i, $
-                                       NCOMPLEMENT=nBest)
-        ;; IF nWorst GT 0 THEN BEGIN
-        ;;    PRINT,'The worst!'
-        ;;    eSpec_delta_t[worst_i] = 2.5
-        ;;    ;; STOP
-        ;; ENDIF
+        ;; eSpec_delta_t          = [FLOAT(eSpec.x[1:-1]-eSpec.x[0:-2]),-1.0]
 
-        best_i__i  = VALUE_CLOSEST2(eSpec.x[best_i],eSpec.x[worst_i])
+        ;; worst_i                = WHERE(( eSpec_delta_t LT 0   ) OR $
+        ;;                                ( eSpec_delta_t GT 2.6 ),nWorst, $
+        ;;                                COMPLEMENT=best_i, $
+        ;;                                NCOMPLEMENT=nBest)
+        ;; ;; IF nWorst GT 0 THEN BEGIN
+        ;; ;;    PRINT,'The worst!'
+        ;; ;;    eSpec_delta_t[worst_i] = 2.5
+        ;; ;;    ;; STOP
+        ;; ;; ENDIF
+
+        ;; best_i__i  = VALUE_CLOSEST2(eSpec.x[best_i],eSpec.x[worst_i])
         
-        best_i__ii = WHERE( ( ABS(eSpec.x[best_i[best_i__i]] - $
-                                     eSpec.x[worst_i]) LT 2.6 ) AND $
-                            ( espec_delta_t[best_i[best_i__i]] LT 2.6 ) AND $
-                            ( espec_delta_t[best_i[best_i__i]] GT 0 ), $
-                           nBest_i__i, $
-                           COMPLEMENT=best_i__badii, $
-                           NCOMPLEMENT=nBest_i__badii)
+        ;; best_i__ii = WHERE( ( ABS(eSpec.x[best_i[best_i__i]] - $
+        ;;                              eSpec.x[worst_i]) LT 2.6 ) AND $
+        ;;                     ( espec_delta_t[best_i[best_i__i]] LT 2.6 ) AND $
+        ;;                     ( espec_delta_t[best_i[best_i__i]] GT 0 ), $
+        ;;                    nBest_i__i, $
+        ;;                    COMPLEMENT=best_i__badii, $
+        ;;                    NCOMPLEMENT=nBest_i__badii)
 
-        PRINT,"Salvaged " + STRCOMPRESS(nBest_i__i,/REMOVE_ALL) + $
-              " eSpec delta-Ts from a cruel fate"
-        PRINT,STRCOMPRESS(nBest_i__badii,/REMOVE_ALL) + $
-              " are going to the pit (=0.0)"
+        ;; PRINT,"Salvaged " + STRCOMPRESS(nBest_i__i,/REMOVE_ALL) + $
+        ;;       " eSpec delta-Ts from a cruel fate"
+        ;; PRINT,STRCOMPRESS(nBest_i__badii,/REMOVE_ALL) + $
+        ;;       " are going to the pit (=0.0)"
 
-        eSpec_delta_t[worst_i[best_i__ii]]    = espec_delta_t[best_i[best_i__i[best_i__ii]]]
-        eSpec_delta_t[worst_i[best_i__badii]] = 0.0 ;;Just have to discard them, because what are they?
+        ;; eSpec_delta_t[worst_i[best_i__ii]]    = espec_delta_t[best_i[best_i__i[best_i__ii]]]
+        ;; eSpec_delta_t[worst_i[best_i__badii]] = 0.0 ;;Just have to discard them, because what are they?
         
         ;; fixme                = WHERE(eSpec_delta_t GT 2,nFix)
         ;; IF nFix GT 0 THEN BEGIN
@@ -195,20 +200,24 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
   IF KEYWORD_SET(ionPlots) THEN BEGIN
      LOAD_NEWELL_ION_DB,ion,/DONT_LOAD_IN_MEMORY;,OUT_GOOD_I=basicClean_ion_i
+     ion_info = ion.info ;;For later
 
      IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
-        ion_delta_t            = [FLOAT(ion.x[1:-1]-ion.x[0:-2]),1.0]
+        ion_delta_t = GET_ESPEC_ION_DELTA_T(ion, $
+                                            DBNAME='ion')
 
-        worst                = WHERE(ion_delta_t LT 0,nWorst)
-        IF nWorst GT 0 THEN BEGIN
-           PRINT,'The worst!'
-           ;; STOP
-        ENDIF
+        ;; ion_delta_t            = [FLOAT(ion.x[1:-1]-ion.x[0:-2]),1.0]
 
-        fixme                = WHERE(ion_delta_t GT 2,nFix)
-        IF nFix GT 0 THEN BEGIN
-           ion_delta_t[fixme]  = 2.0
-        ENDIF
+        ;; worst                  = WHERE(ion_delta_t LT 0,nWorst)
+        ;; IF nWorst GT 0 THEN BEGIN
+        ;;    PRINT,'The worst!'
+        ;;    ;; STOP
+        ;; ENDIF
+
+        ;; fixme                  = WHERE(ion_delta_t GT 2,nFix)
+        ;; IF nFix GT 0 THEN BEGIN
+        ;;    ion_delta_t[fixme]  = 2.0
+        ;; ENDIF
      ENDIF
 
      IF ~KEYWORD_SET(for_IMF_screening) THEN BEGIN ;If doing IMF stuff, GET_RESTRICTED_AND_INTERPED_DB_INDICES will handle this
