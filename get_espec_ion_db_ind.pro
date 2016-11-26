@@ -35,6 +35,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                               DONT_LOAD_IN_MEMORY=nonMem, $
                               ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
                               ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
+                              ESPEC__REMOVE_OUTLIERS=eSpec__remove_outliers, $
                               PRINT_PARAM_SUMMARY=print_param_summary
   
   COMPILE_OPT idl2
@@ -522,6 +523,23 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
            PRINTF,lun,"Please use charIERange=[minCharIE maxCharIE]"
            RETURN, -1
         ENDELSE
+     ENDIF
+
+     IF KEYWORD_SET(eSpec__remove_outliers) AND ~is_ion THEN BEGIN
+        inlier_i = GET_FASTDB_OUTLIER_INDICES(dbStruct, $
+                                               /FOR_ESPEC, $
+                                               /REMOVE_OUTLIERS, $
+                                               USER_INDS=region_i, $
+                                               ;; ONLY_UPPER=only_upper, $
+                                               /ONLY_UPPER, $
+                                               ONLY_LOWER=only_lower, $
+                                               ;; LOG_OUTLIERS=log_outliers, $
+                                               /LOG_OUTLIERS, $
+                                               LOG__ABS=log__abs, $
+                                               LOG__NEG=log__neg, $
+                                               /ADD_SUSPECTED)
+                                               ;; ADD_SUSPECTED=add_suspected)
+        region_i = CGSETINTERSECTION(region_i,inlier_i)
      ENDIF
 
      ;;gotta screen to make sure it's in ACE db too:
