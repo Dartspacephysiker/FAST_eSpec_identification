@@ -51,26 +51,36 @@ FUNCTION GET_ESPEC_STATISTICS, $
   ENDCASE
 
 
-  CASE 1 OF
-     KEYWORD_SET(pos_only): BEGIN
-        discret_inds = CGSETINTERSECTION(eSpec_i,WHERE(eDat GT 0),NORESULT=-1,COUNT=nDiscret)
-        stats_name += '--pos'
+  discret_inds = GET_POS_NEG_INDICES(data, $
+                                     USER_INDS=eSpec_i, $
+                                     POS_ONLY=pos_only, $
+                                     NEG_ONLY=neg_only, $
+                                     INCLUDE_WHERE_EQ_0=inc_0, $
+                                     FINITE=finite, $
+                                     ;; RETURN_STRUCT=struct, $
+                                     OUT_STATS_NAME=stats_name, $
+                                     /VERBOSE)
 
-        PRINT,STRCOMPRESS(nDiscret,/REMOVE_ALL) + ' positive inds here'
-        PRINT,"(i.e., " + STRCOMPRESS(N_ELEMENTS(eSpec_i)-nDiscret,/REMOVE_ALL) + " are negative)"
-     END
-     KEYWORD_SET(neg_only): BEGIN
-        discret_inds = CGSETINTERSECTION(eSpec_i,WHERE(eDat LT 0),NORESULT=-1,COUNT=nDiscret)
-        stats_name += '--neg'
+  ;; CASE 1 OF
+  ;;    KEYWORD_SET(pos_only): BEGIN
+  ;;       discret_inds = CGSETINTERSECTION(eSpec_i,WHERE(eDat GT 0),NORESULT=-1,COUNT=nDiscret)
+  ;;       stats_name += '--pos'
 
-        PRINT,STRCOMPRESS(nDiscret,/REMOVE_ALL) + ' negative inds here'
-        PRINT,"(i.e., " + STRCOMPRESS(N_ELEMENTS(eSpec_i)-nDiscret,/REMOVE_ALL) + " are positive)"
-     END
-     ELSE: BEGIN
-        discret_inds = eSpec_i
-        nDiscret     = N_ELEMENTS(eSpec_i)
-     END
-  ENDCASE
+  ;;       PRINT,STRCOMPRESS(nDiscret,/REMOVE_ALL) + ' positive inds here'
+  ;;       PRINT,"(i.e., " + STRCOMPRESS(N_ELEMENTS(eSpec_i)-nDiscret,/REMOVE_ALL) + " are negative)"
+  ;;    END
+  ;;    KEYWORD_SET(neg_only): BEGIN
+  ;;       discret_inds = CGSETINTERSECTION(eSpec_i,WHERE(eDat LT 0),NORESULT=-1,COUNT=nDiscret)
+  ;;       stats_name += '--neg'
+
+  ;;       PRINT,STRCOMPRESS(nDiscret,/REMOVE_ALL) + ' negative inds here'
+  ;;       PRINT,"(i.e., " + STRCOMPRESS(N_ELEMENTS(eSpec_i)-nDiscret,/REMOVE_ALL) + " are positive)"
+  ;;    END
+  ;;    ELSE: BEGIN
+  ;;       discret_inds = eSpec_i
+  ;;       nDiscret     = N_ELEMENTS(eSpec_i)
+  ;;    END
+  ;; ENDCASE
 
   IF KEYWORD_SET(log_stats) THEN BEGIN
      eDat[discret_inds] = ALOG10( ( KEYWORD_SET(neg_only) ? ABS(eDat) : eDat )[discret_inds])
@@ -87,7 +97,6 @@ FUNCTION GET_ESPEC_STATISTICS, $
                STATS_NAME=stats_name, $
                BPD__OUTLIERS=BPDOutliers, $
                BPD__SUSPECTED_OUTLIERS=BPDSusOutliers)
-
 
   IF ARG_PRESENT(out_i) THEN BEGIN
      out_i = TEMPORARY(discret_inds)
