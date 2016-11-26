@@ -56,9 +56,9 @@ PRO GET_ESPEC_INDS_BY_TYPE,eSpec,m_i,b_i,d_i, $
   ENDIF
 
   IF ~KEYWORD_SET(quiet) THEN BEGIN
-     PRINT,opener+'N M: ' + STRCOMPRESS(mCount,/REMOVE_ALL)
-     PRINT,opener+'N B: ' + STRCOMPRESS(bCount,/REMOVE_ALL)
-     PRINT,opener+'N D: ' + STRCOMPRESS(dCount,/REMOVE_ALL)
+     PRINT,opener+'N M: ' + STRCOMPRESS(KEYWORD_SET(mCount) ? mCount : N_m,/REMOVE_ALL)
+     PRINT,opener+'N B: ' + STRCOMPRESS(KEYWORD_SET(bCount) ? bCount : N_b,/REMOVE_ALL)
+     PRINT,opener+'N D: ' + STRCOMPRESS(KEYWORD_SET(dCount) ? dCount : N_d,/REMOVE_ALL)
   ENDIF
   
   IF m_i[0] EQ -1 THEN skip_me[0] = 1
