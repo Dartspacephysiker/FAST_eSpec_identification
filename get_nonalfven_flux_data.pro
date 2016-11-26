@@ -6,6 +6,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             NONALFVEN__ALL_FLUXES=nonalfven__all_fluxes, $
                             ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
                             ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
+                            ESPEC__REMOVE_OUTLIERS=eSpec__remove_outliers, $
                             NONALFVEN__NEWELLPLOT_PROBOCCURRENCE=nonAlfven__newellPlot_probOccurrence, $
                             DESPUN_ALF_DB=despun_alf_db, $
                             USE_AACGM=use_AACGM, $
@@ -192,6 +193,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                             DONT_LOAD_IN_MEMORY=nonMem, $
                                             ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
                                             ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
+                                            ESPEC__REMOVE_OUTLIERS=eSpec__remove_outliers, $
                                             /PRINT_PARAM_SUMMARY)
 
         nBef_eSpec           = N_ELEMENTS(good_eSpec_i)
@@ -380,6 +382,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                /FOR_ESPEC_OR_ION_DB, $
                                ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
                                ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
+                               ESPEC__REMOVE_OUTLIERS=eSpec__remove_outliers, $
                                RESTRICT_WITH_THESE_I=restrict_with_these_eSpec_i, $
                                RESET_GOOD_INDS=reset_good_inds, $
                                DONT_LOAD_IN_MEMORY=nonMem) ;; , $
