@@ -602,6 +602,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         je_lims  = [0,2.855e10] ;Drop 0.25% of the broadbands
         jee_lims = [0,1.043e2]  ;Drop 0.25% of the broadbands
 
+        je_lims  = [0,3.36e9] ;Drop 1.0% of all
+        jee_lims = [0,3.1172] ;Drop 1.0% of all
+
         ;; percentToDrop = N_ELEMENTS(WHERE( ( (espec.broad EQ 1) OR (eSpec.broad EQ 2) ) AND $
         ;;                                   ( eSpec.je GT 4e10 ) ) ) / $
         ;;                 FLOAT(N_ELEMENTS(WHERE( ( (espec.broad EQ 1) OR $
@@ -627,67 +630,68 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
 
 
-        IF KEYWORD_SET(eSpec__remove_outliers) AND ~is_ion THEN BEGIN
+        ;; IF KEYWORD_SET(eSpec__remove_outliers) AND ~is_ion THEN BEGIN
 
-        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-           ;;NEW WAY
-           GET_ESPEC_INDS_BY_TYPE,NEWELL__eSpec, $ ;m_i,b_i,d_i, $
-                                  /LISTPLEASE, $
-                                  ;; N_ARR=NArr, $
-                                  OUT_I_LIST=i_list, $
-                                  ;; ONLY_STRICT=only_strict, $
-                                  ;; ONLY_NONSTRICT=only_nonStrict, $
-                                  USER_INDS=good_i, $
-                                  NO_INDS_AVAILABLE=skip_me, $
-                                  QUIET=quiet
+        ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;;    ;;NEW WAY
+        ;;    GET_ESPEC_INDS_BY_TYPE,NEWELL__eSpec, $ ;m_i,b_i,d_i, $
+        ;;                           /LISTPLEASE, $
+        ;;                           ;; N_ARR=NArr, $
+        ;;                           OUT_I_LIST=i_list, $
+        ;;                           ;; ONLY_STRICT=only_strict, $
+        ;;                           ;; ONLY_NONSTRICT=only_nonStrict, $
+        ;;                           USER_INDS=good_i, $
+        ;;                           NO_INDS_AVAILABLE=skip_me, $
+        ;;                           QUIET=quiet
 
-           final_i_list = LIST()
-           FOR k=0,N_ELEMENTS(i_list)-1 DO BEGIN
+        ;;    ;; final_i_list = LIST()
+        ;;    ;; FOR k=0,N_ELEMENTS(i_list)-1 DO BEGIN
 
-              IF skip_me[k] THEN CONTINUE
+        ;;    ;;    IF skip_me[k] THEN CONTINUE
 
-              tmp_i = i_list[k]
+        ;;    ;;    tmp_i = i_list[k]
 
-              tmpInlier_i = GET_FASTDB_OUTLIER_INDICES(dbStruct, $
-                                                    /FOR_ESPEC, $
-                                                    /REMOVE_OUTLIERS, $
-                                                    USER_INDS=tmp_i, $
-                                                    ;; ONLY_UPPER=only_upper, $
-                                                    /ONLY_UPPER, $
-                                                    ONLY_LOWER=only_lower, $
-                                                    ;; LOG_OUTLIERS=log_outliers, $
-                                                    /LOG_OUTLIERS, $
-                                                    LOG__ABS=log__abs, $
-                                                    LOG__NEG=log__neg, $
-                                                    /ADD_SUSPECTED)
+        ;;    ;;    tmpInlier_i = GET_FASTDB_OUTLIER_INDICES(dbStruct, $
+        ;;    ;;                                          /FOR_ESPEC, $
+        ;;    ;;                                          /REMOVE_OUTLIERS, $
+        ;;    ;;                                          USER_INDS=tmp_i, $
+        ;;    ;;                                          ;; ONLY_UPPER=only_upper, $
+        ;;    ;;                                          /ONLY_UPPER, $
+        ;;    ;;                                          ONLY_LOWER=only_lower, $
+        ;;    ;;                                          ;; LOG_OUTLIERS=log_outliers, $
+        ;;    ;;                                          /LOG_OUTLIERS, $
+        ;;    ;;                                          LOG__ABS=log__abs, $
+        ;;    ;;                                          LOG__NEG=log__neg, $
+        ;;    ;;                                          /ADD_SUSPECTED)
 
-              IF (tmpInlier_i[0] NE -1) THEN BEGIN
-                 final_i_list.Add,tmpInlier_i
-              ENDIF ELSE BEGIN
-                 STOP
-              ENDELSE
+        ;;    ;;    IF (tmpInlier_i[0] NE -1) THEN BEGIN
+        ;;    ;;       final_i_list.Add,tmpInlier_i
+        ;;    ;;    ENDIF ELSE BEGIN
+        ;;    ;;       STOP
+        ;;    ;;    ENDELSE
 
-              ;; ADD_SUSPECTED=add_suspected)
-           ENDFOR
+        ;;    ;;    ;; ADD_SUSPECTED=add_suspected)
+        ;;    ;; ENDFOR
 
-           final_i = LIST_TO_1DARRAY(TEMPORARY(final_i_list))
-        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-           ;;OLD WAY
-           ;; inlier_i = GET_FASTDB_OUTLIER_INDICES(dbStruct, $
-           ;;                                       /FOR_ESPEC, $
-           ;;                                       /REMOVE_OUTLIERS, $
-           ;;                                       USER_INDS=region_i, $
-           ;;                                       ;; ONLY_UPPER=only_upper, $
-           ;;                                       /ONLY_UPPER, $
-           ;;                                       ONLY_LOWER=only_lower, $
-           ;;                                       ;; LOG_OUTLIERS=log_outliers, $
-           ;;                                       /LOG_OUTLIERS, $
-           ;;                                       LOG__ABS=log__abs, $
-           ;;                                       LOG__NEG=log__neg, $
-           ;;                                       /ADD_SUSPECTED)
+        ;;    ;; final_i = LIST_TO_1DARRAY(TEMPORARY(final_i_list))
 
-           good_i = CGSETINTERSECTION(good_i,TEMPORARY(final_i))
-        ENDIF
+        ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;;    ;;OLD WAY
+        ;;    ;; inlier_i = GET_FASTDB_OUTLIER_INDICES(dbStruct, $
+        ;;    ;;                                       /FOR_ESPEC, $
+        ;;    ;;                                       /REMOVE_OUTLIERS, $
+        ;;    ;;                                       USER_INDS=region_i, $
+        ;;    ;;                                       ;; ONLY_UPPER=only_upper, $
+        ;;    ;;                                       /ONLY_UPPER, $
+        ;;    ;;                                       ONLY_LOWER=only_lower, $
+        ;;    ;;                                       ;; LOG_OUTLIERS=log_outliers, $
+        ;;    ;;                                       /LOG_OUTLIERS, $
+        ;;    ;;                                       LOG__ABS=log__abs, $
+        ;;    ;;                                       LOG__NEG=log__neg, $
+        ;;    ;;                                       /ADD_SUSPECTED)
+
+        ;;    good_i = CGSETINTERSECTION(good_i,TEMPORARY(final_i))
+        ;; ENDIF
 
 
 

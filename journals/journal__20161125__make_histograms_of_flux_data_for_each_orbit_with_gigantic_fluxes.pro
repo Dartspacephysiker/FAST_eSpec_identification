@@ -21,10 +21,10 @@ PRO JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC
 
   ;;Plot options
   output_fa_crossing  = 1
-  skip_histos         = 0
+  skip_histos         = 1
 
   ;;txt output
-  output_txtFile      = 1
+  output_txtFile      = 0
 
   ;;Histo plot options (if ~skip_histos)
   eFlux               = 1
