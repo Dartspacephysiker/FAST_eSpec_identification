@@ -51,7 +51,7 @@ FUNCTION GET_ESPEC_STATISTICS, $
   ENDCASE
 
 
-  discret_inds = GET_POS_NEG_INDICES(data, $
+  discret_inds = GET_POS_NEG_INDICES(eDat, $
                                      USER_INDS=eSpec_i, $
                                      POS_ONLY=pos_only, $
                                      NEG_ONLY=neg_only, $

@@ -637,9 +637,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                   OUT_I_LIST=i_list, $
                                   ;; ONLY_STRICT=only_strict, $
                                   ;; ONLY_NONSTRICT=only_nonStrict, $
-                                  ;; USER_INDS=user_inds, $
+                                  USER_INDS=good_i, $
                                   NO_INDS_AVAILABLE=skip_me, $
                                   QUIET=quiet
+
            final_i_list = LIST()
            FOR k=0,N_ELEMENTS(i_list)-1 DO BEGIN
 

@@ -11,7 +11,7 @@ PRO JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC
   doCharE = 0
 
   ;;Define "gigantic"
-  gigantic_Jee   = 5e2
+  gigantic_Jee   = 1e2
   gigantic_Je    = '?'
   gigantic_charE = 1e4
 
@@ -20,13 +20,13 @@ PRO JOURNAL__20161125__MAKE_HISTOGRAMS_OF_FLUX_DATA_FOR_EACH_ORBIT_WITH_GIGANTIC
   force_load_DB   = 0
 
   ;;Plot options
-  output_fa_crossing  = 0
-  skip_histos         = 1
+  output_fa_crossing  = 1
+  skip_histos         = 0
 
   ;;txt output
   output_txtFile      = 1
 
-  ;;Histo plot options (if ~skip_histos)x
+  ;;Histo plot options (if ~skip_histos)
   eFlux               = 1
   eNumFlux            = 0
   charE               = 0
