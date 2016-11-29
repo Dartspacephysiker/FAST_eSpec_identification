@@ -14,6 +14,7 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
                           NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
                           NEWELLPLOT_NORMALIZE=newellPlot_normalize, $
                           NEWELLPLOT_PROBOCCURRENCE=newellPlot_probOccurrence, $
+                          COMBINE_ACCELERATED=comb_accelerated, $
                           TMPLT_H2DSTR=tmplt_h2dStr, $
                           H2DSTRS=h2dStrs, $
                           ;; H2DMASKSTR=h2dMaskStr, $
@@ -41,6 +42,7 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
   mlt_broad    = eSpec.mlt[broad_i]-shiftM
   mlt_diffuse  = eSpec.mlt[diffuse_i]-shiftM
 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Screen 'em for negs
   mNegMLT = WHERE(mlt_mono LT 0)
   bNegMLT = WHERE(mlt_broad LT 0)
@@ -65,8 +67,29 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Bonus
-  titles                    = ['Monoenergetic','Broadband','Diffuse']
-  dataNames                 = ['mono'         ,'broad'    ,'diffuse']
+  titles        = ['Monoenergetic','Broadband','Diffuse']
+  dataNames     = ['mono'         ,'broad'    ,'diffuse']
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;Combined?
+  IF KEYWORD_SET(comb_accelerated) THEN BEGIN
+     comb_i    = CGSETUNION(mono_i,broad_i)
+
+     mlt_comb  = eSpec.mlt[comb_i]-shiftM
+     cNegMLT   = WHERE(mlt_comb LT 0)
+     IF cNegMLT[0] NE -1 THEN BEGIN
+        mlt_comb[cNegMLT] = mlt_comb[cNegMLT] + 24
+     ENDIF
+     
+     ilat_comb  = eSpec.ilat[comb_i]
+
+     mlt_list.Add,mlt_comb
+     ilat_list.Add,ilat_comb
+
+     titles     = [titles   ,'Accelerated']
+     dataNames  = [dataNames,'accel'      ]
+
+  ENDIF
 
   IF KEYWORD_SET(nonAlf) THEN BEGIN
      dataNames += '_nonAlf'
@@ -79,7 +102,7 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
   h2dStrs                   = !NULL
   dataRawPtrs               = !NULL
   newell_nonzero_nev_i_list = LIST()  
-  nPlots                    = 3
+  nPlots                    = 3 + KEYWORD_SET(comb_accelerated)
   FOR i=0,nPlots-1 DO BEGIN
      tmpDataName             = dataNames[i]
 
@@ -137,6 +160,7 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
 
      ;;Get the data
      GET_NEWELL_PROBOCCURRENCE,h2dStrs, $
+                               ;; COMBINE_ACCELERATED=comb_accelerated, $
                                OUT_H2D_LIST=tmp_H2D_list
      FOR i=0,N_ELEMENTS(h2dStrs)-1 DO BEGIN
         h2dStrs[i].data                 = tmp_H2D_list[i]

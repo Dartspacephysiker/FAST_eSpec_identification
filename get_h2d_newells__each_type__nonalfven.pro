@@ -14,6 +14,7 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                                           NEWELLPLOT_NORMALIZE=newellPlot_normalize, $
                                           NEWELLPLOT_PROBOCCURRENCE=newellPlot_probOccurrence, $
                                           NEWELL_2009_INTERP=newell_2009_interp, $
+                                          COMBINE_ACCELERATED=comb_accelerated, $
                                           TMPLT_H2DSTR=tmplt_h2dStr, $
                                           H2DSTRS=h2dStrs, $
                                           ;; H2DMASKSTR=h2dMaskStr, $
@@ -77,6 +78,7 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                         NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
                         NEWELLPLOT_NORMALIZE=newellPlot_normalize, $
                         NEWELLPLOT_PROBOCCURRENCE=newellPlot_probOccurrence, $
+                        COMBINE_ACCELERATED=comb_accelerated, $
                         TMPLT_H2DSTR=tmplt_h2dStr, $
                         H2DSTRS=h2dStrs, $
                         ;; H2DMASKSTR=h2dMaskStr, $

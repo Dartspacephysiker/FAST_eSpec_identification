@@ -12,6 +12,7 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
                                 OUT_TITLES=out_titles, $
                                 OUT_DATANAMESUFFS=out_datanamesuffs, $
                                 OUT_I_LIST=out_i_list, $
+                                  COMBINE_ACCELERATED=comb_accelerated, $
                                 ;; DESPUN_ALF_DB=despun_alf_db, $
                                 SUM_LUN=sum_lun
 
@@ -101,4 +102,10 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
   out_datanamesuffs = "_" + ['broad','diff','mono'] ;,'BD','BM','DM','BDM','Anom']
   out_i_list        = LIST(pure_b_i,pure_d_i,pure_m_i) ;,mix_bd_i,mix_bm_i,mix_dm_i,mix_bdm_i,anomal_i)
 
+  IF KEYWORD_SET(comb_accelerated) THEN BEGIN
+     out_titles = [out_titles,'(accel.)']
+     out_datanamesuffs = [out_datanamesuffs,"_accel"]
+     out_i_list.ADD,CGSETUNION(pure_b_i,pure_m_i)
+  ENDIF
+  
 END

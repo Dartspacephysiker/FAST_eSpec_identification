@@ -1,9 +1,11 @@
 ;2016/06/11
 PRO GET_NEWELL_PROBOCCURRENCE,h2dStrs, $
-                                   OUT_H2D_LIST=out_H2D_list
+                              ;; COMBINE_ACCELERATED=comb_accelerated, $                              
+                              OUT_H2D_LIST=out_H2D_list
 
   COMPILE_OPT idl2
 
+  ;;Denominator doesn't change, even if we have accelerated
   denom                             = h2dStrs[0].data +h2dStrs[1].data+h2dStrs[2].data
   tmp_div_i                         = WHERE(denom GT 0)
   IF tmp_div_i[0] EQ -1 THEN STOP
