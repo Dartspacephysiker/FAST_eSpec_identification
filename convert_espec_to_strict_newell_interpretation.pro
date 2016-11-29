@@ -7,6 +7,7 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
    NM_CONVTOBS=nM_ConvToBS, $
    FAVOR_BROADSTRICT_OVER_MONO=favor_broadStrict_over_mono, $
    HUGE_STRUCTURE=huge_structure, $
+   HAS_NO_INFO_STRUCT=look__im_homeless, $
    VERBOSE=verbose
    
    
@@ -27,8 +28,10 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
 
    ENDIF ELSE BEGIN
       
-      PRINT,"How did you come to CONVERT_ESPEC_TO_STRICT[...] without having an info struct?"
-      STOP
+      IF ~KEYWORD_SET(look__im_homeless) THEN BEGIN
+         PRINT,"How did you come to CONVERT_ESPEC_TO_STRICT[...] without having an info struct?"
+         STOP
+      ENDIF
       info  = {converted        : 0B, $
                Newell2009interp : 0B, $
                correctedFluxes  : 0B}
