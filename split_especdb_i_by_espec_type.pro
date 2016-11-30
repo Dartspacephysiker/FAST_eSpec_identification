@@ -1,39 +1,26 @@
 ;;06/08/16
 PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
-                                PURE_B_I=pure_b_i, $
-                                PURE_D_I=pure_d_i, $
-                                PURE_M_I=pure_m_i, $
-                                ;; MIX_BD_I=mix_bd_i, $
-                                ;; MIX_BM_I=mix_bm_i, $
-                                ;; MIX_DM_I=mix_dm_i, $
-                                ;; MIX_BDM_I=mix_bdm_i, $
-                                ANOMAL_I=anomal_i, $
-                                SUMMARY=summary, $
-                                OUT_TITLES=out_titles, $
-                                OUT_DATANAMESUFFS=out_datanamesuffs, $
-                                OUT_I_LIST=out_i_list, $
+                                  PURE_B_I=pure_b_i, $
+                                  PURE_D_I=pure_d_i, $
+                                  PURE_M_I=pure_m_i, $
+                                  ;; MIX_BD_I=mix_bd_i, $
+                                  ;; MIX_BM_I=mix_bm_i, $
+                                  ;; MIX_DM_I=mix_dm_i, $
+                                  ;; MIX_BDM_I=mix_bdm_i, $
+                                  ANOMAL_I=anomal_i, $
+                                  SUMMARY=summary, $
+                                  OUT_TITLES=out_titles, $
+                                  OUT_DATANAMESUFFS=out_datanamesuffs, $
+                                  OUT_I_LIST=out_i_list, $
                                   COMBINE_ACCELERATED=comb_accelerated, $
-                                ;; DESPUN_ALF_DB=despun_alf_db, $
-                                SUM_LUN=sum_lun
+                                  ;; DESPUN_ALF_DB=despun_alf_db, $
+                                  SUM_LUN=sum_lun
 
   COMPILE_OPT IDL2
 
   LOAD_NEWELL_ESPEC_DB,eSpec
 
-  ;; LOAD_ALF_NEWELL_ESPEC_DB,eSpec,alf_i__good_eSpec, $
-  ;;                          NEWELLDBFILE=NewellDBFile, $
-  ;;                          NEWELLDBDIR=NewellDBDir, $
-  ;;                          DESPUN_ALF_DB=is_despun
-
-  ;; outFile       = STRMID(NewellDBFile,0,STRPOS(newelldbfile,'TOTAL')) + $
-  ;;                    ;; 'all_good_alf_eSpec_i--CATEGORIZED--' + $
-  ;;                     'all_good_alf_eSpec_i--killed_befs_afts--CATEGORIZED--' + $
-  ;;                    STRMID(NewellDBFile,STRPOS(NewellDBFile,'Orbs_'),STRPOS(NewellDBFile,'2016')-STRPOS(NewellDBFile,'Orbs_')) + $
-  ;;                    ;; GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '.sav'
-  ;;                 '20160606' + '.sav'
-
-
-  ;; RESTORE,NewellDBDir+outFile
+  
 
   pure_b_i      = WHERE(eSpec.broad EQ 1 OR eSpec.broad EQ 2)
   pure_d_i      = WHERE(eSpec.diffuse EQ 1 OR eSpec.diffuse EQ 2)
@@ -45,15 +32,15 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
   anomal_i      = CGSETDIFFERENCE(good_i,[pure_b_i,pure_d_i,pure_m_i],NORESULT=-1)
 
   IF pure_b_i[0] NE -1 THEN BEGIN
-     pure_b_i   = CGSETINTERSECTION(good_i,pure_b_i,COUNT=nB)
+     pure_b_i   = CGSETINTERSECTION(good_i,pure_b_i,COUNT=nB,NORESULT=-1)
   ENDIF
 
   IF pure_d_i[0] NE -1 THEN BEGIN
-     pure_d_i   = CGSETINTERSECTION(good_i,pure_d_i,COUNT=nD)
+     pure_d_i   = CGSETINTERSECTION(good_i,pure_d_i,COUNT=nD,NORESULT=-1)
   ENDIF
 
   IF pure_m_i[0] NE -1 THEN BEGIN
-     pure_m_i   = CGSETINTERSECTION(good_i,pure_m_i,COUNT=nM)
+     pure_m_i   = CGSETINTERSECTION(good_i,pure_m_i,COUNT=nM,NORESULT=-1)
   ENDIF
 
   ;; IF mix_bd_i[0] NE -1 THEN BEGIN
@@ -74,7 +61,7 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
 
   IF anomal_i[0] NE -1 THEN BEGIN
      ;; anomal_i   = CGSETINTERSECTION(good_i,anomal_i,COUNT=nAnom)
-     anomal_i   = CGSETINTERSECTION(good_i,anomal_i,COUNT=nAnom)
+     anomal_i   = CGSETINTERSECTION(good_i,anomal_i,COUNT=nAnom,NORESULT=-1)
   ENDIF
   IF N_ELEMENTS(nAnom) EQ 0 THEN nAnom = 0
 
@@ -100,12 +87,28 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
 
   out_titles        = " (" + ['Broadband','Diffuse','Monoenergetic'] + ")" ;,"Broad/Diff",'Broad/Mono','Diff/Mono','BDM','Anomalous'] + ")"
   out_datanamesuffs = "_" + ['broad','diff','mono'] ;,'BD','BM','DM','BDM','Anom']
-  out_i_list        = LIST(pure_b_i,pure_d_i,pure_m_i) ;,mix_bd_i,mix_bm_i,mix_dm_i,mix_bdm_i,anomal_i)
+  out_i_list        = LIST(nB GT 0 ? pure_b_i : !NULL, $
+                           nD GT 0 ? pure_d_i : !NULL, $
+                           nM GT 0 ? pure_m_i : !NULL) ;,mix_bd_i,mix_bm_i,mix_dm_i,mix_bdm_i,anomal_i)
 
   IF KEYWORD_SET(comb_accelerated) THEN BEGIN
      out_titles = [out_titles,'(accel.)']
      out_datanamesuffs = [out_datanamesuffs,"_accel"]
-     out_i_list.ADD,CGSETUNION(pure_b_i,pure_m_i)
+     CASE 1 OF
+        (nB GT 0) AND (nM GT 0): BEGIN
+           out_i_list.ADD,CGSETUNION(pure_b_i,pure_m_i)
+        END
+        (nB GT 0): BEGIN
+           out_i_list.ADD,pure_b_i
+        END
+        (nM GT 0): BEGIN
+           out_i_list.ADD,pure_M_i
+        END
+        ELSE: BEGIN
+           out_i_list.ADD,!NULL
+        END
+     ENDCASE
+     
   ENDIF
   
 END
