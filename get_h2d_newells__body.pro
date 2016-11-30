@@ -88,6 +88,7 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
 
      titles     = [titles   ,'Accelerated']
      dataNames  = [dataNames,'accel'      ]
+     Newell_plotRange = [[Newell_plotRange],[Newell_plotRange[*,0]+Newell_plotRange[*,1]]]
 
   ENDIF
 
