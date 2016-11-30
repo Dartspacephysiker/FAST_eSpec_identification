@@ -32,43 +32,43 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Indices
-  mono_i       = WHERE((eSpec.mono   EQ 1) OR (eSpec.mono  EQ 2),nMono)
   broad_i      = WHERE((eSpec.broad  EQ 1) OR (eSpec.broad EQ 2),nBroad)
   diffuse_i    = WHERE(eSpec.diffuse EQ 1,nDiffuse)
+  mono_i       = WHERE((eSpec.mono   EQ 1) OR (eSpec.mono  EQ 2),nMono)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MLTs
-  mlt_mono     = eSpec.mlt[mono_i]-shiftM
   mlt_broad    = eSpec.mlt[broad_i]-shiftM
   mlt_diffuse  = eSpec.mlt[diffuse_i]-shiftM
+  mlt_mono     = eSpec.mlt[mono_i]-shiftM
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Screen 'em for negs
-  mNegMLT = WHERE(mlt_mono LT 0)
   bNegMLT = WHERE(mlt_broad LT 0)
   dNegMLT = WHERE(mlt_diffuse LT 0)
-  IF mNegMLT[0] NE -1 THEN BEGIN
-     mlt_mono[mNegMLT]    = mlt_mono[mNegMLT] + 24
-  ENDIF
+  mNegMLT = WHERE(mlt_mono LT 0)
   IF bNegMLT[0] NE -1 THEN BEGIN
      mlt_broad[bNegMLT]   = mlt_broad[bNegMLT] + 24
   ENDIF
   IF dNegMLT[0] NE -1 THEN BEGIN
      mlt_diffuse[dNegMLT] = mlt_diffuse[dNegMLT] + 24
   ENDIF
-  mlt_list      = LIST(TEMPORARY(mlt_mono),TEMPORARY(mlt_broad),TEMPORARY(mlt_diffuse))
+  IF mNegMLT[0] NE -1 THEN BEGIN
+     mlt_mono[mNegMLT]    = mlt_mono[mNegMLT] + 24
+  ENDIF
+  mlt_list      = LIST(TEMPORARY(mlt_broad),TEMPORARY(mlt_diffuse),TEMPORARY(mlt_mono))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;ILATs
-  ilat_mono     = eSpec.ilat[mono_i]
   ilat_broad    = eSpec.ilat[broad_i]
   ilat_diffuse  = eSpec.ilat[diffuse_i]
-  ilat_list     = LIST(TEMPORARY(ilat_mono),TEMPORARY(ilat_broad),TEMPORARY(ilat_diffuse))
+  ilat_mono     = eSpec.ilat[mono_i]
+  ilat_list     = LIST(TEMPORARY(ilat_broad),TEMPORARY(ilat_diffuse),TEMPORARY(ilat_mono))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Bonus
-  titles        = ['Monoenergetic','Broadband','Diffuse']
-  dataNames     = ['mono'         ,'broad'    ,'diffuse']
+  titles        = ['Broadband','Diffuse','Monoenergetic']
+  dataNames     = ['broad'    ,'diffuse','mono'         ]
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Combined?

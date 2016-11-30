@@ -608,7 +608,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
   ENDIF
 
   ;;Now get the data
-  IF KEYWORD_SET(ePlots) THEN BEGIN
+  IF KEYWORD_SET(ePlots) OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
      eFluxPlotType           = 'eFlux_nonAlfven' + $
                                ( KEYWORD_SET(eSpec__Newell_2009_interp) ? $
                                  '--2009_interp' : '' )
@@ -645,7 +645,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
 
   ;;Last, get the MLTs and ILATs
   ;;Electrons
-  IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
+  IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) OR KEYWORD_SET(nonAlfven__newellPlot_probOccurrence) THEN BEGIN
      ;; eSpec__mlts          = eSpec.mlt[eSpec_i]
      ;; eSpec__ilats         = eSpec.ilat[eSpec_i]
      eSpec__mlts             = eSpec.mlt
