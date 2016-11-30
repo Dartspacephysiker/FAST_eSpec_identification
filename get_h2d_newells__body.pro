@@ -204,7 +204,7 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
               ENDELSE
            END
            2: BEGIN
-              IF (pR_dimSize[0] EQ 2) AND (pR_dimSize[1] EQ 3) THEN BEGIN
+              IF (pR_dimSize[0] EQ 2) AND (pR_dimSize[1] GE 3) THEN BEGIN
                  h2dStrs[i].lim         = newell_plotRange[*,i]
               ENDIF ELSE BEGIN
                  h2dStrs[i].lim         = FLOAT([0,1])
