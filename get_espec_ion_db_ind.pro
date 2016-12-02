@@ -22,6 +22,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                               MAXILAT=maxI, $
                               BINILAT=binI, $
                               EQUAL_AREA_BINNING=EA_binning, $
+                              MIMC_STRUCT=MIMC_struct, $
+                              ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
                               ;; DO_LSHELL=do_lshell, $
                               ;; MINLSHELL=minL, $
                               ;; MAXLSHELL=maxL, $
@@ -84,7 +86,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      STOP
   ENDIF
 
-  IF ~KEYWORD_SET(do_not_set_defaults) THEN BEGIN
+  IF N_ELEMENTS(MIMC_struct) EQ 0 THEN BEGIN
+     STOP
      SET_DEFAULT_MLT_ILAT_AND_MAGC,MINMLT=minM,MAXMLT=maxM,BINM=binM, $
                                    MINILAT=minI,MAXILAT=maxI,BINI=binI, $
                                    MINLSHELL=minL,MAXLSHELL=maxL,BINL=binL, $
@@ -93,6 +96,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                    BOTH_HEMIS=both_hemis, $
                                    NORTH=north, $
                                    SOUTH=south, $
+                                   MIMC_STRUCT=MIMC_struct, $
                                    LUN=lun
   ENDIF
 
