@@ -10,6 +10,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                               ALTITUDERANGE=altitudeRange, $
                               CHARERANGE=charERange, $
                               CHARIERANGE=charIERange, $
+                              CHARE__NEWELL_THE_CUSP=charE__Newell_the_cusp, $
                               BOTH_HEMIS=both_hemis, $
                               HEMI=hemi, $
                               HWMAUROVAL=HwMAurOval, $
@@ -480,6 +481,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
            chare_i           = GET_CHARE_INDS(dbStruct, $
                                               charERange[0], $
                                               charERange[1], $
+                                              NEWELL_THE_CUSP=charE__Newell_the_cusp, $
                                               /FOR_ESPEC_DB, $
                                               LUN=lun)
            ;; chare             = ABS(dbStruct.jee/dbStruct.je)*6.242*1.0e11

@@ -37,6 +37,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                             ALTITUDERANGE=altitudeRange, $
                             CHARERANGE=charERange, $
                             CHARIERANGE=charIERange, $
+                            CHARE__NEWELL_THE_CUSP=charE__Newell_the_cusp, $
                             SAMPLE_T_RESTRICTION=sample_t_restriction, $
                             INCLUDE_32HZ=include_32Hz, $
                             DISREGARD_SAMPLE_T=disregard_sample_t, $
@@ -165,6 +166,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                             ORBRANGE=orbRange, $
                                             ALTITUDERANGE=altitudeRange, $
                                             CHARERANGE=charERange, $
+                                            CHARE__NEWELL_THE_CUSP=charE__Newell_the_cusp, $
                                             ;; CHARIERANGE=charIERange, $
                                             BOTH_HEMIS=both_hemis, $
                                             NORTH=north, $
@@ -229,6 +231,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                           ORBRANGE=orbRange, $
                                           ALTITUDERANGE=altitudeRange, $
                                           ;; CHARERANGE=charERange, $
+                                          CHARE__NEWELL_THE_CUSP=charE__Newell_the_cusp, $
                                           CHARIERANGE=charERange, $
                                           HEMI=hemi, $
                                           HWMAUROVAL=HwMAurOval, $
@@ -327,6 +330,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                                ALTITUDERANGE=altitudeRange, $
                                CHARERANGE=charERange, $
                                ;; CHARIERANGE=charIERange, $ ;Only for non-Alfvén ions
+                               CHARE__NEWELL_THE_CUSP=charE__Newell_the_cusp, $
                                SAMPLE_T_RESTRICTION=sample_t_restriction, $
                                INCLUDE_32HZ=include_32Hz, $
                                DISREGARD_SAMPLE_T=disregard_sample_t, $
@@ -400,6 +404,7 @@ PRO GET_NONALFVEN_FLUX_DATA,plot_i, $
                         ALTITUDERANGE=altitudeRange, $
                         ;; CHARERANGE=charERange, $
                         CHARIERANGE=charIERange, $ ;Only for non-Alfvén ions
+                        CHARE__NEWELL_THE_CUSP=charE__Newell_the_cusp, $
                         SAMPLE_T_RESTRICTION=sample_t_restriction, $
                         INCLUDE_32HZ=include_32Hz, $
                         DISREGARD_SAMPLE_T=disregard_sample_t, $
