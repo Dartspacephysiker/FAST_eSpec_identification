@@ -34,33 +34,33 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
   ;;This common block is defined ONLY here, in GET_ESPEC_ION_DB_IND, and in LOAD_NEWELL_ESPEC_DB
   @common__newell_espec.pro
   
-  IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
-     LOAD_NEWELL_ESPEC_DB,espec ;,/DONT_LOAD_IN_MEMORY
-  ENDIF ELSE BEGIN
-     ;; eSpec  = TEMPORARY(NEWELL__eSpec)
-     eSpec     = NEWELL__eSpec
-  ENDELSE
+  ;; IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
+  ;;    LOAD_NEWELL_ESPEC_DB,espec ;,/DONT_LOAD_IN_MEMORY
+  ;; ENDIF ELSE BEGIN
+  ;;    ;; eSpec  = TEMPORARY(NEWELL__eSpec)
+  ;;    eSpec     = NEWELL__eSpec
+  ;; ENDELSE
 
   IF KEYWORD_SET(newell_2009_interp) THEN BEGIN
-     IF ~eSpec.info.Newell2009interp THEN BEGIN
+     IF ~NEWELL__eSpec.info.Newell2009interp THEN BEGIN
         PRINT,"Well you've got yourself a mismatch. Figure it out."
         STOP
      ENDIF
   ENDIF
 
   tmp_eSpec    = { $
-                 ;;x       : eSpec.x[eSpec_i]         , $
-                 ;;orbit   : eSpec.orbit[eSpec_i]     , $
-                 MLT     : eSpec.mlt[eSpec_i]       , $
-                 ILAT    : eSpec.ilat[eSpec_i]      , $
-                 ;;ALT     : eSpec.alt[eSpec_i]       , $
-                 mono    : eSpec.mono[eSpec_i]      , $
-                 broad   : eSpec.broad[eSpec_i]     , $
-                 diffuse : eSpec.diffuse[eSpec_i]   , $
-                 info    : eSpec.info               }              ; , $
-  ;; Je:eSpec.Je[eSpec_i]            , $
-  ;; Jee:eSpec.Jee[eSpec_i]};;       , $
-  ;; nBad_eSpec:eSpec.nBad_eSpec[eSpec_i]}
+                 ;;x       : NEWELL__eSpec.x[eSpec_i]         , $
+                 ;;orbit   : NEWELL__eSpec.orbit[eSpec_i]     , $
+                 MLT     : NEWELL__eSpec.mlt[eSpec_i]       , $
+                 ILAT    : NEWELL__eSpec.ilat[eSpec_i]      , $
+                 ;;ALT     : NEWELL__eSpec.alt[eSpec_i]       , $
+                 mono    : NEWELL__eSpec.mono[eSpec_i]      , $
+                 broad   : NEWELL__eSpec.broad[eSpec_i]     , $
+                 diffuse : NEWELL__eSpec.diffuse[eSpec_i]   , $
+                 info    : NEWELL__eSpec.info               }              ; , $
+  ;; Je:NEWELL__eSpec.Je[eSpec_i]            , $
+  ;; Jee:NEWELL__eSpec.Jee[eSpec_i]};;       , $
+  ;; nBad_eSpec:NEWELL__eSpec.nBad_eSpec[eSpec_i]}
 
   ;;The main body
   GET_H2D_NEWELLS__BODY,tmp_eSpec, $

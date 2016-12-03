@@ -7,7 +7,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          NEWELLDBFILE=NewellDBFile, $
                          FORCE_LOAD_DB=force_load_db, $
                          DONT_LOAD_IN_MEMORY=nonMem, $
-                         DONT_PERFORM_CORRECTION=dont_perform_correction, $
+                         DONT_PERFORM_CORRECTION=dont_perform_SH_correction, $
                          DONT_CONVERT_TO_STRICT_NEWELL=dont_convert_to_strict_newell, $
                          COORDINATE_SYSTEM=coordinate_system, $
                          USE_AACGM_COORDS=use_aacgm, $
@@ -187,7 +187,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                                   REDUCE_DBSIZE=reduce_dbSize
 
      ;;Correct fluxes
-     IF ~(KEYWORD_SET(dont_perform_correction) OR (KEYWORD_SET(just_times) AND KEYWORD_SET(dont_perform_correction))) THEN BEGIN
+     IF ~(KEYWORD_SET(dont_perform_SH_correction) OR (KEYWORD_SET(just_times) AND KEYWORD_SET(dont_perform_SH_correction))) THEN BEGIN
         IF ~quiet THEN PRINT,"Correcting eSpec fluxes so that earthward is positive in SH..."
         IF FLOAT(N_ELEMENTS(WHERE(eSpec.jee LT 0 AND eSpec.ilat LT 0)))/N_ELEMENTS(WHERE(eSpec.ilat LT 0)) GT 0.1 THEN BEGIN
            eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])

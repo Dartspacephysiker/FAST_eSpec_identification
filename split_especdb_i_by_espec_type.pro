@@ -18,13 +18,16 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
 
   COMPILE_OPT IDL2
 
-  LOAD_NEWELL_ESPEC_DB,eSpec
+  @common__newell_espec.pro
+  IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
+     LOAD_NEWELL_ESPEC_DB
+     PRINT,"How??"
+     STOP
+  ENDIF
 
-  
-
-  pure_b_i      = WHERE(eSpec.broad EQ 1 OR eSpec.broad EQ 2)
-  pure_d_i      = WHERE(eSpec.diffuse EQ 1 OR eSpec.diffuse EQ 2)
-  pure_m_i      = WHERE(eSpec.mono EQ 1 OR eSpec.mono EQ 2)
+  pure_b_i      = WHERE(NEWELL__eSpec.broad EQ 1 OR NEWELL__eSpec.broad EQ 2)
+  pure_d_i      = WHERE(NEWELL__eSpec.diffuse EQ 1 OR NEWELL__eSpec.diffuse EQ 2)
+  pure_m_i      = WHERE(NEWELL__eSpec.mono EQ 1 OR NEWELL__eSpec.mono EQ 2)
   ;; mix_bd_i      = WHERE(mix_bd)
   ;; mix_bm_i      = WHERE(mix_bm)
   ;; mix_dm_i      = WHERE(mix_dm)
