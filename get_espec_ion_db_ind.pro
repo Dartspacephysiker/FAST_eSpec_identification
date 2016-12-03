@@ -226,12 +226,12 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                    LUN=lun
 
               IF ~KEYWORD_SET(nonMem) THEN BEGIN
-                 NEWELL__eSpec         = dbStruct
+                 NEWELL__eSpec         = TEMPORARY(dbStruct)
                  IF N_ELEMENTS(failCodes) GT 0 THEN BEGIN
-                    NEWELL__failCodes  = failCodes
+                    NEWELL__failCodes  = TEMPORARY(failCodes)
                  ENDIF
-                 NEWELL__dbFile        = dbFile
-                 NEWELL__dbDir         = dbDir
+                 NEWELL__dbFile        = TEMPORARY(dbFile)
+                 NEWELL__dbDir         = TEMPORARY(dbDir)
               ENDIF
 
            ENDELSE

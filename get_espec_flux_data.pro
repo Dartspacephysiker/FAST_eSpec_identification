@@ -162,8 +162,8 @@ PRO GET_ESPEC_FLUX_DATA, $
                                             DONT_LOAD_IN_MEMORY=nonMem, $
                                             ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
                                             ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
-                                            ESPEC__REMOVE_OUTLIERS=eSpec__remove_outliers, $
-                                            /PRINT_PARAM_SUMMARY)
+                                            ESPEC__REMOVE_OUTLIERS=eSpec__remove_outliers);, $
+                                            ;; PRINT_PARAM_SUMMARY)
 
         nBef_eSpec           = N_ELEMENTS(good_eSpec_i)
      ENDIF
@@ -221,8 +221,8 @@ PRO GET_ESPEC_FLUX_DATA, $
                                           RESET_GOOD_INDS=reset_good_inds, $
                                           DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                                           ;; /DONT_LOAD_IN_MEMORY, $
-                                          DONT_LOAD_IN_MEMORY=nonMem, $
-                                          /PRINT_PARAM_SUMMARY)
+                                          DONT_LOAD_IN_MEMORY=nonMem);, $
+                                          ;; /PRINT_PARAM_SUMMARY)
 
         nBef_ion             = N_ELEMENTS(good_ion_i)
      ENDIF
@@ -582,10 +582,10 @@ PRO GET_ESPEC_FLUX_DATA, $
 
   IF KEYWORD_SET(for_IMF_screening) THEN BEGIN
      IF KEYWORD_SET(espec_i_list) THEN BEGIN
-        eSpec_i              = eSpec_i_list
+        eSpec_i              = TEMPORARY(eSpec_i_list)
      ENDIF
      IF KEYWORD_SET(ion_i_list) THEN BEGIN
-        ion_i                = ion_i_list
+        ion_i                = TEMPORARY(ion_i_list)
      ENDIF
   ENDIF
 
