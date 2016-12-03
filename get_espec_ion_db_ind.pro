@@ -270,28 +270,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         IF nonzero_good_i NE 0 THEN BEGIN
            CHECK_FOR_NEW_ESPEC_ION_IND_CONDS,is_ion, $
                                              KEYWORD_SET(for_alfven_db) ? NWLL_ALF__RECALCULATE : NEWELL__RECALCULATE, $
-                                             ORBRANGE=orbRange, $
-                                             ALTITUDERANGE=altitudeRange, $
-                                             CHARERANGE=charERange, $
-                                             BOTH_HEMIS=both_hemis, $
-                                             NORTH=north, $
-                                             SOUTH=south, $
-                                             HEMI=hemi, $
-                                             HWMAUROVAL=HwMAurOval, $
-                                             HWMKPIND=HwMKpInd, $
-                                             MINMLT=minM, $
-                                             MAXMLT=maxM, $
-                                             BINM=binM, $
-                                             MINILAT=minILAT, $
-                                             MAXILAT=maxILAT, $
-                                             BINILAT=binILAT, $
-                                             EQUAL_AREA_BINNING=EA_binning, $
-                                             ;; DO_LSHELL=do_lshell, $
-                                             ;; MINLSHELL=minLshell, $
-                                             ;; MAXLSHELL=maxLshell, $
-                                             ;; BINLSHELL=binLshell, $
-                                             DAYSIDE=dayside, $
-                                             NIGHTSIDE=nightside, $
+                                             IMF_STRUCT=IMF_struct, $
+                                             MIMC_STRUCT=MIMC_struct, $
+                                             ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
                                              HAVE_GOOD_I=have_good_i, $
                                              LUN=lun
            calculate                      = KEYWORD_SET(for_alfven_db) ? NWLL_ALF__RECALCULATE : NEWELL__RECALCULATE
@@ -341,27 +322,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         IF nonzero_good_i NE 0 THEN BEGIN
            CHECK_FOR_NEW_ESPEC_ION_IND_CONDS,is_ion, $
                                              KEYWORD_SET(for_alfven_db) ? NWLL_ALF_I__RECALCULATE : NEWELL_I__RECALCULATE, $
-                                             ORBRANGE=orbRange, $
-                                             ALTITUDERANGE=altitudeRange, $
-                                             CHARERANGE=charERange, $
-                                             BOTH_HEMIS=both_hemis, $
-                                             NORTH=north, $
-                                             SOUTH=south, $
-                                             HEMI=hemi, $
-                                             HWMAUROVAL=HwMAurOval, $
-                                             HWMKPIND=HwMKpInd, $
-                                             MINMLT=minM, $
-                                             MAXMLT=maxM, $
-                                             BINM=binMLT, $
-                                             MINILAT=minILAT, $
-                                             MAXILAT=maxILAT, $
-                                             BINILAT=binILAT, $
-                                             ;; DO_LSHELL=do_lshell, $
-                                             ;; MINLSHELL=minLshell, $
-                                             ;; MAXLSHELL=maxLshell, $
-                                             ;; BINLSHELL=binLshell, $
-                                             DAYSIDE=dayside, $
-                                             NIGHTSIDE=nightside, $
+                                             IMF_STRUCT=IMF_struct, $
+                                             MIMC_STRUCT=MIMC_struct, $
+                                             ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
                                              HAVE_GOOD_I=have_good_i, $
                                              LUN=lun
            calculate                      = KEYWORD_SET(for_alfven_db) ? NWLL_ALF_I__RECALCULATE : NEWELL_I__RECALCULATE
@@ -396,9 +359,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
      ;;;;;;;;;;;;
      ;;Handle longitudes
-     MIMC__minMLT         = minM
-     MIMC__maxMLT         = maxM
-     MIMC__binMLT         = binM
+     MIMC__minMLT         = MIMC_struct.minM
+     MIMC__maxMLT         = MIMC_struct.maxM
+     MIMC__binMLT         = MIMC_struct.binM
      MIMC__dayside        = KEYWORD_SET(dayside)
      MIMC__nightside      = KEYWORD_SET(nightside)
      mlt_i                = GET_MLT_INDS(dbStruct,MIMC__minMLT,MIMC__maxMLT, $
@@ -749,34 +712,6 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                    IMF_STRUCT=IMF_struct, $
                                    MIMC_STRUCT=MIMC_struct, $
                                    ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
-                                   ;; CLOCKSTR=clockStr, $
-                                   ;; ANGLELIM1=angleLim1, $
-                                   ;; ANGLELIM2=angleLim2, $
-                                   ;; ORBRANGE=orbRange, $
-                                   ;; ALTITUDERANGE=altitudeRange, $
-                                   ;; CHARERANGE=charERange, $
-                                   ;; minMLT=minM, $
-                                   ;; maxMLT=maxM, $
-                                   ;; BINMLT=binM, $
-                                   ;; SHIFTMLT=shiftM, $
-                                   ;; MINILAT=minI, $
-                                   ;; MAXILAT=maxI, $
-                                   ;; BINILAT=binI, $
-                                   ;; EQUAL_AREA_BINNING=EA_binning, $
-                                   ;; DO_LSHELL=do_lShell,MINLSHELL=minL,MAXLSHELL=maxL,BINLSHELL=binL, $
-                                   ;; MIN_MAGCURRENT=minMC,MAX_NEGMAGCURRENT=maxNegMC, $
-                                   ;; HWMAUROVAL=HwMAurOval,HWMKPIND=HwMKpInd, $
-                                   ;; BYMIN=byMin, BZMIN=bzMin, BYMAX=byMax, BZMAX=bzMax, BX_OVER_BYBZ_LIM=Bx_over_ByBz_Lim, $
-                                   ;; PARAMSTRING=paramString, PARAMSTRPREFIX=plotPrefix,PARAMSTRSUFFIX=plotSuffix,$
-                                   ;; SATELLITE=satellite, $
-                                   ;; OMNI_COORDS=omni_Coords, $
-                                   ;; HEMI=hemi, $
-                                   ;; DELAY=delay, $
-                                   ;; STABLEIMF=stableIMF, $
-                                   ;; SMOOTHWINDOW=smoothWindow, $
-                                   ;; INCLUDENOCONSECDATA=includeNoConsecData, $
-                                   ;; HOYDIA=hoyDia, $
-                                   ;; MASKMIN=maskMin, $
                                    LUN=lun
      ENDIF
      
