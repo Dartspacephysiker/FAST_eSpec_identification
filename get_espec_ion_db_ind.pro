@@ -73,8 +73,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
   ENDIF
                                 ;For statistical auroral oval
-  defHwMAurOval=0
-  defHwMKpInd=7
+  ;; defHwMAurOval=0
+  ;; defHwMKpInd=7
 
   defLun                                          = -1
 
@@ -347,8 +347,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
   IF KEYWORD_SET(calculate) THEN BEGIN
 
-     IF ~KEYWORD_SET(HwMAurOval) THEN HwMAurOval  = defHwMAurOval
-     IF ~KEYWORD_SET(HwMKpInd) THEN HwMKpInd      = defHwMKpInd
+     ;; IF ~KEYWORD_SET(HwMAurOval) THEN HwMAurOval  = defHwMAurOval
+     ;; IF ~KEYWORD_SET(HwMKpInd) THEN HwMKpInd      = defHwMKpInd
 
 
      ;;Welcome message
@@ -385,7 +385,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         MIMC__minILAT     = minI
         MIMC__maxILAT     = maxI
         MIMC__binILAT     = binI
-        MIMC__EA_binning  = KEYWORD_SET(EA_binning)
+        MIMC__EA_binning  = KEYWORD_SET(alfDB_plot_struct.EA_binning)
         ilat_i            = GET_ILAT_INDS(dbStruct,MIMC__minILAT,MIMC__maxILAT,MIMC__hemi, $
                                           N_ILAT=n_ilat,N_NOT_ILAT=n_not_ilat,LUN=lun)
         region_i          = CGSETINTERSECTION(ilat_i,mlt_i)
@@ -393,8 +393,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Want just Holzworth/Meng statistical auroral oval?
-     IF HwMAurOval THEN region_i = CGSETINTERSECTION(region_i, $
-                                                     WHERE(ABS(dbStruct.ilat) GT auroral_zone(dbStruct.mlt,HwMKpInd,/lat)/(!DPI)*180.))
+     IF KEYWORD_SET(alfDB_plot_struct.HwMAurOval) THEN BEGIN
+        region_i = CGSETINTERSECTION(region_i, $
+                                     WHERE(ABS(dbStruct.ilat) GT AURORAL_ZONE(dbStruct.mlt,HwMKpInd,/lat)/(!DPI)*180.))
+     ENDIF
 
   ;;;;;;;;;;;;;;;;;;;;;;
      ;;Now combine them all

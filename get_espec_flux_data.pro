@@ -13,12 +13,6 @@ PRO GET_ESPEC_FLUX_DATA, $
    USE_AACGM=use_AACGM, $
    USE_MAG_COORDS=use_MAG, $
    T1_ARR=t1_arr,T2_ARR=t2_arr, $
-   EPLOTS=ePlots, $
-   EFLUXPLOTTYPE=eFluxPlotType, $
-   ENUMFLPLOTS=eNumFlPlots, $
-   ENUMFLPLOTTYPE=eNumFlPlotType, $
-   IONPLOTS=ionPlots, $
-   IFLUXPLOTTYPE=iFluxPlotType, $
    DO_TIMEAVG_FLUXQUANTITIES=do_timeAvg_fluxQuantities, $
    ESPEC_DELTA_T=eSpec_delta_t, $
    ION_DELTA_T=ion_delta_t, $
@@ -70,6 +64,9 @@ PRO GET_ESPEC_FLUX_DATA, $
 
   COMPILE_OPT idl2
 
+  @common__newell_espec.pro
+  @common__newell_ion_db.pro
+
   IF SIZE(plot_i,/TYPE) EQ 11 THEN BEGIN
      PRINT,'plot_i is a list!'
      plot_i_is_list = 1
@@ -77,57 +74,28 @@ PRO GET_ESPEC_FLUX_DATA, $
      plot_i_is_list = 0
   ENDELSE
 
-  IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) $
-     OR KEYWORD_SET(eSpec__newellPlot_probOccurrence) THEN BEGIN
+  IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots)                   OR $
+     KEYWORD_SET(alfDB_plot_struct.ePlots)                        OR $ 
+     KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) $
+  THEN BEGIN
 
-     LOAD_NEWELL_ESPEC_DB,eSpec,/DONT_LOAD_IN_MEMORY, $
-                          DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(eSpec__Newell_2009_interp), $
-                          USE_2000KM_FILE=eSpec__use_2000km_file, $
-                          /DONT_PERFORM_CORRECTION
-     eSpec_info = eSpec.info
+     LOAD_NEWELL_ESPEC_DB, $
+        ;; eSpec, $
+        ;; /DONT_LOAD_IN_MEMORY, $
+        DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(alfDB_plot_struct.eSpec__Newell_2009_interp), $
+        USE_2000KM_FILE=alfDB_plot_struct.eSpec__use_2000km_file ;, $
+        ;; /DONT_PERFORM_CORRECTION
 
-     IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
-        eSpec_delta_t = GET_ESPEC_ION_DELTA_T(eSpec, $
+     eSpec_info = NEWELL__eSpec.info
+
+     IF KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities) THEN BEGIN
+        eSpec_delta_t = GET_ESPEC_ION_DELTA_T(NEWELL__eSpec, $
                                               DBNAME='eSpec')
 
-        ;; eSpec_delta_t          = [FLOAT(eSpec.x[1:-1]-eSpec.x[0:-2]),-1.0]
-
-        ;; worst_i                = WHERE(( eSpec_delta_t LT 0   ) OR $
-        ;;                                ( eSpec_delta_t GT 2.6 ),nWorst, $
-        ;;                                COMPLEMENT=best_i, $
-        ;;                                NCOMPLEMENT=nBest)
-        ;; ;; IF nWorst GT 0 THEN BEGIN
-        ;; ;;    PRINT,'The worst!'
-        ;; ;;    eSpec_delta_t[worst_i] = 2.5
-        ;; ;;    ;; STOP
-        ;; ;; ENDIF
-
-        ;; best_i__i  = VALUE_CLOSEST2(eSpec.x[best_i],eSpec.x[worst_i])
-        
-        ;; best_i__ii = WHERE( ( ABS(eSpec.x[best_i[best_i__i]] - $
-        ;;                              eSpec.x[worst_i]) LT 2.6 ) AND $
-        ;;                     ( espec_delta_t[best_i[best_i__i]] LT 2.6 ) AND $
-        ;;                     ( espec_delta_t[best_i[best_i__i]] GT 0 ), $
-        ;;                    nBest_i__i, $
-        ;;                    COMPLEMENT=best_i__badii, $
-        ;;                    NCOMPLEMENT=nBest_i__badii)
-
-        ;; PRINT,"Salvaged " + STRCOMPRESS(nBest_i__i,/REMOVE_ALL) + $
-        ;;       " eSpec delta-Ts from a cruel fate"
-        ;; PRINT,STRCOMPRESS(nBest_i__badii,/REMOVE_ALL) + $
-        ;;       " are going to the pit (=0.0)"
-
-        ;; eSpec_delta_t[worst_i[best_i__ii]]    = espec_delta_t[best_i[best_i__i[best_i__ii]]]
-        ;; eSpec_delta_t[worst_i[best_i__badii]] = 0.0 ;;Just have to discard them, because what are they?
-        
-        ;; fixme                = WHERE(eSpec_delta_t GT 2,nFix)
-        ;; IF nFix GT 0 THEN BEGIN
-        ;;    eSpec_delta_t[fixme] = 2.5
-        ;; ENDIF
      ENDIF
 
      IF ~KEYWORD_SET(for_IMF_screening) THEN BEGIN ;If doing IMF stuff, GET_RESTRICTED_AND_INTERPED_DB_INDICES will handle this
-        good_eSpec_i = GET_ESPEC_ION_DB_IND(eSpec,satellite,lun, $
+        good_eSpec_i = GET_ESPEC_ION_DB_IND(NEWELL__eSpec,satellite,lun, $
                                             ;; DBFILE=dbfile, $
                                             ;; DBDIR=dbDir, $
                                             ORBRANGE=orbRange, $
@@ -160,21 +128,21 @@ PRO GET_ESPEC_FLUX_DATA, $
                                             DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                                             ;; /DONT_LOAD_IN_MEMORY, $
                                             DONT_LOAD_IN_MEMORY=nonMem, $
-                                            ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
-                                            ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
-                                            ESPEC__REMOVE_OUTLIERS=eSpec__remove_outliers);, $
+                                            ESPEC__NEWELL_2009_INTERP=alfDB_plot_struct.eSpec__Newell_2009_interp, $
+                                            ESPEC__USE_2000KM_FILE=alfDB_plot_struct.eSpec__use_2000km_file, $
+                                            ESPEC__REMOVE_OUTLIERS=alfDB_plot_struct.eSpec__remove_outliers);, $
                                             ;; PRINT_PARAM_SUMMARY)
 
         nBef_eSpec           = N_ELEMENTS(good_eSpec_i)
      ENDIF
   ENDIF
 
-  IF KEYWORD_SET(ionPlots) THEN BEGIN
-     LOAD_NEWELL_ION_DB,ion,/DONT_LOAD_IN_MEMORY;,OUT_GOOD_I=basicClean_ion_i
-     ion_info = ion.info ;;For later
+  IF KEYWORD_SET(alfDB_plot_struct.ionPlots) THEN BEGIN
+     LOAD_NEWELL_ION_DB ;,ion,/DONT_LOAD_IN_MEMORY;,OUT_GOOD_I=basicClean_ion_i
+     ion_info = NEWELL__ion.info ;;For later
 
      IF KEYWORD_SET(do_timeAvg_fluxQuantities) THEN BEGIN
-        ion_delta_t = GET_ESPEC_ION_DELTA_T(ion, $
+        ion_delta_t = GET_ESPEC_ION_DELTA_T(NEWELL__ion, $
                                             DBNAME='ion')
 
         ;; ion_delta_t            = [FLOAT(ion.x[1:-1]-ion.x[0:-2]),1.0]
@@ -235,7 +203,9 @@ PRO GET_ESPEC_FLUX_DATA, $
      KEYWORD_SET(for_storms): BEGIN
 
         ;;Electrons?
-        IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) THEN BEGIN
+        IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots) OR $
+           KEYWORD_SET(alfDB_plot_struct.ePlots)         $
+        THEN BEGIN
            todaysEspecFile   = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ESPEC_INDICES( $
                                SUFFIX=indFileSuff, $
                                DSTCUTOFF=dstCutoff, $
@@ -260,7 +230,7 @@ PRO GET_ESPEC_FLUX_DATA, $
         ENDIF
 
         ;;Now ions
-        IF KEYWORD_SET(ionPlots) THEN BEGIN
+        IF KEYWORD_SET(alfDB_plot_struct.ionPlots) THEN BEGIN
            todaysIonFile     = TODAYS_NONSTORM_MAINPHASE_AND_RECOVERYPHASE_ION_INDICES(SUFFIX=indFileSuff, $
                                                                                        DSTCUTOFF=dstCutoff, $
                                                                                        /MOST_RECENT)
@@ -286,10 +256,10 @@ PRO GET_ESPEC_FLUX_DATA, $
      END
      KEYWORD_SET(for_IMF_screening): BEGIN
         ;;In this case, we're going to grab all the IMF-type inds a bit later
-        IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) $
-        OR KEYWORD_SET(eSpec__newellPlot_probOccurrence) THEN BEGIN
+        IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots) OR KEYWORD_SET(alfDB_plot_struct.ePlots) $
+        OR KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) THEN BEGIN
            eSpec_i_list      = GET_RESTRICTED_AND_INTERPED_DB_INDICES( $
-                               eSpec,satellite,delay,LUN=lun, $
+                               NEWELL__eSpec,satellite,delay,LUN=lun, $
                                ;; DBTIMES=cdbTime, $
                                DBFILE=dbfile, $
                                HEMI=hemi, $
@@ -321,9 +291,9 @@ PRO GET_ESPEC_FLUX_DATA, $
                                HWMAUROVAL=HwMAurOval, $
                                HWMKPIND=HwMKpInd, $
                                /FOR_ESPEC_OR_ION_DB, $
-                               ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
-                               ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
-                               ESPEC__REMOVE_OUTLIERS=eSpec__remove_outliers, $
+                               ESPEC__NEWELL_2009_INTERP=alfDB_plot_struct.eSpec__Newell_2009_interp, $
+                               ESPEC__USE_2000KM_FILE=alfDB_plot_struct.eSpec__use_2000km_file, $
+                               ESPEC__REMOVE_OUTLIERS=alfDB_plot_struct.eSpec__remove_outliers, $
                                RESTRICT_WITH_THESE_I=restrict_with_these_eSpec_i, $
                                RESET_GOOD_INDS=reset_good_inds, $
                                DONT_LOAD_IN_MEMORY=nonMem) ;; , $
@@ -331,9 +301,9 @@ PRO GET_ESPEC_FLUX_DATA, $
 
 
         ENDIF
-        IF KEYWORD_SET(ionPlots) THEN BEGIN
+        IF KEYWORD_SET(alfDB_plot_struct.ionPlots) THEN BEGIN
            ion_i_list = GET_RESTRICTED_AND_INTERPED_DB_INDICES( $
-                        ion,satellite,delay,LUN=lun, $
+                        NEWELL__ion,satellite,delay,LUN=lun, $
                         ;; DBTIMES=cdbTime, $
                         DBFILE=dbfile, $
                         HEMI=hemi, $
@@ -376,12 +346,14 @@ PRO GET_ESPEC_FLUX_DATA, $
      ELSE: BEGIN
 
         ;;Electrons?
-        IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) $
-        OR KEYWORD_SET(eSpec__newellPlot_probOccurrence) THEN BEGIN
+        IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots)                   OR $
+           KEYWORD_SET(alfDB_plot_struct.ePlots)                        OR $
+           KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) $
+        THEN BEGIN
            GET_DATA_AVAILABILITY_FOR_ARRAY_OF_UTC_RANGES, $
               T1_ARR=t1_Arr, $
               T2_ARR=t2_Arr, $
-              DBSTRUCT=eSpec, $
+              DBSTRUCT=NEWELL__eSpec, $
               DBTIMES=dbTimes, $
               /FOR_ESPEC_DB, $
               /DO_NOT_MAKE_ORB_INFO, $
@@ -397,7 +369,7 @@ PRO GET_ESPEC_FLUX_DATA, $
         ENDIF
 
         ;;Now ions
-        IF KEYWORD_SET(ionPlots) THEN BEGIN
+        IF KEYWORD_SET(alfDB_plot_struct.ionPlots) THEN BEGIN
            GET_DATA_AVAILABILITY_FOR_ARRAY_OF_UTC_RANGES, $
               T1_ARR=t1_Arr, $
               T2_ARR=t2_Arr, $
@@ -420,9 +392,12 @@ PRO GET_ESPEC_FLUX_DATA, $
   ENDCASE
 
   ;;Electrons
-  IF ~KEYWORD_SET(eSpec__all_fluxes) THEN BEGIN
-     IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) $
-     OR KEYWORD_SET(eSpec__newellPlot_probOccurrence) THEN BEGIN
+  IF ~KEYWORD_SET(alfDB_plot_struct.eSpec__all_fluxes) THEN BEGIN
+
+     IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots) OR $
+        KEYWORD_SET(alfDB_plot_struct.ePlots)      OR $
+        KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) $
+     THEN BEGIN
         LOAD_ALF_NEWELL_ESPEC_DB,!NULL,good_alf_eSpec_i,good_eSpec_assoc_w_alf_i, $
                                  DESPUN_ALF_DB=despun_alf_db, $
                                  /DONT_LOAD_IN_MEMORY
@@ -439,7 +414,7 @@ PRO GET_ESPEC_FLUX_DATA, $
 
               nBef_eSpec           = N_ELEMENTS(eSpec_i)
 
-              IF KEYWORD_SET(eSpec__junk_alfven_candidates) THEN BEGIN
+              IF KEYWORD_SET(alfDB_plot_struct.eSpec__junk_alfven_candidates) THEN BEGIN
                  PRINT,"Even junking electron measurements associated with Alfvén wave CANDIDATES!"
                  eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i,COUNT=nAft_eSpec)
               ENDIF ELSE BEGIN
@@ -456,7 +431,7 @@ PRO GET_ESPEC_FLUX_DATA, $
 
            nBef_eSpec           = N_ELEMENTS(eSpec_i)
 
-           IF KEYWORD_SET(eSpec__junk_alfven_candidates) THEN BEGIN
+           IF KEYWORD_SET(alfDB_plot_struct.eSpec__junk_alfven_candidates) THEN BEGIN
               PRINT,"Even junking electron measurements associated with Alfvén wave CANDIDATES!"
               eSpec_i           = CGSETDIFFERENCE(eSpec_i,good_eSpec_assoc_w_alf_i,COUNT=nAft_eSpec)
            ENDIF ELSE BEGIN
@@ -470,7 +445,7 @@ PRO GET_ESPEC_FLUX_DATA, $
         ENDELSE
      ENDIF
 
-     IF KEYWORD_SET(ionPlots) THEN BEGIN
+     IF KEYWORD_SET(alfDB_plot_struct.ionPlots) THEN BEGIN
         LOAD_ALF_NEWELL_ION_DB,good_alf_ion_i,good_iSpec_assoc_w_alf_i, $
                                DESPUN_ALF_DB=despun_alf_db, $
                                /DONT_LOAD_IN_MEMORY
@@ -489,7 +464,7 @@ PRO GET_ESPEC_FLUX_DATA, $
 
               nBef_ion           = N_ELEMENTS(ion_i)
 
-              IF KEYWORD_SET(eSpec__junk_alfven_candidates) THEN BEGIN
+              IF KEYWORD_SET(alfDB_plot_struct.eSpec__junk_alfven_candidates) THEN BEGIN
                  PRINT,"Even junking electron measurements associated with Alfvén wave CANDIDATES!"
                  ion_i           = CGSETDIFFERENCE(ion_i,good_iSpec_assoc_w_alf_i,COUNT=nAft_ion)
               ENDIF ELSE BEGIN
@@ -504,7 +479,7 @@ PRO GET_ESPEC_FLUX_DATA, $
            ENDFOR
         ENDIF ELSE BEGIN
 
-        IF KEYWORD_SET(eSpec__junk_alfven_candidates) THEN BEGIN
+        IF KEYWORD_SET(alfDB_plot_struct.eSpec__junk_alfven_candidates) THEN BEGIN
            PRINT,"Even junking ion measurements associated with Alfvén wave CANDIDATES!"
            ion_i             = CGSETDIFFERENCE(ion_i,good_iSpec_assoc_w_alf_i,COUNT=nAft_ion)
         ENDIF ELSE BEGIN
@@ -520,40 +495,20 @@ PRO GET_ESPEC_FLUX_DATA, $
   ENDIF
 
   ;;Now get the data
-  IF KEYWORD_SET(ePlots) OR KEYWORD_SET(eSpec__newellPlot_probOccurrence) THEN BEGIN
-     eFluxPlotType           = 'eFlux_eSpec' + $
-                               ( KEYWORD_SET(eSpec__Newell_2009_interp) ? $
-                                 '--2009' : '' )
-     ;; eFlux_data           = eSpec.jee[eSpec_i]
-     ;; eFlux_data              = eSpec.jee
+  IF KEYWORD_SET(alfDB_plot_struct.ePlots) OR KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) THEN BEGIN
      eFlux_data              = 1
   ENDIF
 
-  IF KEYWORD_SET(eNumFlPlots) THEN BEGIN
-     eNumFlPlotType          = 'eNumFlux_eSpec' + $
-                               ( KEYWORD_SET(eSpec__Newell_2009_interp) ? $
-                                 '--2009' : '' )
-     ;; eNumFlux_data        = eSpec.je[eSpec_i]
-     ;; eNumFlux_data           = eSpec.je
+  IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots) THEN BEGIN
      eNumFlux_data           = 1
   ENDIF
 
-  IF KEYWORD_SET(ionPlots) THEN BEGIN
+  IF KEYWORD_SET(alfDB_plot_struct.ionPlots) THEN BEGIN
      CASE 1 OF
-        STRUPCASE(iFluxPlotType) EQ 'ENERGY': BEGIN
-           iFluxPlotType     = 'JEi_eSpec' + $
-                               ( KEYWORD_SET(ion__Newell_2009_interp) ? $
-                                 '--2009' : '' )
-           ;; iFlux_data     = ion.jei[ion_i]
-           ;; iFlux_data        = ion.jei
+        STRUPCASE(alfDB_plot_struct.iFluxPlotType) EQ 'ENERGY': BEGIN
            iFlux_data        = 1
         END
         ELSE: BEGIN
-           iFluxPlotType     = 'Ji_eSpec' + $
-                               ( KEYWORD_SET(ion__Newell_2009_interp) ? $
-                                 '--2009' : '' )
-           ;; iNumFlux_data  = ion.ji[ion_i]
-           ;; iNumFlux_data     = ion.ji
            iNumFlux_data     = 1
         END
      ENDCASE
@@ -561,21 +516,16 @@ PRO GET_ESPEC_FLUX_DATA, $
 
   ;;Last, get the MLTs and ILATs
   ;;Electrons
-  IF KEYWORD_SET(eNumFlPlots) OR KEYWORD_SET(ePlots) OR KEYWORD_SET(eSpec__newellPlot_probOccurrence) THEN BEGIN
-     ;; eSpec__mlts          = eSpec.mlt[eSpec_i]
-     ;; eSpec__ilats         = eSpec.ilat[eSpec_i]
-     ;; eSpec__mlts             = eSpec.mlt
-     ;; eSpec__ilats            = eSpec.ilat
+  IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots)                   OR $
+     KEYWORD_SET(alfDB_plot_struct.ePlots)                        OR $
+     KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) $
+  THEN BEGIN
      eSpec__mlts             = 1
      eSpec__ilats            = 1
   ENDIF
 
   ;;Ions
-  IF KEYWORD_SET(ionPlots) THEN BEGIN
-     ;; ion__mlts            = ion.mlt[ion_i]
-     ;; ion__ilats           = ion.ilat[ion_i]
-     ;; ion__mlts               = ion.mlt
-     ;; ion__ilats              = ion.ilat
+  IF KEYWORD_SET(alfDB_plot_struct.ionPlots) THEN BEGIN
      ion__mlts               = 1
      ion__ilats              = 1
   ENDIF
