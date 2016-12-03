@@ -22,6 +22,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                               MAXILAT=maxI, $
                               BINILAT=binI, $
                               EQUAL_AREA_BINNING=EA_binning, $
+                              IMF_STRUCT=IMF_struct, $
                               MIMC_STRUCT=MIMC_struct, $
                               ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
                               ;; DO_LSHELL=do_lshell, $
@@ -278,9 +279,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                              HEMI=hemi, $
                                              HWMAUROVAL=HwMAurOval, $
                                              HWMKPIND=HwMKpInd, $
-                                             MINMLT=minMLT, $
-                                             MAXMLT=maxMLT, $
-                                             BINM=binMLT, $
+                                             MINMLT=minM, $
+                                             MAXMLT=maxM, $
+                                             BINM=binM, $
                                              MINILAT=minILAT, $
                                              MAXILAT=maxILAT, $
                                              BINILAT=binILAT, $
@@ -349,8 +350,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
                                              HEMI=hemi, $
                                              HWMAUROVAL=HwMAurOval, $
                                              HWMKPIND=HwMKpInd, $
-                                             MINMLT=minMLT, $
-                                             MAXMLT=maxMLT, $
+                                             MINMLT=minM, $
+                                             MAXMLT=maxM, $
                                              BINM=binMLT, $
                                              MINILAT=minILAT, $
                                              MAXILAT=maxILAT, $
@@ -745,34 +746,37 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
      IF KEYWORD_SET(print_param_summary) THEN BEGIN
         PRINT_ALFVENDB_PLOTSUMMARY,dbStruct,good_i, $
+                                   IMF_STRUCT=IMF_struct, $
+                                   MIMC_STRUCT=MIMC_struct, $
+                                   ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
                                    ;; CLOCKSTR=clockStr, $
                                    ;; ANGLELIM1=angleLim1, $
                                    ;; ANGLELIM2=angleLim2, $
-                                   ORBRANGE=orbRange, $
-                                   ALTITUDERANGE=altitudeRange, $
-                                   CHARERANGE=charERange, $
-                                   minMLT=minM, $
-                                   maxMLT=maxM, $
-                                   BINMLT=binM, $
-                                   SHIFTMLT=shiftM, $
-                                   MINILAT=minI, $
-                                   MAXILAT=maxI, $
-                                   BINILAT=binI, $
-                                   EQUAL_AREA_BINNING=EA_binning, $
+                                   ;; ORBRANGE=orbRange, $
+                                   ;; ALTITUDERANGE=altitudeRange, $
+                                   ;; CHARERANGE=charERange, $
+                                   ;; minMLT=minM, $
+                                   ;; maxMLT=maxM, $
+                                   ;; BINMLT=binM, $
+                                   ;; SHIFTMLT=shiftM, $
+                                   ;; MINILAT=minI, $
+                                   ;; MAXILAT=maxI, $
+                                   ;; BINILAT=binI, $
+                                   ;; EQUAL_AREA_BINNING=EA_binning, $
                                    ;; DO_LSHELL=do_lShell,MINLSHELL=minL,MAXLSHELL=maxL,BINLSHELL=binL, $
                                    ;; MIN_MAGCURRENT=minMC,MAX_NEGMAGCURRENT=maxNegMC, $
-                                   HWMAUROVAL=HwMAurOval,HWMKPIND=HwMKpInd, $
+                                   ;; HWMAUROVAL=HwMAurOval,HWMKPIND=HwMKpInd, $
                                    ;; BYMIN=byMin, BZMIN=bzMin, BYMAX=byMax, BZMAX=bzMax, BX_OVER_BYBZ_LIM=Bx_over_ByBz_Lim, $
-                                   PARAMSTRING=paramString, PARAMSTRPREFIX=plotPrefix,PARAMSTRSUFFIX=plotSuffix,$
-                                   SATELLITE=satellite, $
+                                   ;; PARAMSTRING=paramString, PARAMSTRPREFIX=plotPrefix,PARAMSTRSUFFIX=plotSuffix,$
+                                   ;; SATELLITE=satellite, $
                                    ;; OMNI_COORDS=omni_Coords, $
-                                   HEMI=hemi, $
+                                   ;; HEMI=hemi, $
                                    ;; DELAY=delay, $
                                    ;; STABLEIMF=stableIMF, $
                                    ;; SMOOTHWINDOW=smoothWindow, $
                                    ;; INCLUDENOCONSECDATA=includeNoConsecData, $
-                                   HOYDIA=hoyDia, $
-                                   MASKMIN=maskMin, $
+                                   ;; HOYDIA=hoyDia, $
+                                   ;; MASKMIN=maskMin, $
                                    LUN=lun
      ENDIF
      
