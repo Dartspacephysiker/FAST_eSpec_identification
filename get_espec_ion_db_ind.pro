@@ -375,17 +375,22 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      MIMC__south          = KEYWORD_SET(south)
      MIMC__both_hemis     = KEYWORD_SET(both_hemis)
      IF KEYWORD_SET(do_lShell) THEN BEGIN
-        MIMC__minLshell   = minL
-        MIMC__maxLshell   = maxL
-        MIMC__binLshell   = binL
+
+        MIMC__minLshell   = MIMC_struct.minL
+        MIMC__maxLshell   = MIMC_struct.maxL
+        MIMC__binLshell   = MIMC_struct.binL
+
         lshell_i          = GET_LSHELL_INDS(dbStruct,MIMC__minLshell,MIMC__maxLshell,MIMC__hemi, $
                                             N_LSHELL=n_lshell,N_NOT_LSHELL=n_not_lshell,LUN=lun)
         region_i          = CGSETINTERSECTION(lshell_i,mlt_i)
      ENDIF ELSE BEGIN
-        MIMC__minILAT     = minI
-        MIMC__maxILAT     = maxI
-        MIMC__binILAT     = binI
+
+        MIMC__minILAT     = MIMC_struct.minI
+        MIMC__maxILAT     = MIMC_struct.maxI
+        MIMC__binILAT     = MIMC_struct.binI
+
         MIMC__EA_binning  = KEYWORD_SET(alfDB_plot_struct.EA_binning)
+
         ilat_i            = GET_ILAT_INDS(dbStruct,MIMC__minILAT,MIMC__maxILAT,MIMC__hemi, $
                                           N_ILAT=n_ilat,N_NOT_ILAT=n_not_ilat,LUN=lun)
         region_i          = CGSETINTERSECTION(ilat_i,mlt_i)
@@ -431,7 +436,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
      ;;limits on altitudes to use?
      IF KEYWORD_SET(altitudeRange) THEN BEGIN
-        MIMC__altitudeRange  = altitudeRange
+        MIMC__altitudeRange  = alfDB_plot_struct.altitudeRange
         IF N_ELEMENTS(altitudeRange) EQ 2 THEN BEGIN
            alt_i             = GET_ALTITUDE_INDS(dbStruct,MIMC__altitudeRange[0],MIMC__altitudeRange[1],LUN=lun)
            region_i          = CGSETINTERSECTION(region_i,alt_i)
@@ -446,12 +451,12 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      ;;limits on characteristic electron energies to use?
      IF KEYWORD_SET (charERange) AND ~is_ion THEN BEGIN
         IF N_ELEMENTS(charERange) EQ 2 THEN BEGIN
-           MIMC__charERange  = charERange
+           MIMC__charERange  = alfDB_plot_struct.charERange
            
            chare_i           = GET_CHARE_INDS(dbStruct, $
-                                              charERange[0], $
-                                              charERange[1], $
-                                              NEWELL_THE_CUSP=charE__Newell_the_cusp, $
+                                              MIMC__charERange[0], $
+                                              MIMC__charERange[1], $
+                                              NEWELL_THE_CUSP=alfDB_plot_struct.charE__Newell_the_cusp, $
                                               /FOR_ESPEC_DB, $
                                               LUN=lun)
            ;; chare             = ABS(dbStruct.jee/dbStruct.je)*6.242*1.0e11
@@ -571,11 +576,16 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         ;; je_lims  = [0,3e10]
         ;; jee_lims = [0,3e2]
 
-        je_lims  = [0,2.855e10] ;Drop 0.25% of the broadbands
+        ;;The command: GET_INDICES_ABOVE_PERCENT_THRESHOLD(NEWELL__eSpec.je[WHERE(broad)],0.25,OUT_FINAL_VAL=je_upper_lim)
+        je_lims  = [0,2.855e10] ;Drop 0.25% of the broadbands 
         jee_lims = [0,1.043e2]  ;Drop 0.25% of the broadbands
 
+        ;;The command: GET_INDICES_ABOVE_PERCENT_THRESHOLD(NEWELL__eSpec.je[WHERE(broad)],1.0,OUT_FINAL_VAL=je_upper_lim)
         je_lims  = [0,3.36e9] ;Drop 1.0% of all
         jee_lims = [0,3.1172] ;Drop 1.0% of all
+
+        je_lims  = [0,1e10] ;Drop ... less than 1.0% (by rounding up to nearest decade)
+        jee_lims = [0,10.0] ;Drop ... less than 1.0% (by rounding up to nearest decade)
 
         ;; percentToDrop = N_ELEMENTS(WHERE( ( (espec.broad EQ 1) OR (eSpec.broad EQ 2) ) AND $
         ;;                                   ( eSpec.je GT 4e10 ) ) ) / $
