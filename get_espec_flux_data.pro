@@ -190,7 +190,6 @@ PRO GET_ESPEC_FLUX_DATA, $
                                IMF_STRUCT=IMF_struct, $
                                MIMC_STRUCT=MIMC_struct, $
                                DBFILE=dbfile, $
-                               HEMI=hemi, $
                                RESET_OMNI_INDS=reset_omni_inds, $
                                DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                                /FOR_ESPEC_OR_ION_DB, $

@@ -1,13 +1,8 @@
 ;2016/06/02
 PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
-                                          MINM=minM, $
-                                          MAXM=maxM, $
-                                          BINM=binM, $
-                                          SHIFTM=shiftM, $
-                                          MINI=minI, $
-                                          MAXI=maxI, $
-                                          BINI=binI, $
-                                          EQUAL_AREA_BINNING=EA_binning, $
+                                          ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
+                                          IMF_STRUCT=IMF_struct, $
+                                          MIMC_STRUCT=MIMC_struct, $
                                           NEWELL_PLOTRANGE=newell_plotRange, $
                                           LOG_NEWELLPLOT=log_newellPlot, $
                                           NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
@@ -65,14 +60,9 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
   ;;The main body
   GET_H2D_NEWELLS__BODY,tmp_eSpec, $
                         /NONALFVEN, $
-                        MINM=minM, $
-                        MAXM=maxM, $
-                        BINM=binM, $
-                        SHIFTM=shiftM, $
-                        MINI=minI, $
-                        MAXI=maxI, $
-                        BINI=binI, $
-                        EQUAL_AREA_BINNING=EA_binning, $
+                        ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
+                        IMF_STRUCT=IMF_struct, $
+                        MIMC_STRUCT=MIMC_struct, $
                         NEWELL_PLOTRANGE=newell_plotRange, $
                         LOG_NEWELLPLOT=log_newellPlot, $
                         NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $

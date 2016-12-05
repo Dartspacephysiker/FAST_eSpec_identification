@@ -1,14 +1,9 @@
 ;;11/24/16
 PRO GET_H2D_NEWELLS__BODY,eSpec, $
                           NONALFVEN=nonAlf, $
-                          MINM=minM, $
-                          MAXM=maxM, $
-                          BINM=binM, $
-                          SHIFTM=shiftM, $
-                          MINI=minI, $
-                          MAXI=maxI, $
-                          BINI=binI, $
-                          EQUAL_AREA_BINNING=EA_binning, $
+                          ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
+                          IMF_STRUCT=IMF_struct, $
+                          MIMC_STRUCT=MIMC_struct, $
                           NEWELL_PLOTRANGE=newell_plotRange, $
                           LOG_NEWELLPLOT=log_newellPlot, $
                           NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
@@ -17,10 +12,8 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
                           COMBINE_ACCELERATED=comb_accelerated, $
                           TMPLT_H2DSTR=tmplt_h2dStr, $
                           H2DSTRS=h2dStrs, $
-                          ;; H2DMASKSTR=h2dMaskStr, $
                           H2DFLUXN=h2dFluxN, $
                           NEWELL_NONZERO_NEV_I=newell_nonzero_nEv_i, $
-                          ;; MASKMIN=maskMin, $
                           DATANAMES=dataNames, $
                           DATARAWPTRS=dataRawPtrs, $
                           CB_FORCE_OOBHIGH=cb_force_oobHigh, $
@@ -38,9 +31,9 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MLTs
-  mlt_broad    = eSpec.mlt[broad_i]-shiftM
-  mlt_diffuse  = eSpec.mlt[diffuse_i]-shiftM
-  mlt_mono     = eSpec.mlt[mono_i]-shiftM
+  mlt_broad    = eSpec.mlt[broad_i]-MIMC_struct.shiftM
+  mlt_diffuse  = eSpec.mlt[diffuse_i]-MIMC_struct.shiftM
+  mlt_mono     = eSpec.mlt[mono_i]-MIMC_struct.shiftM
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Screen 'em for negs
@@ -75,7 +68,7 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
   IF KEYWORD_SET(comb_accelerated) THEN BEGIN
      comb_i    = CGSETUNION(mono_i,broad_i)
 
-     mlt_comb  = eSpec.mlt[comb_i]-shiftM
+     mlt_comb  = eSpec.mlt[comb_i]-MIMC_struct.shiftM
      cNegMLT   = WHERE(mlt_comb LT 0)
      IF cNegMLT[0] NE -1 THEN BEGIN
         mlt_comb[cNegMLT] = mlt_comb[cNegMLT] + 24
@@ -125,12 +118,9 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
                              TITLE=titles[i], $
                              IN_MLTS=mlt_list[i], $
                              IN_ILATS=ilat_list[i], $
-                             MINM=minM,MAXM=maxM, $
-                             BINM=binM, $
-                             SHIFTM=shiftM, $
-                             MINI=minI,MAXI=maxI,BINI=binI, $
-                             EQUAL_AREA_BINNING=EA_binning, $
-                             DO_LSHELL=do_lShell, MINL=minL,MAXL=maxL,BINL=binL, $
+                             ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
+                             IMF_STRUCT=IMF_struct, $
+                             MIMC_STRUCT=MIMC_struct, $
                              NEWELL_PLOTRANGE=plotRange, $
                              LOG_NEWELLPLOT=log_newellPlot, $
                              NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
@@ -138,10 +128,8 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
                              NEWELLPLOT_PROBOCCURRENCE=newellPlot_probOccurrence, $
                              TMPLT_H2DSTR=tmplt_h2dStr, $
                              H2DSTR=h2dStr, $
-                             ;; H2DMASKSTR=h2dMaskStr, $
                              H2DFLUXN=h2dFluxN, $
                              NEWELL_NONZERO_NEV_I=newell_nonzero_nEv_i, $
-                             ;; MASKMIN=maskMin, $
                              DATANAME=tmpDataName, $
                              DATARAWPTR=dataRawPtr, $
                              CB_FORCE_OOBHIGH=cb_force_oobHigh, $

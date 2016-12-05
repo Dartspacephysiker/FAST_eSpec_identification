@@ -346,10 +346,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
      
      ;;;;;;;;;;;;
      ;;Handle latitudes, combine with mlt
-     MIMC__hemi           = hemi
-     MIMC__north          = KEYWORD_SET(north)
-     MIMC__south          = KEYWORD_SET(south)
-     MIMC__both_hemis     = KEYWORD_SET(both_hemis)
+     MIMC__hemi           = MIMC_struct.hemi
+     MIMC__north          = KEYWORD_SET(MIMC_struct.north)
+     MIMC__south          = KEYWORD_SET(MIMC_struct.south)
+     MIMC__both_hemis     = KEYWORD_SET(MIMC_struct.both_hemis)
      IF KEYWORD_SET(do_lShell) THEN BEGIN
 
         MIMC__minLshell   = MIMC_struct.minL
@@ -413,12 +413,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
            orb_i             = GET_ORBRANGE_INDS( $
                                dbStruct, $
                                MIMC__orbRange[0], $
-                               MIMC__orbRange[1], $o
-                               DONT_TRASH_BAD_ORBITS= $
-                               ((is_maximus) AND $
-                                KEYWORD_SET(alfDB_plot_struct.dont_blackball_maximus)) OR $
-                               (~(is_maximus) AND $
-                                KEYWORD_SET(alfDB_plot_struct.dont_blackball_fastloc)), $
+                               MIMC__orbRange[1], $
                                LUN=lun)
         ENDELSE
 
@@ -487,7 +482,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
      ;;limits on characteristic electron energies to use?
      test = !NULL
      STR_ELEMENT,alfDB_plot_struct,'charERange',test
-     IF (SIZE(test,/TYPE) NE 0) AND is_maximus THEN BEGIN
+     IF (SIZE(test,/TYPE) NE 0) THEN BEGIN
         IF N_ELEMENTS(alfDB_plot_struct.charERange) EQ 2 THEN BEGIN
            MIMC__charERange  = alfDB_plot_struct.charERange
            
@@ -496,7 +491,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                alfDB_plot_struct.charERange[0], $
                                alfDB_plot_struct.charERange[1], $
                                NEWELL_THE_CUSP=alfDB_plot_struct.charE__Newell_the_cusp, $
-                               CHASTDB=alfDB_plot_struct.chastDB, $
+                               /FOR_ESPEC_DB, $
                                LUN=lun)
 
            region_i          = CGSETINTERSECTION(region_i,chare_i)
