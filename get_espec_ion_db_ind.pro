@@ -1,45 +1,21 @@
 ;***********************************************
 ;2016/06/07
 ;This is like GET_CHASTON_IND for the electron and ion DBs
-FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
+FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                               FOR_ALFVEN_DB=for_alfven_db, $
                               DESPUN_ALF_DB=despun_alf_db, $
                               DBFILE=dbfile, $
                               DBDIR=dbDir, $
-                              ORBRANGE=orbRange, $
-                              ALTITUDERANGE=altitudeRange, $
-                              CHARERANGE=charERange, $
                               CHARIERANGE=charIERange, $
-                              CHARE__NEWELL_THE_CUSP=charE__Newell_the_cusp, $
-                              BOTH_HEMIS=both_hemis, $
-                              HEMI=hemi, $
-                              HWMAUROVAL=HwMAurOval, $
-                              HWMKPIND=HwMKpInd, $
-                              MINMLT=minM, $
-                              MAXMLT=maxM, $
-                              BINM=binM, $
-                              MINILAT=minI, $
-                              MAXILAT=maxI, $
-                              BINILAT=binI, $
-                              EQUAL_AREA_BINNING=EA_binning, $
+                              ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
                               IMF_STRUCT=IMF_struct, $
                               MIMC_STRUCT=MIMC_struct, $
-                              ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
-                              ;; DO_LSHELL=do_lshell, $
-                              ;; MINLSHELL=minL, $
-                              ;; MAXLSHELL=maxL, $
-                              ;; BINLSHELL=binL, $
                               USE_AACGM=use_aacgm, $
-                              DAYSIDE=dayside, $
-                              NIGHTSIDE=nightside, $
                               GET_ESPEC_I_NOT_ION_I=get_eSpec_i, $
                               GET_ION_I=get_ion_i, $
                               RESET_GOOD_INDS=reset_good_inds, $
                               DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                               DONT_LOAD_IN_MEMORY=nonMem, $
-                              ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
-                              ESPEC__USE_2000KM_FILE=eSpec__use_2000km_file, $
-                              ESPEC__REMOVE_OUTLIERS=eSpec__remove_outliers, $
                               PRINT_PARAM_SUMMARY=print_param_summary
   
   COMPILE_OPT idl2
@@ -411,64 +387,122 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Limits on orbits to use?
-     IF KEYWORD_SET(orbRange) THEN BEGIN
-        MIMC__orbRange        = orbRange
-        CASE N_ELEMENTS(orbRange) OF
+     test = !NULL
+     STR_ELEMENT,alfDB_plot_struct,'orbRange',test
+     IF SIZE(test,/TYPE) NE 0 THEN BEGIN
+        MIMC__orbRange        = alfDB_plot_struct.orbRange
+        CASE N_ELEMENTS(alfDB_plot_struct.orbRange) OF
            1: BEGIN
-              MIMC__orbRange  = [orbRange,orbRange]
+              MIMC__orbRange  = [alfDB_plot_struct.orbRange,alfDB_plot_struct.orbRange]
            END
            2: BEGIN
-              MIMC__orbRange  = orbRange
+              MIMC__orbRange  = alfDB_plot_struct.orbRange
            END
            ELSE: BEGIN
-              PRINTF,lun,"Incorrect input for keyword 'orbRange'!!"
-              PRINTF,lun,"Please use orbRange=[minOrb maxOrb] or a single element"
-              RETURN, -1
+              PRINTF,lun,"Assuming you want me to believe you about this orbit array ..."
+              is_orbArr       = 1
+              MIMC__orbRange  = alfDB_plot_struct.orbRange
            END
         ENDCASE
-        ;; IF N_ELEMENTS(orbRange) EQ 2 THEN BEGIN
-        orb_i                 = GET_ORBRANGE_INDS(dbStruct,MIMC__orbRange[0],MIMC__orbRange[1],LUN=lun)
-        region_i              = CGSETINTERSECTION(region_i,orb_i)
-        ;; ENDIF ELSE BEGIN
-        ;; ENDELSE
-     ENDIF
+
+        IF KEYWORD_SET(is_orbArr) THEN BEGIN
+           tmp_i             = CGSETINTERSECTION(dbStruct.orbit, $
+                                                 MIMC__orbRange, $
+                                                 POSITIONS=orb_i)
+        ENDIF ELSE BEGIN
+           orb_i             = GET_ORBRANGE_INDS( $
+                               dbStruct, $
+                               MIMC__orbRange[0], $
+                               MIMC__orbRange[1], $o
+                               DONT_TRASH_BAD_ORBITS= $
+                               ((is_maximus) AND $
+                                KEYWORD_SET(alfDB_plot_struct.dont_blackball_maximus)) OR $
+                               (~(is_maximus) AND $
+                                KEYWORD_SET(alfDB_plot_struct.dont_blackball_fastloc)), $
+                               LUN=lun)
+        ENDELSE
+
+        IF orb_i[0] NE -1 THEN BEGIN
+           region_i          = CGSETINTERSECTION(region_i,orb_i)
+        ENDIF ELSE BEGIN
+           PRINTF,lun,'No orbs matching provided range!'
+           STOP
+        ENDELSE
+     ENDIF     
+;; IF KEYWORD_SET(orbRange) THEN BEGIN
+;;         MIMC__orbRange        = orbRange
+;;         CASE N_ELEMENTS(orbRange) OF
+;;            1: BEGIN
+;;               MIMC__orbRange  = [orbRange,orbRange]
+;;            END
+;;            2: BEGIN
+;;               MIMC__orbRange  = orbRange
+;;            END
+;;            ELSE: BEGIN
+;;               PRINTF,lun,"Incorrect input for keyword 'orbRange'!!"
+;;               PRINTF,lun,"Please use orbRange=[minOrb maxOrb] or a single element"
+;;               RETURN, -1
+;;            END
+;;         ENDCASE
+;;         ;; IF N_ELEMENTS(orbRange) EQ 2 THEN BEGIN
+;;         orb_i                 = GET_ORBRANGE_INDS(dbStruct,MIMC__orbRange[0],MIMC__orbRange[1],LUN=lun)
+;;         region_i              = CGSETINTERSECTION(region_i,orb_i)
+;;         ;; ENDIF ELSE BEGIN
+;;         ;; ENDELSE
+;;      ENDIF
      
 
      ;;limits on altitudes to use?
-     IF KEYWORD_SET(altitudeRange) THEN BEGIN
+     test = !NULL
+     STR_ELEMENT,alfDB_plot_struct,'altitudeRange',test
+     IF SIZE(test,/TYPE) NE 0 THEN BEGIN
         MIMC__altitudeRange  = alfDB_plot_struct.altitudeRange
-        IF N_ELEMENTS(altitudeRange) EQ 2 THEN BEGIN
-           alt_i             = GET_ALTITUDE_INDS(dbStruct,MIMC__altitudeRange[0],MIMC__altitudeRange[1],LUN=lun)
+        IF N_ELEMENTS(alfDB_plot_struct.altitudeRange) EQ 2 THEN BEGIN
+           alt_i             = GET_ALTITUDE_INDS( $
+                               dbStruct, $
+                               MIMC__altitudeRange[0], $
+                               MIMC__altitudeRange[1],LUN=lun)
            region_i          = CGSETINTERSECTION(region_i,alt_i)
         ENDIF ELSE BEGIN
            PRINTF,lun,"Incorrect input for keyword 'altitudeRange'!!"
-           PRINTF,lun,"Please use altitudeRange=[minAlt maxAlt]"
+           PRINTF,lun,"Please use altitudeRange = [minAlt maxAlt]"
            RETURN, -1
         ENDELSE
      ENDIF
+
+ ;;      ;;limits on altitudes to use?
+     ;; IF KEYWORD_SET(altitudeRange) THEN BEGIN
+     ;;    MIMC__altitudeRange  = alfDB_plot_struct.altitudeRange
+     ;;    IF N_ELEMENTS(altitudeRange) EQ 2 THEN BEGIN
+     ;;       alt_i             = GET_ALTITUDE_INDS(dbStruct,MIMC__altitudeRange[0],MIMC__altitudeRange[1],LUN=lun)
+     ;;       region_i          = CGSETINTERSECTION(region_i,alt_i)
+     ;;    ENDIF ELSE BEGIN
+     ;;       PRINTF,lun,"Incorrect input for keyword 'altitudeRange'!!"
+     ;;       PRINTF,lun,"Please use altitudeRange=[minAlt maxAlt]"
+     ;;       RETURN, -1
+     ;;    ENDELSE
+     ;; ENDIF
      
      ;; was using this to compare our Poynting flux estimates against Keiling et al. 2003 Fig. 3
      ;;limits on characteristic electron energies to use?
-     IF KEYWORD_SET (charERange) AND ~is_ion THEN BEGIN
-        IF N_ELEMENTS(charERange) EQ 2 THEN BEGIN
+     test = !NULL
+     STR_ELEMENT,alfDB_plot_struct,'charERange',test
+     IF (SIZE(test,/TYPE) NE 0) AND is_maximus THEN BEGIN
+        IF N_ELEMENTS(alfDB_plot_struct.charERange) EQ 2 THEN BEGIN
            MIMC__charERange  = alfDB_plot_struct.charERange
            
-           chare_i           = GET_CHARE_INDS(dbStruct, $
-                                              MIMC__charERange[0], $
-                                              MIMC__charERange[1], $
-                                              NEWELL_THE_CUSP=alfDB_plot_struct.charE__Newell_the_cusp, $
-                                              /FOR_ESPEC_DB, $
-                                              LUN=lun)
-           ;; chare             = ABS(dbStruct.jee/dbStruct.je)*6.242*1.0e11
-           ;; ;; chare_i        = WHERE(dbStruct.max_chare_losscone GE MIMC__charERange[0] AND $
-           ;; ;;                                             dbStruct.max_chare_losscone LE MIMC__charERange[1])
-           ;; chare_i           = WHERE(chare GE MIMC__charERange[0] AND $
-           ;;                                             chare LE MIMC__charERange[1])
+           chare_i           = GET_CHARE_INDS( $
+                               dbStruct, $
+                               alfDB_plot_struct.charERange[0], $
+                               alfDB_plot_struct.charERange[1], $
+                               NEWELL_THE_CUSP=alfDB_plot_struct.charE__Newell_the_cusp, $
+                               CHASTDB=alfDB_plot_struct.chastDB, $
+                               LUN=lun)
 
            region_i          = CGSETINTERSECTION(region_i,chare_i)
         ENDIF ELSE BEGIN
            PRINTF,lun,"Incorrect input for keyword 'charERange'!!"
-           PRINTF,lun,"Please use charERange=[minCharE maxCharE]"
+           PRINTF,lun,"Please use charERange = [minCharE maxCharE]"
            RETURN, -1
         ENDELSE
      ENDIF
@@ -502,16 +536,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         ENDELSE
      ENDIF
 
-     ;;gotta screen to make sure it's in ACE db too:
-     ;;Only so many are useable, since ACE data start in 1998
-     
-     ;; IF KEYWORD_SET(satellite) THEN BEGIN
-     ;;    sat_i                                     = GET_SATELLITE_INDS(dbStruct,satellite,LUN=lun)
-     ;;    good_i                                    = region_i[where(region_i GE sat_i,nGood,complement=lost,ncomplement=nlost)]
-     ;;    lost                                      = region_i[lost]
-     ;; ENDIF ELSE BEGIN
         good_i          = TEMPORARY(region_i)
-     ;; ENDELSE
 
      ;;Now, clear out all the garbage (NaNs & Co.)
      IF is_ion THEN BEGIN
@@ -612,7 +637,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
         PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
 
 
-        ;; IF KEYWORD_SET(eSpec__remove_outliers) AND ~is_ion THEN BEGIN
+        ;; IF KEYWORD_SET(alfDB_plot_struct.eSpec__remove_outliers) AND ~is_ion THEN BEGIN
 
         ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         ;;    ;;NEW WAY
@@ -744,22 +769,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,satellite,lun, $
      IF is_ion THEN BEGIN
         good_i                 = NEWELL_I__good_i 
         NEWELL_I__HAVE_GOOD_I  = 1
-        ;; IF ARG_PRESENT(out_maximus) THEN BEGIN
-        ;;    PRINT,'Giving you maximus...'
-        ;;    out_maximus = NEWELL_I__maximus
-        ;; ENDIF
-        ;; IF ARG_PRESENT(out_cdbTime) THEN BEGIN
-        ;;    PRINT,'Giving you maximus...'
-        ;;    out_cdbTime = NEWELL_I__times
-        ;; ENDIF
      ENDIF ELSE BEGIN
         good_i                 = NWLL_ALF__good_i
         NWLL_ALF__HAVE_GOOD_I  = 1
-        ;; IF ARG_PRESENT(out_fastLoc) AND N_ELEMENTS(out_fastLoc) EQ 0 THEN BEGIN
-        ;;    PRINT,'Giving you fastLoc...'
-        ;;    out_fastLoc = NWLL_ALF__eSpec
-        ;; ENDIF
-        ;; ENDIF
      ENDELSE
   ENDELSE
 
