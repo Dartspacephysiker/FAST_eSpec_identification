@@ -1,5 +1,6 @@
   COMMON NEWELL,NEWELL__eSpec, $
      NEWELL__HAVE_GOOD_I, $
+     ;; NEWELL__delta_t, $
      NEWELL__failCode, $
      NEWELL__good_i, $
      NEWELL__charERange, $
