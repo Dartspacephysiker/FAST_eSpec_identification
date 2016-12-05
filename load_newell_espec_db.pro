@@ -9,6 +9,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          DONT_LOAD_IN_MEMORY=nonMem, $
                          DONT_PERFORM_CORRECTION=dont_perform_SH_correction, $
                          DONT_CONVERT_TO_STRICT_NEWELL=dont_convert_to_strict_newell, $
+                         DONT_MAP_TO_100KM=dont_map, $
                          COORDINATE_SYSTEM=coordinate_system, $
                          USE_AACGM_COORDS=use_aacgm, $
                          USE_GEO_COORDS=use_geo, $
@@ -150,18 +151,32 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      RESTORE,NewellDBDir+NewellDBFile
 
      IF KEYWORD_SET(use_2000km_file) THEN BEGIN
-        eSpec    = {x        : eSpec.x, $
-                    orbit    : eSpec.orbit, $
-                    mlt      : eSpec.coords.aacgm.mlt, $
-                    ilat     : eSpec.coords.aacgm.lat, $
-                    alt      : eSpec.coords.aacgm.alt, $
-                    je       : eSpec.je, $
-                    jee      : eSpec.jee, $
-                    mono     : eSpec.mono, $
-                    broad    : eSpec.broad, $
-                    diffuse  : eSpec.diffuse, $
-                    info     : eSpec.info}
+        eSpec    = {x          : eSpec.x                , $
+                    orbit      : eSpec.orbit            , $
+                    ;; mlt     : eSpec.coords.aacgm.mlt , $
+                    ;; ilat    : eSpec.coords.aacgm.lat , $
+                    ;; alt     : eSpec.coords.aacgm.alt , $
+                    mlt        : eSpec.coords.SDT.mlt   , $
+                    ilat       : eSpec.coords.SDT.ilat  , $
+                    alt        : eSpec.coords.SDT.alt   , $
+                    je         : eSpec.je               , $
+                    jee        : eSpec.jee              , $
+                    mapFactor  : eSpec.mapFactor        , $
+                    mono       : eSpec.mono             , $
+                    broad      : eSpec.broad            , $
+                    diffuse    : eSpec.diffuse          , $
+                    info       : eSpec.info}
      ENDIF
+
+     IF KEYWORD_SET(dont_map) THEN BEGIN
+        PRINT,"Not mapping to 100 km ..."
+     ENDIF ELSE BEGIN
+        PRINT,"Mapping eSpec meas to 100 km ..."
+        eSpec.je  *= eSpec.mapFactor
+        eSpec.jee *= eSpec.mapFactor
+     ENDELSE
+
+     STR_ELEMENT,eSpec,'mapFactor',/DELETE
 
      IF KEYWORD_SET(reduce_dbSize) THEN BEGIN
         PRINT,"Reducing eSpec DB size, tossing out possibly extraneous members ..."
