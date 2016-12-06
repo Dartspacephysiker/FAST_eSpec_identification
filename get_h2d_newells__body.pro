@@ -9,6 +9,9 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
                           NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
                           NEWELLPLOT_NORMALIZE=newellPlot_normalize, $
                           NEWELLPLOT_PROBOCCURRENCE=newellPlot_probOccurrence, $
+                          T_PROBOCCURRENCE=t_probOccurrence, $
+                          T_PROBOCC_PLOTRANGE=t_probOcc_plotRange, $
+                          THISTDENOMINATOR=tHistDenominator, $
                           COMBINE_ACCELERATED=comb_accelerated, $
                           TMPLT_H2DSTR=tmplt_h2dStr, $
                           H2DSTRS=h2dStrs, $
@@ -29,6 +32,9 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
   diffuse_i    = WHERE(eSpec.diffuse EQ 1,nDiffuse)
   mono_i       = WHERE((eSpec.mono   EQ 1) OR (eSpec.mono  EQ 2),nMono)
 
+  IF KEYWORD_SET(t_probOccurrence) THEN BEGIN
+     i_list    = LIST(broad_i,diffuse_i,mono_i)
+  ENDIF
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MLTs
   mlt_broad    = eSpec.mlt[broad_i]-MIMC_struct.shiftM
@@ -82,6 +88,10 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
      titles     = [titles   ,'Accelerated']
      dataNames  = [dataNames,'accel'      ]
      Newell_plotRange = [[Newell_plotRange],[Newell_plotRange[*,0]+Newell_plotRange[*,1]]]
+
+     IF KEYWORD_SET(t_ProbOccurrence) THEN BEGIN
+        i_list.Add,comb_i
+     ENDIF
 
   ENDIF
 
@@ -162,6 +172,110 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
         ENDIF
         IF newell_plotRange[1] GE 1 THEN BEGIN
            newell_plotRange[1]          = 1.
+        ENDIF
+     ENDIF
+  ENDIF
+
+  IF KEYWORD_SET(t_probOccurrence) THEN BEGIN
+
+     probOccH2DStrs   = !NULL
+     probOccDataNames = !NULL
+     FOR i=0,N_ELEMENTS(h2dStrs)-1 DO BEGIN
+        
+        tmpMask    = BYTE(h2dStrs[i].data)
+        tmpMask[*] = 255
+        tmpMask[newell_nonzero_nev_i_list[i]] = 0
+
+        dims                  = SIZE(t_probOcc_plotRange,/DIMENSIONS)
+        CASE N_ELEMENTS(dims) OF 
+           0:   plotRange     = [0,1]
+           1: BEGIN
+              CASE dims OF
+                 0: plotRange = !NULL
+                 2: plotRange = t_probOcc_plotRange
+                 ELSE: BEGIN
+                 END
+              ENDCASE
+           END
+           2:   plotRange     = t_probOcc_plotRange[*,i]
+        ENDCASE
+
+        GET_PROB_OCCURRENCE_PLOTDATA,eSpec,i_list[i],tHistDenominator, $
+                                     /FOR_ESPEC_DBS, $
+                                     ;; LOGPROBOCCURRENCE=(KEYWORD_SET(all_logPlots) OR KEYWORD_SET(logProbOccurrence)), $
+                                     PROBOCCURRENCERANGE=plotRange, $
+                                     ;; PROBOCCURRENCEAUTOSCALE=probOccurrenceAutoscale, $
+                                     ;; DO_WIDTH_X=do_width_x, $
+                                     MINM=MIMC_struct.minM, $
+                                     MAXM=MIMC_struct.maxM, $
+                                     BINM=MIMC_struct.binM, $
+                                     SHIFTM=MIMC_struct.shiftM, $
+                                     MINI=MIMC_struct.minI, $
+                                     MAXI=MIMC_struct.maxI, $
+                                     BINI=MIMC_struct.binI, $
+                                     EQUAL_AREA_BINNING=alfDB_plot_struct.EA_binning, $
+                                     DO_LSHELL=MIMC_struct.do_lshell, $
+                                     MINL=MIMC_struct.minL, $
+                                     MAXL=MIMC_struct.maxL, $
+                                     BINL=MIMC_struct.binL, $
+                                     OUTH2DBINSMLT=outH2DBinsMLT, $
+                                     OUTH2DBINSILAT=outH2DBinsILAT, $
+                                     OUTH2DBINSLSHELL=outH2DBinsLShell, $
+                                     ;; H2D_NONZERO_NEV_I=hEv_nz_i, $
+                                     H2DFLUXN=h2dFluxN, $
+                                     H2DMASK=tmpMask, $
+                                     OUT_H2DMASK=out_h2dMask, $
+                                     OUT_H2DPROBOCC=H2DProbOcc, $
+                                     H2DSTR=h2dStr, $
+                                     TMPLT_H2DSTR=tmplt_h2dStr, $
+                                     DATANAME=dataName, $
+                                     DATARAWPTR=dataRawPtr
+        
+        probOccDataNames = [probOccDataNames,dataNames[i] + "_tProbOcc"]
+
+        h2dStr.name      = probOccDataNames[-1]
+        h2dStr.title     = h2dStrs[i].title + " (tProb. Occ.)"
+        probOccH2DStrs   = [probOccH2DStrs,h2dStr] 
+
+        ;;HEY, if newellPlot_probOccurrence isn't set, this will be printed below
+        IF KEYWORD_SET(print_mandm) AND KEYWORD_SET(newellPlot_probOccurrence) THEN BEGIN
+           ;; IF KEYWORD_SET(medianPlot) OR ~KEYWORD_SET(logAvgPlot) THEN BEGIN
+           fmt                      = 'G10.4' 
+           maxh2d                   = MAX(probOccH2DStrs[i].data[newell_nonzero_nEv_i_list[i]])
+           minh2d                   = MIN(probOccH2DStrs[i].data[newell_nonzero_nEv_i_list[i]])
+           ;; ENDIF ELSE BEGIN
+           ;;    fmt                = 'F10.2'
+           ;;    maxh2d             = ALOG10(MAX(probOccH2DStrs[i].data[newell_nonzero_nEv_i_list[i]]))
+           ;;    minh2d             = ALOG10(MIN(probOccH2DStrs[i].data[newell_nonzero_nEv_i_list[i]]))
+           ;; ENDELSE
+           PRINTF,lun,probOccH2DStrs[i].title
+           PRINTF,lun,FORMAT='("Max, min:",T20,' + fmt + ',T35,' + fmt + ')', $
+                  maxh2d, $
+                  minh2d
+        ENDIF
+      ENDFOR
+
+     CASE 1 OF
+        KEYWORD_SET(newellPlot_probOccurrence): BEGIN
+           ;;Better combine       ; user wants BOTH
+
+           dataNames = [dataNames,probOccDataNames]
+           H2DStrs   = [H2DStrs,probOCCH2DStrs]
+        END
+        ELSE: BEGIN
+           dataNames = probOccDataNames
+           H2DStrs   = probOCCH2DStrs
+
+        END
+     ENDCASE
+
+     ;;Fix range if it's bogus
+     IF KEYWORD_SET(t_probOcc_plotRange) AND N_ELEMENTS(t_probOcc_plotRange) EQ 2 THEN BEGIN
+        IF t_probOcc_plotRange[0] GE 1 THEN BEGIN
+           t_probOcc_plotRange[0]          = 0.
+        ENDIF
+        IF t_probOcc_plotRange[1] GE 1 THEN BEGIN
+           t_probOcc_plotRange[1]          = 1.
         ENDIF
      ENDIF
   ENDIF

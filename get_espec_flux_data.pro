@@ -51,7 +51,7 @@ PRO GET_ESPEC_FLUX_DATA, $
         DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(alfDB_plot_struct.eSpec__Newell_2009_interp), $
         USE_2000KM_FILE=alfDB_plot_struct.eSpec__use_2000km_file, $
         DONT_MAP_TO_100KM=alfDB_plot_struct.eSpec__noMap, $
-        LOAD_DELTA_T=KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities)
+        LOAD_DELTA_T=KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities) OR KEYWORD_SET(alfDB_plot_struct.eSpec__t_probOccurrence)
 
      eSpec_info = NEWELL__eSpec.info
 

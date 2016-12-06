@@ -8,6 +8,9 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                                           NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
                                           NEWELLPLOT_NORMALIZE=newellPlot_normalize, $
                                           NEWELLPLOT_PROBOCCURRENCE=newellPlot_probOccurrence, $
+                                          T_PROBOCCURRENCE=t_ProbOccurrence, $
+                                          T_PROBOCC_PLOTRANGE=t_probOcc_plotRange, $
+                                          THISTDENOMINATOR=tHistDenominator, $
                                           NEWELL_2009_INTERP=newell_2009_interp, $
                                           COMBINE_ACCELERATED=comb_accelerated, $
                                           TMPLT_H2DSTR=tmplt_h2dStr, $
@@ -53,6 +56,10 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                  broad   : NEWELL__eSpec.broad[eSpec_i]     , $
                  diffuse : NEWELL__eSpec.diffuse[eSpec_i]   , $
                  info    : NEWELL__eSpec.info               }              ; , $
+
+  IF KEYWORD_SET(t_probOccurrence) THEN BEGIN
+     STR_ELEMENT,tmp_eSpec,'delta_t',NEWELL__delta_t[eSpec_i],/ADD_REPLACE
+  ENDIF
   ;; Je:NEWELL__eSpec.Je[eSpec_i]            , $
   ;; Jee:NEWELL__eSpec.Jee[eSpec_i]};;       , $
   ;; nBad_eSpec:NEWELL__eSpec.nBad_eSpec[eSpec_i]}
@@ -68,6 +75,9 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                         NEWELLPLOT_AUTOSCALE=newellPlot_autoscale, $
                         NEWELLPLOT_NORMALIZE=newellPlot_normalize, $
                         NEWELLPLOT_PROBOCCURRENCE=newellPlot_probOccurrence, $
+                        T_PROBOCCURRENCE=t_probOccurrence, $
+                        T_PROBOCC_PLOTRANGE=t_probOcc_plotRange, $
+                        THISTDENOMINATOR=tHistDenominator, $
                         COMBINE_ACCELERATED=comb_accelerated, $
                         TMPLT_H2DSTR=tmplt_h2dStr, $
                         H2DSTRS=h2dStrs, $
