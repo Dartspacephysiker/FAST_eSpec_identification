@@ -17,6 +17,7 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
            DB_version       : '', $
            DB_extras        : '', $
            is_AlfNewell     : BYTE(KEYWORD_SET(is_AlfNewell)), $
+           is_mapped        : 0B, $
            coords           : 'SDT'}
 
 

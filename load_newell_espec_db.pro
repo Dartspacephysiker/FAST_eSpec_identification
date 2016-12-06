@@ -175,6 +175,12 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                     info       : eSpec.info}
      ENDIF
 
+     NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
+                                  DB_DATE=DB_date, $
+                                  DB_VERSION=DB_version, $
+                                  DB_EXTRAS=DB_extras, $
+                                  REDUCE_DBSIZE=reduce_dbSize
+
      IF KEYWORD_SET(load_delta_t) THEN BEGIN
         PRINT,"Loading eSpec delta_ts ..."
         eSpec__delta_t = GET_ESPEC_ION_DELTA_T(eSpec, $
@@ -191,6 +197,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         IF KEYWORD_SET(load_delta_t) THEN BEGIN
            eSpec__delta_t /= SQRT(eSpec.mapFactor)
         ENDIF
+
+        eSpec.info.is_mapped = 1B
      ENDELSE
 
      ;; STR_ELEMENT,eSpec,'mapFactor',/DELETE
@@ -212,14 +220,9 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                    broad       : eSpec.broad       , $
                    diffuse     : eSpec.diffuse     , $
                    je          : eSpec.je          , $
-                   jee         : eSpec.jee         }
+                   jee         : eSpec.jee         , $
+                   info        : eSpec.info        }
      ENDIF
-
-     NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
-                                  DB_DATE=DB_date, $
-                                  DB_VERSION=DB_version, $
-                                  DB_EXTRAS=DB_extras, $
-                                  REDUCE_DBSIZE=reduce_dbSize
 
      ;;Correct fluxes
      IF ~(KEYWORD_SET(dont_perform_SH_correction) OR (KEYWORD_SET(just_times) AND KEYWORD_SET(dont_perform_SH_correction))) THEN BEGIN
