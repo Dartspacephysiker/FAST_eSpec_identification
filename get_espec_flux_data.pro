@@ -57,7 +57,8 @@ PRO GET_ESPEC_FLUX_DATA, $
      IF KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities) THEN BEGIN
         eSpec__delta_t = GET_ESPEC_ION_DELTA_T(NEWELL__eSpec, $
                                                DBNAME='eSpec')
-
+        eSpec__delta_t /= SQRT(NEWELL__eSpec.mapFactor)
+        STR_ELEMENT,NEWELL__eSpec,'mapFactor',/DELETE
      ENDIF
 
      IF ~KEYWORD_SET(for_IMF_screening) THEN BEGIN ;If doing IMF stuff, GET_RESTRICTED_AND_INTERPED_DB_INDICES will handle this

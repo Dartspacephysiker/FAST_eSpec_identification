@@ -172,11 +172,11 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
         PRINT,"Not mapping to 100 km ..."
      ENDIF ELSE BEGIN
         PRINT,"Mapping eSpec meas to 100 km ..."
-        eSpec.je  *= eSpec.mapFactor
-        eSpec.jee *= eSpec.mapFactor
+        eSpec.je  /= eSpec.mapFactor
+        eSpec.jee /= eSpec.mapFactor
      ENDELSE
 
-     STR_ELEMENT,eSpec,'mapFactor',/DELETE
+     ;; STR_ELEMENT,eSpec,'mapFactor',/DELETE
 
      IF KEYWORD_SET(reduce_dbSize) THEN BEGIN
         PRINT,"Reducing eSpec DB size, tossing out possibly extraneous members ..."
