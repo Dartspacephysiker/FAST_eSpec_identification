@@ -7,7 +7,7 @@ PRO GET_ESPEC_FLUX_DATA, $
    IMF_STRUCT=IMF_struct, $
    MIMC_STRUCT=MIMC_struct, $
    T1_ARR=t1_arr,T2_ARR=t2_arr, $
-   ESPEC_DELTA_T=NEWELL__delta_t, $
+   ;; ESPEC_DELTA_T=NEWELL__delta_t, $ ;Comes as part of Newell COMMON vars
    ION_DELTA_T=ion_delta_t, $
    OUT_EFLUX_DATA=eFlux_data, $
    OUT_ENUMFLUX_DATA=eNumFlux_data, $
@@ -50,16 +50,13 @@ PRO GET_ESPEC_FLUX_DATA, $
      LOAD_NEWELL_ESPEC_DB, $
         DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(alfDB_plot_struct.eSpec__Newell_2009_interp), $
         USE_2000KM_FILE=alfDB_plot_struct.eSpec__use_2000km_file, $
-        DONT_MAP_TO_100KM=alfDB_plot_struct.eSpec__noMap
+        DONT_MAP_TO_100KM=alfDB_plot_struct.eSpec__noMap, $
+        LOAD_DELTA_T=KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities)
 
      eSpec_info = NEWELL__eSpec.info
 
-     IF KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities) THEN BEGIN
-        eSpec__delta_t = GET_ESPEC_ION_DELTA_T(NEWELL__eSpec, $
-                                               DBNAME='eSpec')
-        eSpec__delta_t /= SQRT(NEWELL__eSpec.mapFactor)
-        STR_ELEMENT,NEWELL__eSpec,'mapFactor',/DELETE
-     ENDIF
+     ;; IF KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities) THEN BEGIN
+     ;; ENDIF
 
      IF ~KEYWORD_SET(for_IMF_screening) THEN BEGIN ;If doing IMF stuff, GET_RESTRICTED_AND_INTERPED_DB_INDICES will handle this
         good_eSpec_i = GET_ESPEC_ION_DB_IND(NEWELL__eSpec, $
