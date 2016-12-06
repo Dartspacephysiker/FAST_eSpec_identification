@@ -1,6 +1,6 @@
 ;2016/06/04
 ;;NOTE: We do not clean the current database. It's clean as a whistle.
-PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
+PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          FAILCODES=failCode, $
                          USE_UNSORTED_FILE=use_unsorted_file, $
                          NEWELLDBDIR=NewellDBDir, $
@@ -10,14 +10,16 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                          DONT_PERFORM_CORRECTION=dont_perform_SH_correction, $
                          DONT_CONVERT_TO_STRICT_NEWELL=dont_convert_to_strict_newell, $
                          DONT_MAP_TO_100KM=dont_map, $
+                         LOAD_DELTA_T=load_delta_t, $
                          COORDINATE_SYSTEM=coordinate_system, $
                          USE_AACGM_COORDS=use_aacgm, $
                          USE_GEO_COORDS=use_geo, $
                          USE_MAG_COORDS=use_mag, $
-                         JUST_TIMES=just_times, $
-                         OUT_TIMES=out_times, $
+                         ;; JUST_TIMES=just_times, $
+                         ;; OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
                          USE_2000KM_FILE=use_2000km_file, $
+                         CLEAR_MEMORY=clear_memory, $
                          NO_MEMORY_LOAD=noMem, $
                          REDUCED_DB=reduce_dbSize, $
                          LUN=lun, $
@@ -38,10 +40,12 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      ENDELSE
   ENDIF
 
-  ;;This common block is defined ONLY here and in GET_ESPEC_ION_DB_IND
-  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  IF KEYWORD_SET(clear_memory) THEN BEGIN
+     CLEAR_ESPEC_DB_VARS,QUIET=quiet
+     RETURN
+  ENDIF
+
   @common__newell_espec.pro
-  ;; ENDIF
   
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
@@ -86,27 +90,32 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      lun                 = -1
   ENDIF
 
-  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
   IF N_ELEMENTS(NEWELL__eSpec) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
      CASE 1 OF
         KEYWORD_SET(just_times): BEGIN
            IF ~quiet THEN PRINT,"Just giving eSpec times ..."
            out_times     = NEWELL__eSpec.x
 
-           IF KEYWORD_SET(nonMem) THEN BEGIN
-              CLEAR_ESPEC_DB_VARS
-           ENDIF
-
            RETURN
         END
+        KEYWORD_SET(nonMem): BEGIN
+           PRINT,"Moving eSpec structure/data in mem to outputted variables ..."
+           eSpec            = TEMPORARY(NEWELL__eSpec     )
+           ;; fastLoc_times    = TEMPORARY(FASTLOC__times)
+           NewellDBFile     = TEMPORARY(NEWELL__dbFile    )
+           NewellDBDir      = TEMPORARY(NEWELL__dbDir     )
+           failCodes        = N_ELEMENTS(NEWELL__failCodes) GT 0 ? TEMPORARY(NEWELL__failCodes) : !NULL
+           eSpec__delta_t   = N_ELEMENTS(NEWELL__delta_t  ) GT 0 ? TEMPORARY(NEWELL__delta_t  ) : !NULL 
+        END
         ELSE: BEGIN
-           IF ~quiet THEN PRINT,'Restoring eSpec DB already in memory...'
-           eSpec         = NEWELL__eSpec
-           IF N_ELEMENTS(NEWELL__failCodes) GT 0 THEN BEGIN
-              failCodes  = NEWELL__failCodes
-           ENDIF
-           NewellDBDir   = NEWELL__dbDir
-           NewellDBFile  = NEWELL__dbFile
+           ;; IF ~quiet THEN PRINT,'Restoring eSpec DB already in memory...'
+           ;; eSpec         = NEWELL__eSpec
+           ;; IF N_ELEMENTS(NEWELL__failCodes) GT 0 THEN BEGIN
+           ;;    failCodes  = NEWELL__failCodes
+           ;; ENDIF
+           ;; NewellDBDir   = NEWELL__dbDir
+           ;; NewellDBFile  = NEWELL__dbFile
+           PRINT,"There is already an eSpec DB in memory! If you want it to come out, set /NO_MEMORY_LOAD"
         END
      ENDCASE
      RETURN
@@ -116,27 +125,25 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   IF N_ELEMENTS(NewellDBDir) EQ 0 THEN BEGIN
      NewellDBDir      = defNewellDBDir
   ENDIF
-  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-  NEWELL__dbDir          = NewellDBDir
-  ;; ENDIF
+
+  ;; NEWELL__dbDir          = NewellDBDir
+
 
   IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
      CASE KEYWORD_SET(use_unsorted_file) OF
         1: BEGIN
-           ;; IF ~quiet THEN PRINT,'Using UNsorted eSpec DB ...'
            specType      = 'UNSORTED'
            NewellDBFile  = defNewellDBFile
         END
         ELSE: BEGIN
-           ;; IF ~quiet THEN PRINT,'Using sorted eSpec DB ...'
            specType      = 'SORTED'
            NewellDBFile  = defSortNewellDBFile
         END
      ENDCASE
   ENDIF
-  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-  NEWELL__dbFile         = NewellDBFile
-  ;; ENDIF
+
+  ;; NEWELL__dbFile         = NewellDBFile
+
 
   ;;If just getting times, at this point we've populated other variables
   ;;that might be of interest to user, so JET
@@ -168,12 +175,23 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
                     info       : eSpec.info}
      ENDIF
 
+     IF KEYWORD_SET(load_delta_t) THEN BEGIN
+        PRINT,"Loading eSpec delta_ts ..."
+        eSpec__delta_t = GET_ESPEC_ION_DELTA_T(eSpec, $
+                                               DBNAME='eSpec')
+     ENDIF
+
      IF KEYWORD_SET(dont_map) THEN BEGIN
         PRINT,"Not mapping to 100 km ..."
      ENDIF ELSE BEGIN
-        PRINT,"Mapping eSpec meas to 100 km ..."
+        PRINT,"Mapping eSpec observations to 100 km ..."
         eSpec.je  *= eSpec.mapFactor
         eSpec.jee *= eSpec.mapFactor
+
+        IF KEYWORD_SET(load_delta_t) THEN BEGIN
+           eSpec__delta_t /= eSpec.mapFactor
+        ENDIF
+
      ENDELSE
 
      STR_ELEMENT,eSpec,'mapFactor',/DELETE
@@ -181,7 +199,10 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      IF KEYWORD_SET(reduce_dbSize) THEN BEGIN
         PRINT,"Reducing eSpec DB size, tossing out possibly extraneous members ..."
 
-        IF MAX(eSpec.orbit) GT 65534 THEN STOP
+        IF MAX(eSpec.orbit) GT 65534 THEN BEGIN
+           PRINT,"You're about to descend into confusion if you shrink tag member ORBIT for this database."
+           STOP                 ;Because the tag ORBIT is type UINT
+        ENDIF
 
         eSpec   = {x           : eSpec.x           , $
                    orbit       : UINT(eSpec.orbit) , $
@@ -204,8 +225,11 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
      ;;Correct fluxes
      IF ~(KEYWORD_SET(dont_perform_SH_correction) OR (KEYWORD_SET(just_times) AND KEYWORD_SET(dont_perform_SH_correction))) THEN BEGIN
         IF ~quiet THEN PRINT,"Correcting eSpec fluxes so that earthward is positive in SH..."
+        
+        ;;The following line says that if there are a lot of jee values in the Southern Hemi that are negative, we need to perform a conversion
+        ;;to make earthward positive in the SH
         IF FLOAT(N_ELEMENTS(WHERE(eSpec.jee LT 0 AND eSpec.ilat LT 0)))/N_ELEMENTS(WHERE(eSpec.ilat LT 0)) GT 0.1 THEN BEGIN
-           eSpec.je[WHERE(eSpec.ilat LT 0)]  = (-1.)*(eSpec.je[WHERE(eSpec.ilat LT 0)])
+           eSpec.je [WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.je [WHERE(eSpec.ilat LT 0)])
            eSpec.jee[WHERE(eSpec.ilat LT 0)] = (-1.)*(eSpec.jee[WHERE(eSpec.ilat LT 0)])
         ENDIF
         
@@ -223,16 +247,6 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
         IF ~quiet THEN PRINT,"Not correcting sign in each hemisphere, and not converting to strict Newell interp ..."
      ENDELSE
 
-     ;;The following lines aren't necessary for this little beaut
-
-     ;; IF FILE_TEST(NewellDBDir+defNewellDBCleanInds) THEN BEGIN
-     ;;    RESTORE,NewellDBDir+defNewellDBCleanInds
-     ;; ENDIF ELSE BEGIN        
-     ;;    good_i = BASIC_ESPEC_ION_DB_CLEANER(eSpec,/CLEAN_NANS_AND_INFINITIES)
-     ;;    IF ~quiet THEN PRINT,'Saving NaN- and INF-less eSpec DB inds to ' + defNewellDBCleanInds + '...'
-     ;;    SAVE,good_i,FILENAME=NewellDBDir+defNewellDBCleanInds
-     ;; ENDELSE
-     
   ENDIF ELSE BEGIN
      IF ~quiet THEN PRINTF,lun,'eSpec DB already loaded! Not restoring ' + NewellDBFile + '...'
   ENDELSE
@@ -290,23 +304,22 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec, $
   ;; ENDIF
 
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     NEWELL__eSpec          = eSpec
+     NEWELL__eSpec          = TEMPORARY(eSpec)
+
+     IF KEYWORD_SET(load_delta_t) THEN BEGIN
+        NEWELL__delta_t     = TEMPORARY(eSpec__delta_t)
+     ENDIF
+
+     NEWELL__dbFile         = TEMPORARY(NewellDBFile)
+     NEWELL__dbDir          = TEMPORARY(NewellDBDir )
 
      IF N_ELEMENTS(failCode) NE 0 THEN BEGIN
-        NEWELL__failCodes   = failCode
+        NEWELL__failCodes   = TEMPORARY(failCode)
      ENDIF ELSE BEGIN
         NEWELL__failCodes   = !NULL
         IF ~quiet THEN PRINT,'This Newell DB file doesn''t have fail codes!'
      ENDELSE
 
-  ENDIF
-
-  IF KEYWORD_SET(just_times) THEN BEGIN
-     out_times              = (TEMPORARY(eSpec)).x
-  ENDIF
-
-  IF KEYWORD_SET(nonMem) THEN BEGIN
-     CLEAR_ESPEC_DB_VARS,QUIET=quiet
   ENDIF
 
   RETURN

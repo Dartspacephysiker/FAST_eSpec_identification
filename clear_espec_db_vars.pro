@@ -6,7 +6,8 @@ PRO CLEAR_ESPEC_DB_VARS,QUIET=quiet
 
   NEWELL__eSpec        = !NULL
   NEWELL__HAVE_GOOD_I  = !NULL
-  NEWELL__failCode     = !NULL
+  NEWELL__delta_t      = !NULL
+  NEWELL__failCodes    = !NULL
   NEWELL__good_i       = !NULL
   NEWELL__charERange   = !NULL
 
