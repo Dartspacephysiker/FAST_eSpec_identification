@@ -1,6 +1,6 @@
 PRO CLEAR_ION_DB_VARS
 
-  COMMON NEWELL_I
+  @common__newell_ion_db.pro
 
   PRINT,'Clearing ion COMMON vars ...'
 
