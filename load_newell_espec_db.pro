@@ -10,6 +10,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          DONT_PERFORM_CORRECTION=dont_perform_SH_correction, $
                          DONT_CONVERT_TO_STRICT_NEWELL=dont_convert_to_strict_newell, $
                          DONT_MAP_TO_100KM=no_mapping, $
+                         DO_NOT_MAP_FLUXES=do_not_map_fluxes, $
+                         DO_NOT_MAP_DELTA_T=do_not_map_delta_t, $
                          LOAD_DELTA_T=load_delta_t, $
                          COORDINATE_SYSTEM=coordinate_system, $
                          USE_AACGM_COORDS=use_aacgm, $
@@ -200,7 +202,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      IF KEYWORD_SET(load_dILAT) THEN BEGIN
         PRINT,"Loading dILAT in place of eSpec delta_t, and not mapping ..."
         
-        no_mapping              = 1
+        ;; no_mapping              = 1
+        do_not_map_delta_t      = 1
 
         eSpec__delta_t          = TEMPORARY(ABS(FLOAT(width_ILAT)))
         eSpec.info.dILAT_not_dt = 1B
@@ -209,7 +212,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      IF KEYWORD_SET(load_dAngle) THEN BEGIN
         PRINT,"Loading dAngle in place of eSpec delta_t, and not mapping ..."
         
-        no_mapping               = 1
+        ;; no_mapping               = 1
+        do_not_map_delta_t       = 1
 
         eSpec__delta_t           = TEMPORARY(ABS(FLOAT(width_angle)))
         eSpec.info.dAngle_not_dt = 1B
@@ -218,25 +222,30 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      IF KEYWORD_SET(load_dx) THEN BEGIN
         PRINT,"Loading dx in place of eSpec delta_t, and not mapping ..."
         
-        no_mapping              = 1
+        ;; no_mapping              = 1
+        do_not_map_delta_t      = 1
 
         eSpec__delta_t          = TEMPORARY(ABS(FLOAT(width_x)))
         eSpec.info.dx_not_dt    = 1B
      ENDIF
 
-     IF KEYWORD_SET(no_mapping) THEN BEGIN
+     IF KEYWORD_SET(no_mapping) OR KEYWORD_SET(do_not_map_fluxes) THEN BEGIN
         PRINT,"Not mapping to 100 km ..."
      ENDIF ELSE BEGIN
         PRINT,"Mapping eSpec observations to 100 km ..."
         eSpec.je  *= eSpec.mapFactor
         eSpec.jee *= eSpec.mapFactor
 
-        IF KEYWORD_SET(load_delta_t) THEN BEGIN
-           eSpec__delta_t /= SQRT(eSpec.mapFactor)
-        ENDIF
-
         eSpec.info.is_mapped = 1B
      ENDELSE
+
+     IF ~(KEYWORD_SET(do_not_map_delta_t) OR KEYWORD_SET(no_mapping)) $
+        AND (N_ELEMENTS(eSpec__delta_t) GT 0) $
+     THEN BEGIN
+        eSpec__delta_t         /= SQRT(eSpec.mapFactor)
+        eSpec.info.dt_is_mapped = 1B
+     ENDIF
+
 
      ;; STR_ELEMENT,eSpec,'mapFactor',/DELETE
 
