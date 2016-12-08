@@ -5,6 +5,14 @@ PRO LOAD_NEWELL_ION_DB,ion, $
                        NEWELLDBFILE=NewellDBFile, $
                        FORCE_LOAD_DB=force_load_db, $
                        DONT_LOAD_IN_MEMORY=nonMem, $
+                       ;;   LOAD_DELTA_T=load_delta_t, $
+                       ;;   COORDINATE_SYSTEM=coordinate_system, $
+                       ;;   USE_AACGM_COORDS=use_aacgm, $
+                       ;;   USE_GEO_COORDS=use_geo, $
+                       ;;   USE_MAG_COORDS=use_mag, $
+                       ;; LOAD_DELTA_ILAT_FOR_WIDTH_TIME=load_dILAT, $
+                       ;; LOAD_DELTA_ANGLE_FOR_WIDTH_TIME=load_dAngle, $
+                       ;; LOAD_DELTA_X_FOR_WIDTH_TIME=load_dx, $
                        JUST_TIMES=just_times, $
                        OUT_TIMES=out_times, $
                        ;; OUT_CLEANED_I=cleaned_i, $

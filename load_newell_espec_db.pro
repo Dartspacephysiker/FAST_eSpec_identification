@@ -9,7 +9,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          DONT_LOAD_IN_MEMORY=nonMem, $
                          DONT_PERFORM_CORRECTION=dont_perform_SH_correction, $
                          DONT_CONVERT_TO_STRICT_NEWELL=dont_convert_to_strict_newell, $
-                         DONT_MAP_TO_100KM=dont_map, $
+                         DONT_MAP_TO_100KM=no_mapping, $
                          LOAD_DELTA_T=load_delta_t, $
                          COORDINATE_SYSTEM=coordinate_system, $
                          USE_AACGM_COORDS=use_aacgm, $
@@ -18,6 +18,9 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          ;; JUST_TIMES=just_times, $
                          ;; OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
+                         LOAD_DELTA_ILAT_FOR_WIDTH_TIME=load_dILAT, $
+                         LOAD_DELTA_ANGLE_FOR_WIDTH_TIME=load_dAngle, $
+                         LOAD_DELTA_X_FOR_WIDTH_TIME=load_dx, $
                          USE_2000KM_FILE=use_2000km_file, $
                          CLEAR_MEMORY=clear_memory, $
                          NO_MEMORY_LOAD=noMem, $
@@ -126,9 +129,6 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      NewellDBDir      = defNewellDBDir
   ENDIF
 
-  ;; NEWELL__dbDir          = NewellDBDir
-
-
   IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
      CASE KEYWORD_SET(use_unsorted_file) OF
         1: BEGIN
@@ -141,9 +141,6 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         END
      ENDCASE
   ENDIF
-
-  ;; NEWELL__dbFile         = NewellDBFile
-
 
   ;;If just getting times, at this point we've populated other variables
   ;;that might be of interest to user, so JET
@@ -181,13 +178,53 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                                   DB_EXTRAS=DB_extras, $
                                   REDUCE_DBSIZE=reduce_dbSize
 
+     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     ;;What type of delta do you want?
+     bad = KEYWORD_SET(load_delta_t) + KEYWORD_SET(load_dILAT) + KEYWORD_SET(load_dx) + KEYWORD_SET(load_dAngle)
+     IF bad GT 1 THEN BEGIN
+        PRINT,"Can't have it all."
+        STOP
+     ENDIF ELSE BEGIN
+        IF ~KEYWORD_SET(load_delta_t) THEN BEGIN
+           dILAT_file         = GET_FAST_DB_STRING(eSpec,/FOR_ESPEC_DB) + '-delta_ilats.sav'
+           RESTORE,DBDir+dILAT_file
+        ENDIF
+     ENDELSE
+
      IF KEYWORD_SET(load_delta_t) THEN BEGIN
         PRINT,"Loading eSpec delta_ts ..."
         eSpec__delta_t = GET_ESPEC_ION_DELTA_T(eSpec, $
                                                DBNAME='eSpec')
      ENDIF
 
-     IF KEYWORD_SET(dont_map) THEN BEGIN
+     IF KEYWORD_SET(load_dILAT) THEN BEGIN
+        PRINT,"Loading dILAT in place of eSpec delta_t, and not mapping ..."
+        
+        no_mapping              = 1
+
+        eSpec__delta_t          = TEMPORARY(ABS(FLOAT(width_ILAT)))
+        eSpec.info.dILAT_not_dt = 1B
+     ENDIF
+
+     IF KEYWORD_SET(load_dAngle) THEN BEGIN
+        PRINT,"Loading dAngle in place of eSpec delta_t, and not mapping ..."
+        
+        no_mapping               = 1
+
+        eSpec__delta_t           = TEMPORARY(ABS(FLOAT(width_angle)))
+        eSpec.info.dAngle_not_dt = 1B
+     ENDIF
+
+     IF KEYWORD_SET(load_dx) THEN BEGIN
+        PRINT,"Loading dx in place of eSpec delta_t, and not mapping ..."
+        
+        no_mapping              = 1
+
+        eSpec__delta_t          = TEMPORARY(ABS(FLOAT(width_x)))
+        eSpec.info.dx_not_dt    = 1B
+     ENDIF
+
+     IF KEYWORD_SET(no_mapping) THEN BEGIN
         PRINT,"Not mapping to 100 km ..."
      ENDIF ELSE BEGIN
         PRINT,"Mapping eSpec observations to 100 km ..."
