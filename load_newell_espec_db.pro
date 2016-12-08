@@ -180,14 +180,14 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;What type of delta do you want?
-     bad = KEYWORD_SET(load_delta_t) + KEYWORD_SET(load_dILAT) + KEYWORD_SET(load_dx) + KEYWORD_SET(load_dAngle)
-     IF bad GT 1 THEN BEGIN
+     delta_stuff = KEYWORD_SET(load_delta_t) + KEYWORD_SET(load_dILAT) + KEYWORD_SET(load_dx) + KEYWORD_SET(load_dAngle)
+     IF delta_stuff GT 1 THEN BEGIN
         PRINT,"Can't have it all."
         STOP
      ENDIF ELSE BEGIN
         IF ~KEYWORD_SET(load_delta_t) THEN BEGIN
            dILAT_file         = GET_FAST_DB_STRING(eSpec,/FOR_ESPEC_DB) + '-delta_ilats.sav'
-           RESTORE,DBDir+dILAT_file
+           RESTORE,NewellDBDir+dILAT_file
         ENDIF
      ENDELSE
 
@@ -345,7 +345,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      NEWELL__eSpec          = TEMPORARY(eSpec)
 
-     IF KEYWORD_SET(load_delta_t) THEN BEGIN
+     IF KEYWORD_SET(delta_stuff) THEN BEGIN
         NEWELL__delta_t     = TEMPORARY(eSpec__delta_t)
      ENDIF
 
@@ -362,5 +362,4 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
   ENDIF
 
   RETURN
-
 END

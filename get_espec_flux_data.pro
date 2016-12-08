@@ -47,11 +47,19 @@ PRO GET_ESPEC_FLUX_DATA, $
      KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) $
   THEN BEGIN
 
+     other_guys = alfDB_plot_struct.load_dILAT OR alfDB_plot_struct.load_dAngle OR alfDB_plot_struct.load_dx
      LOAD_NEWELL_ESPEC_DB, $
         DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(alfDB_plot_struct.eSpec__Newell_2009_interp), $
         USE_2000KM_FILE=alfDB_plot_struct.eSpec__use_2000km_file, $
         DONT_MAP_TO_100KM=alfDB_plot_struct.eSpec__noMap, $
-        LOAD_DELTA_T=KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities) OR KEYWORD_SET(alfDB_plot_struct.eSpec__t_probOccurrence)
+        LOAD_DELTA_T=( (KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities) OR $
+                        KEYWORD_SET(alfDB_plot_struct.t_probOccurrence) $
+                       ) $
+                       AND ~other_guys), $
+        LOAD_DELTA_ILAT_FOR_WIDTH_TIME=alfDB_plot_struct.load_dILAT, $
+        LOAD_DELTA_ANGLE_FOR_WIDTH_TIME=alfDB_plot_struct.load_dAngle, $
+        LOAD_DELTA_X_FOR_WIDTH_TIME=alfDB_plot_struct.load_dx
+
 
      eSpec_info = NEWELL__eSpec.info
 
