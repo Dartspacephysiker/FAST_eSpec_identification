@@ -6,6 +6,7 @@ PRO GET_ESPEC_FLUX_DATA, $
    ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
    IMF_STRUCT=IMF_struct, $
    MIMC_STRUCT=MIMC_struct, $
+   DBS_RESET=DBs_reset, $
    T1_ARR=t1_arr,T2_ARR=t2_arr, $
    ;; ESPEC_DELTA_T=NEWELL__delta_t, $ ;Comes as part of Newell COMMON vars
    ION_DELTA_T=ion_delta_t, $
@@ -58,8 +59,8 @@ PRO GET_ESPEC_FLUX_DATA, $
                        AND ~other_guys), $
         LOAD_DELTA_ILAT_FOR_WIDTH_TIME=alfDB_plot_struct.load_dILAT, $
         LOAD_DELTA_ANGLE_FOR_WIDTH_TIME=alfDB_plot_struct.load_dAngle, $
-        LOAD_DELTA_X_FOR_WIDTH_TIME=alfDB_plot_struct.load_dx
-
+        LOAD_DELTA_X_FOR_WIDTH_TIME=alfDB_plot_struct.load_dx, $
+        FORCE_LOAD_DB=KEYWORD_SET(DBs_reset)
 
      eSpec_info = NEWELL__eSpec.info
 
