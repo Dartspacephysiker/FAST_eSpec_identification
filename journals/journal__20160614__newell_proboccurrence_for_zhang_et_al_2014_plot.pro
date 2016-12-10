@@ -360,7 +360,7 @@ PRO JOURNAL__20160614__NEWELL_PROBOCCURRENCE_FOR_ZHANG_ET_AL_2014_PLOT
                                      RESET_GOOD_INDS=reset_good_inds, $
                                      NO_BURSTDATA=no_burstData, $
                                      DATADIR=dataDir, $
-                                     DO_CHASTDB=do_chastDB, $
+                                     CHASTDB=chastDB, $
                                      DO_DESPUNDB=do_despunDB, $
                                      NEVENTSPLOTRANGE=nEventsPlotRange, $
                                      LOGNEVENTSPLOT=logNEventsPlot, $

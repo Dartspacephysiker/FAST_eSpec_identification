@@ -289,7 +289,7 @@ PRO JOURNAL__20160613__TOTAL_POWER__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A
                                   RESET_GOOD_INDS=reset_good_inds, $
                                   NO_BURSTDATA=no_burstData, $
                                   DATADIR=dataDir, $
-                                  DO_CHASTDB=do_chastDB, $
+                                  CHASTDB=chastDB, $
                                   DO_DESPUNDB=do_despunDB, $
                                   NEVENTSPLOTRANGE=nEventsPlotRange, $
                                   LOGNEVENTSPLOT=logNEventsPlot, $

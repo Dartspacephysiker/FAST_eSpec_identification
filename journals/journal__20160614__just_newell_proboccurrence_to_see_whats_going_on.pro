@@ -303,7 +303,7 @@ PRO JOURNAL__20160614__JUST_NEWELL_PROBOCCURRENCE_TO_SEE_WHATS_GOING_ON
                                   RESET_GOOD_INDS=reset_good_inds, $
                                   NO_BURSTDATA=no_burstData, $
                                   DATADIR=dataDir, $
-                                  DO_CHASTDB=do_chastDB, $
+                                  CHASTDB=chastDB, $
                                   DO_DESPUNDB=do_despunDB, $
                                   NEVENTSPLOTRANGE=nEventsPlotRange, $
                                   LOGNEVENTSPLOT=logNEventsPlot, $

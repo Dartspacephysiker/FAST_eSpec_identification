@@ -299,7 +299,7 @@ PRO JOURNAL__20160613__ANALOG_TO_CHASTON_ET_AL_2007__FIG2A__MULTIPLY_BY_ESPEC_TY
                                   RESET_GOOD_INDS=reset_good_inds, $
                                   NO_BURSTDATA=no_burstData, $
                                   DATADIR=dataDir, $
-                                  DO_CHASTDB=do_chastDB, $
+                                  CHASTDB=chastDB, $
                                   DO_DESPUNDB=do_despunDB, $
                                   NEVENTSPLOTRANGE=nEventsPlotRange, $
                                   LOGNEVENTSPLOT=logNEventsPlot, $
