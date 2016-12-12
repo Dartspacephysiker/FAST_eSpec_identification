@@ -43,48 +43,23 @@ PRO GET_ESPEC_FLUX_DATA, $
      plot_i_is_list = 0
   ENDELSE
 
-  IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots)                   OR $
-     KEYWORD_SET(alfDB_plot_struct.ePlots)                        OR $ 
-     KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) $
-  THEN BEGIN
+  IF ~KEYWORD_SET(for_IMF_screening) THEN BEGIN ;If doing IMF stuff, GET_RESTRICTED_AND_INTERPED_DB_INDICES will handle this
+     good_eSpec_i = GET_ESPEC_ION_DB_IND(NEWELL__eSpec, $
+                                         lun, $
+                                         ;; DBFILE=dbfile, $
+                                         ;; DBDIR=dbDir, $
+                                         ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
+                                         IMF_STRUCT=IMF_struct, $
+                                         MIMC_STRUCT=MIMC_struct, $
+                                         CHARIERANGE=charIERange, $
+                                         /GET_ESPEC_I_NOT_ION_I, $
+                                         ;; GET_ION_I=get_ion_i, $
+                                         RESET_GOOD_INDS=reset_good_inds, $
+                                         DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
+                                         DONT_LOAD_IN_MEMORY=nonMem) ;, $
+     ;; PRINT_PARAM_SUMMARY)
 
-     other_guys = alfDB_plot_struct.load_dILAT OR alfDB_plot_struct.load_dAngle OR alfDB_plot_struct.load_dx
-     LOAD_NEWELL_ESPEC_DB, $
-        DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(alfDB_plot_struct.eSpec__Newell_2009_interp), $
-        USE_2000KM_FILE=alfDB_plot_struct.eSpec__use_2000km_file, $
-        DONT_MAP_TO_100KM=alfDB_plot_struct.eSpec__noMap, $
-        LOAD_DELTA_T=( (KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities) OR $
-                        KEYWORD_SET(alfDB_plot_struct.t_probOccurrence) $
-                       ) $
-                       AND ~other_guys), $
-        LOAD_DELTA_ILAT_FOR_WIDTH_TIME=alfDB_plot_struct.load_dILAT, $
-        LOAD_DELTA_ANGLE_FOR_WIDTH_TIME=alfDB_plot_struct.load_dAngle, $
-        LOAD_DELTA_X_FOR_WIDTH_TIME=alfDB_plot_struct.load_dx, $
-        FORCE_LOAD_DB=KEYWORD_SET(DBs_reset)
-
-     eSpec_info = NEWELL__eSpec.info
-
-     ;; IF KEYWORD_SET(alfDB_plot_struct.do_timeAvg_fluxQuantities) THEN BEGIN
-     ;; ENDIF
-
-     IF ~KEYWORD_SET(for_IMF_screening) THEN BEGIN ;If doing IMF stuff, GET_RESTRICTED_AND_INTERPED_DB_INDICES will handle this
-        good_eSpec_i = GET_ESPEC_ION_DB_IND(NEWELL__eSpec, $
-                                            lun, $
-                                            ;; DBFILE=dbfile, $
-                                            ;; DBDIR=dbDir, $
-                                            ALFDB_PLOT_STRUCT=alfDB_plot_struct, $
-                                            IMF_STRUCT=IMF_struct, $
-                                            MIMC_STRUCT=MIMC_struct, $
-                                            CHARIERANGE=charIERange, $
-                                            /GET_ESPEC_I_NOT_ION_I, $
-                                            ;; GET_ION_I=get_ion_i, $
-                                            RESET_GOOD_INDS=reset_good_inds, $
-                                            DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
-                                            DONT_LOAD_IN_MEMORY=nonMem);, $
-                                            ;; PRINT_PARAM_SUMMARY)
-
-        nBef_eSpec           = N_ELEMENTS(good_eSpec_i)
-     ENDIF
+     nBef_eSpec           = N_ELEMENTS(good_eSpec_i)
   ENDIF
 
   IF KEYWORD_SET(alfDB_plot_struct.ionPlots) THEN BEGIN
