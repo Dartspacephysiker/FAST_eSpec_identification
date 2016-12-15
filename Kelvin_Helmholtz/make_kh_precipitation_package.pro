@@ -29,13 +29,16 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
   IF KEYWORD_SET(loadDir) THEN BEGIN
      lDir   = loadDir
   ENDIF ELSE BEGIN
-     lDir   = '~/software/sdt/batch_jobs/saves_output_etc/'
+     lDir   = '/SPENCEdata/Research/Satellites/FAST/espec_identification/saves_output_etc/KH_stuff/'
   ENDELSE
 
   IF KEYWORD_SET(plotDir) THEN BEGIN
      pDir   = plotDir
   ENDIF ELSE BEGIN
-     SET_PLOT_DIR,pDir,/FOR_SDT,/ADD_TODAY
+     SET_PLOT_DIR,pDir, $
+                  /FOR_ESPEC_DB, $
+                  ADD_SUFF='/KH_plots/'+ $
+                  GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
   ENDELSE
 
   pNamePref        = KEYWORD_SET(plotNamePref) ? plotNamePref : ''
@@ -105,6 +108,7 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
 
   IF haveILATInfo THEN BEGIN
      ilat_i           = GET_ILAT_INDS(!NULL,minI,maxI,hemi, $
+                                      AURORAL_OVAL=auroral_oval, $
                                       DIRECT_LATITUDES=ilat.y)
      mlt_i            = CGSETINTERSECTION(mlt_i,ilat_i, $
                                           COUNT=nInds, $
@@ -205,11 +209,6 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
   speed = SQRT(vel.y[*,0]^2+vel.y[*,1]^2+vel.y[*,2]^2)*1000.0
   
   ;;get position of each mag point
-  ;;samplingperiod=magz.x(300)-magz.x(299)
-  ;;position=make_array(n_elements(magz.x),/double)
-  ;;position=speed(300)*samplingperiod*findgen(n_elements(magz.x))
-  ;;speed_mag_point=speed(300)
-  
   old_pos        = 0.
   pos            = MAKE_ARRAY(N_ELEMENTS(je.x),/DOUBLE)
   speed_je_point = MAKE_ARRAY(N_ELEMENTS(je.x),/DOUBLE)
@@ -231,18 +230,21 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
   angle       = [0,TOTAL(width_angle,/CUMULATIVE)]
 
   ;;derivatives
-  derivs = {charE : {mlt  : DERIV(mlt.y ,charE), $
-                     ilat : DERIV(ilat.y,charE), $
-                     pos  : DERIV(pos   ,charE), $
-                     angle: DERIV(angle ,charE)},$
-            je    : {mlt  : DERIV(mlt.y ,je.y ), $
-                     ilat : DERIV(ilat.y,je.y ), $
-                     pos  : DERIV(pos   ,je.y ), $
-                     angle: DERIV(angle ,je.y )},$
-            jee   : {mlt  : DERIV(mlt.y ,jee.y), $
-                     ilat : DERIV(ilat.y,jee.y), $
-                     pos  : DERIV(pos   ,jee.y ),$
-                     angle: DERIV(angle ,jee.y)}}
+  derivs      = {charE : {time : DERIV(mlt.x ,charE), $
+                          mlt  : DERIV(mlt.y ,charE), $
+                          ilat : DERIV(ilat.y,charE), $
+                          pos  : DERIV(pos   ,charE), $
+                          angle: DERIV(angle ,charE)},$
+                 je    : {time : DERIV(mlt.x ,je.y ), $
+                          mlt  : DERIV(mlt.y ,je.y ), $
+                          ilat : DERIV(ilat.y,je.y ), $
+                          pos  : DERIV(pos   ,je.y ), $
+                          angle: DERIV(angle ,je.y )},$
+                 jee   : {time : DERIV(mlt.x ,jee.y), $
+                          mlt  : DERIV(mlt.y ,jee.y), $
+                          ilat : DERIV(ilat.y,jee.y), $
+                          pos  : DERIV(pos   ,jee.y ),$
+                          angle: DERIV(angle ,jee.y)}}
 
   ;;Some info
   info   = {energy_electrons : energy_electrons                    , $
@@ -266,6 +268,8 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
   struct = {x      : mlt.x , $
             mlt    : mlt.y , $
             ilat   : ilat.y, $
+            pos    : pos   , $
+            angle  : angle , $
             je     : je.y  , $
             jee    : jee.y , $
             charE  : chare , $
