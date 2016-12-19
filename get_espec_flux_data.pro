@@ -407,6 +407,12 @@ PRO GET_ESPEC_FLUX_DATA, $
      eFlux_data              = 1
   ENDIF
 
+  IF KEYWORD_SET(alfDB_plot_struct.charEPlots) OR $
+     KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) THEN BEGIN
+     eFlux_data              = 1
+     eNumFlux_data           = 1
+  ENDIF
+
   IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots) THEN BEGIN
      eNumFlux_data           = 1
   ENDIF
@@ -424,9 +430,10 @@ PRO GET_ESPEC_FLUX_DATA, $
 
   ;;Last, get the MLTs and ILATs
   ;;Electrons
-  IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots)                   OR $
-     KEYWORD_SET(alfDB_plot_struct.ePlots)                        OR $
-     KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence) $
+  IF KEYWORD_SET(alfDB_plot_struct.eNumFlPlots                      ) OR $
+     KEYWORD_SET(alfDB_plot_struct.ePlots                           ) OR $
+     KEYWORD_SET(alfDB_plot_struct.charEPlots                       ) OR $
+     KEYWORD_SET(alfDB_plot_struct.eSpec__newellPlot_probOccurrence )    $
   THEN BEGIN
      eSpec__mlts             = 1
      eSpec__ilats            = 1
