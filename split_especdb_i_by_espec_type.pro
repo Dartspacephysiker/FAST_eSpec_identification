@@ -87,6 +87,7 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
      PRINTF,tmpLun,FORMAT='(A0,T10,": ",I0)',"SUM",sum
      PRINTF,tmpLun,""
   ENDIF
+  PRINT,FORMAT='(A0,T10,": ",I0)',"pure_b_i",nB
 
   out_titles        = " (" + ['Broadband','Diffuse','Monoenergetic'] + ")" ;,"Broad/Diff",'Broad/Mono','Diff/Mono','BDM','Anomalous'] + ")"
   out_datanamesuffs = "_" + ['broad','diff','mono'] ;,'BD','BM','DM','BDM','Anom']

@@ -183,15 +183,19 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;What type of delta do you want?
      delta_stuff = KEYWORD_SET(load_delta_t) + KEYWORD_SET(load_dILAT) + KEYWORD_SET(load_dx) + KEYWORD_SET(load_dAngle)
-     IF delta_stuff GT 1 THEN BEGIN
-        PRINT,"Can't have it all."
-        STOP
-     ENDIF ELSE BEGIN
-        IF ~KEYWORD_SET(load_delta_t) THEN BEGIN
-           dILAT_file         = GET_FAST_DB_STRING(eSpec,/FOR_ESPEC_DB) + '-delta_ilats.sav'
-           RESTORE,NewellDBDir+dILAT_file
-        ENDIF
-     ENDELSE
+     CASE delta_stuff OF
+        0:
+        1: BEGIN
+           IF ~KEYWORD_SET(load_delta_t) THEN BEGIN
+              dILAT_file         = GET_FAST_DB_STRING(eSpec,/FOR_ESPEC_DB) + '-delta_ilats.sav'
+              RESTORE,NewellDBDir+dILAT_file
+           ENDIF
+        END
+        ELSE: BEGIN
+           PRINT,"Can't have it all."
+           STOP
+        END
+     ENDCASE
 
      IF KEYWORD_SET(load_delta_t) THEN BEGIN
         PRINT,"Loading eSpec delta_ts ..."
