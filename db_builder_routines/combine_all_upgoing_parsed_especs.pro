@@ -74,6 +74,7 @@ PRO COMBINE_ALL_UPGOING_PARSED_ESPECS
            alt             = !NULL
            mlt             = !NULL
            ilat            = !NULL
+           tSort_i         = !NULL
 
            RESTORE,tempFile
 
@@ -84,17 +85,43 @@ PRO COMBINE_ALL_UPGOING_PARSED_ESPECS
                                      OUT_ILAT=ilat, $
                                      LOGLUN=logLun
 
-           
+           nEvents         = (KEYWORD_SET(tSort_i) ? N_ELEMENTS(tSort_i) : $
+                              N_ELEMENTS(eSpecs_parsed.x))
+
+           IF KEYWORD_SET(tSort_i) THEN BEGIN
+              eSpecs_parsed = {x:eSpecs_parsed.x[tSort_i], $
+                               orbit:MAKE_ARRAY(nEvents,VALUE=curOrb), $
+                               mlt:mlt, $
+                               ilat:ilat, $
+                               alt:alt, $
+                               mono:eSpecs_parsed.mono[tSort_i], $
+                               broad:eSpecs_parsed.broad[tSort_i], $
+                               diffuse:eSpecs_parsed.diffuse[tSort_i], $
+                               je:eSpecs_parsed.je[tSort_i], $
+                               jee:eSpecs_parsed.jee[tSort_i], $
+                               nbad_espec:eSpecs_parsed.nbad_espec[tSort_i]}
+           ENDIF ELSE BEGIN
+              eSpecs_parsed = {x:eSpecs_parsed.x, $
+                               orbit:MAKE_ARRAY(nEvents,VALUE=curOrb), $
+                               mlt:mlt, $
+                               ilat:ilat, $
+                               alt:alt, $
+                               mono:eSpecs_parsed.mono, $
+                               broad:eSpecs_parsed.broad, $
+                               diffuse:eSpecs_parsed.diffuse, $
+                               je:eSpecs_parsed.je, $
+                               jee:eSpecs_parsed.jee, $
+                               nbad_espec:eSpecs_parsed.nbad_espec}
+
+           ENDELSE
 
            ADD_EVENT_TO_SPECTRAL_STRUCT, $
               eSpecs, $
               eSpecs_parsed, $
-              tSort_i, $
-              HAS_ALT_AND_ORBIT=(TAG_EXIST(eSpecs_parsed,'alt'   ) AND $
-                                 TAG_EXIST(eSpecs_parsed,'orbit'))
+              ;; tSort_i, $
+              /HAS_ALT_AND_ORBIT
 
-           nEvents         = N_ELEMENTS(eSpecs_parsed.x)
-           cur_orbArr      = [cur_orbArr,MAKE_ARRAY(nEvents,VALUE=curOrb)]
+           ;; cur_orbArr      = [cur_orbArr,MAKE_ARRAY(nEvents,VALUE=curOrb)]
 
            nPredicted                    += nEvents
 
@@ -110,16 +137,17 @@ PRO COMBINE_ALL_UPGOING_PARSED_ESPECS
      curOrb-- ;Fix the damage--trust me
      TOC,clock
      
-     eSpecs           = {x:eSpecs.x, $
-                         orbit:cur_orbArr, $
-                         mlt:eSpecs.mlt, $
-                         ilat:eSpecs.ilat, $
-                         mono:eSpecs.mono, $
-                         broad:eSpecs.broad, $
-                         diffuse:eSpecs.diffuse, $
-                         je:eSpecs.je, $
-                         jee:eSpecs.jee, $
-                         nbad_espec:eSpecs.nbad_espec}
+     ;; eSpecs           = {x:eSpecs.x, $
+     ;;                     orbit:cur_orbArr, $
+     ;;                     mlt:eSpecs.mlt, $
+     ;;                     ilat:eSpecs.ilat, $
+
+     ;;                     mono:eSpecs.mono, $
+     ;;                     broad:eSpecs.broad, $
+     ;;                     diffuse:eSpecs.diffuse, $
+     ;;                     je:eSpecs.je, $
+     ;;                     jee:eSpecs.jee, $
+     ;;                     nbad_espec:eSpecs.nbad_espec}
 
      ;; CREATE_STRUCT(eSpecs,"orbit",cur_orbArr)
 
