@@ -30,7 +30,7 @@ FUNCTION GET_ESPEC_ION_DELTA_T,elOrIon, $
                       NCOMPLEMENT=nBest_i__badii)
 
   PRINT,"Salvaged " + STRCOMPRESS(nBest_i__i,/REMOVE_ALL) + $
-        dbName + " delta-Ts from a cruel fate"
+        " " + dbName + " delta-Ts from a cruel fate"
   PRINT,STRCOMPRESS(nBest_i__badii,/REMOVE_ALL) + $
         " are going to the pit (=0.0)"
 

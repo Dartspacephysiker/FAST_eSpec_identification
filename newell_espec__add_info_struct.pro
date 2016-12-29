@@ -1,6 +1,7 @@
 ;;11/24/16
 ;;Update the eSpec DBs with an info struct
 PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
+                                  IONS=ions, $
                                   DB_DATE=DB_date, $
                                   DB_VERSION=DB_version, $
                                   DB_EXTRAS=DB_extras, $
@@ -9,22 +10,39 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
 
   COMPILE_OPT IDL2
 
-  info  = {converted        : 0B, $
-           Newell2009interp : 0B, $
-           correctedFluxes  : 0B, $
-           is_reduced       : BYTE(KEYWORD_SET(reduce_dbSize)), $
-           DB_date          : '', $
-           DB_version       : '', $
-           DB_extras        : '', $
-           is_AlfNewell     : BYTE(KEYWORD_SET(is_AlfNewell)), $
-           is_mapped        : 0B, $
-           dILAT_not_dt     : 0B, $
-           dAngle_not_dt    : 0B, $
-           dx_not_dt        : 0B, $
-           dt_is_mapped     : 0B, $
-           coords           : 'SDT'}
-
-
+  CASE 1 OF
+     KEYWORD_SET(ions): BEGIN
+        info  = {converted        : 0B, $
+                 correctedFluxes  : 0B, $
+                 is_reduced       : BYTE(KEYWORD_SET(reduce_dbSize)), $
+                 DB_date          : '', $
+                 DB_version       : '', $
+                 DB_extras        : '', $
+                 is_AlfNewell     : BYTE(KEYWORD_SET(is_AlfNewell)), $
+                 is_mapped        : 0B, $
+                 dILAT_not_dt     : 0B, $
+                 dAngle_not_dt    : 0B, $
+                 dx_not_dt        : 0B, $
+                 dt_is_mapped     : 0B, $
+                 coords           : 'SDT'}
+     END
+     ELSE: BEGIN
+        info  = {converted        : 0B, $
+                 Newell2009interp : 0B, $
+                 correctedFluxes  : 0B, $
+                 is_reduced       : BYTE(KEYWORD_SET(reduce_dbSize)), $
+                 DB_date          : '', $
+                 DB_version       : '', $
+                 DB_extras        : '', $
+                 is_AlfNewell     : BYTE(KEYWORD_SET(is_AlfNewell)), $
+                 is_mapped        : 0B, $
+                 dILAT_not_dt     : 0B, $
+                 dAngle_not_dt    : 0B, $
+                 dx_not_dt        : 0B, $
+                 dt_is_mapped     : 0B, $
+                 coords           : 'SDT'}
+     END
+  ENDCASE
   IF KEYWORD_SET(DB_date) THEN BEGIN
      info.DB_date    = DB_date
   ENDIF

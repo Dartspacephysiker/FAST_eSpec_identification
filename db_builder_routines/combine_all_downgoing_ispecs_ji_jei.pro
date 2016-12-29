@@ -138,6 +138,7 @@ PRO COMBINE_ALL_DOWNGOING_ISPECS_JI_JEI
      nTotPredicted  += nPredicted
 
      ;;Some output
+     PRINT,FORMAT='(A0,T12,A0,T24,A0,T36,A0,T48,A0,T60,A0,T72,A0)',"chunkStart","chunkEnd","nPredicted","nActual","nTotPred","nTotActual","orbCount"
      PRINT,FORMAT='(I0,T12,I0,T24,I0,T36,I0,T48,I0,T60,I0,T72,I0)',chunkStartOrb,chunkEndOrb,nPredicted,nActual,nTotPredicted,nTotActual,orbCount
 
      ;;Now reset loop vars
