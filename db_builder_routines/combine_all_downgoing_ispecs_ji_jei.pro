@@ -74,6 +74,7 @@ PRO COMBINE_ALL_DOWNGOING_ISPECS_JI_JEI
            alt             = !NULL
            mlt             = !NULL
            ilat            = !NULL
+           tSort_i         = !NULL
 
            RESTORE,tempFile
 
@@ -85,11 +86,21 @@ PRO COMBINE_ALL_DOWNGOING_ISPECS_JI_JEI
                                      OUT_ILAT=ilat, $
                                      LOGLUN=logLun
 
-           nEvents         = N_ELEMENTS(ji_down.x)
-           IF (nEvents NE N_ELEMENTS(jei_down.x)) THEN STOP
+           nEvents         = (KEYWORD_SET(tSort_i) ? N_ELEMENTS(tSort_i) : $
+                              N_ELEMENTS(ji_down.x))
 
-           CAT_JI_AND_JEI_FROM_NEWELL_FILES_INTO_STRUCT,ions,ji_down,jei_down,MAKE_ARRAY(nEvents,VALUE=curOrb), $
-              alt,mlt,ilat,tSort_i
+           IF (nEvents NE N_ELEMENTS(ji_down.x)) THEN STOP
+
+           IF N_ELEMENTS(tSort_i) GT 0 THEN BEGIN
+              ji_down = {x:ji_down.x[tSort_i], $
+                         y:ji_down.y[tSort_i]}
+              jei_down = {x:jei_down.x[tSort_i], $
+                         y:jei_down.y[tSort_i]}
+           ENDIF
+
+           CAT_JI_AND_JEI_FROM_NEWELL_FILES_INTO_STRUCT,ions,ji_down,jei_down, $
+              MAKE_ARRAY(nEvents,VALUE=curOrb), $
+              alt,mlt,ilat
 
            ;; cur_orbArr      = [cur_orbArr,MAKE_ARRAY(nEvents,VALUE=curOrb)]
 
