@@ -1,6 +1,7 @@
 ;2016/06/04
 ;;NOTE: We do not clean the current database. It's clean as a whistle.
 PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
+                         UPGOING=upgoing, $
                          FAILCODES=failCode, $
                          USE_UNSORTED_FILE=use_unsorted_file, $
                          NEWELLDBDIR=NewellDBDir, $
@@ -55,33 +56,52 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
 
-  ;;The file with failcodes
-  defNewellDBFile        = 'eSpec_failCodes_20160609_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
-  DB_date                = '20160609'
-  DB_version             = 'v0.0'
-  DB_extras              = 'failcodes'
+  CASE 1 OF
+     KEYWORD_SET(upgoing): BEGIN
 
-  ;;The file without failcodes
-  defNewellDBFile        = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav' ;;This file does not need to be cleaned
-  DB_date                = '20160607'
-  DB_version             = 'v0.0'
-  DB_extras              = 'with_mapping_factors'
+        IF KEYWORD_SET(use_unsorted_file) THEN BEGIN
+           PRINT,"Can't use unsorted with upgoing eSpec DB!"
+           use_unsorted_file = 0
+        ENDIF
 
-  defSortNewellDBFile    =  "sorted--" + defNewellDBFile
+        ;;The file without failcodes
+        defNewellDBFile        = 'eSpec_up_20161229_db--PARSED--Orbs_500-16361.sav'
+        DB_date                = '20161229'
+        DB_version             = 'v0.0'
+        DB_extras              = 'upgoing'
 
-  ;;the 2000 km file
-  IF KEYWORD_SET(use_2000km_file) THEN BEGIN
-     PRINT,'Using 2000 km eSpec DB ...'
-     defNewellDBFile     = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords__mapping_factors__strict_Newell_interp.sav'
-     defSortNewellDBFile =  defNewellDBFile
-     DB_date             = '20160607'
-     DB_version          = 'v0.0'
-     DB_extras           = 'Below_2000km/with_alternate_coords/with_mapping_factors/strict_Newell_interp'
-  ENDIF
+     END
+     ELSE: BEGIN
+        ;;The file with failcodes
+        defNewellDBFile        = 'eSpec_failCodes_20160609_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+        DB_date                = '20160609'
+        DB_version             = 'v0.0'
+        DB_extras              = 'failcodes'
 
-  ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
+        ;;The file without failcodes
+        defNewellDBFile        = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+        DB_date                = '20160607'
+        DB_version             = 'v0.0'
+        DB_extras              = 'with_mapping_factors'
+
+        defSortNewellDBFile    =  "sorted--" + defNewellDBFile
+
+        ;;the 2000 km file
+        IF KEYWORD_SET(use_2000km_file) THEN BEGIN
+           PRINT,'Using 2000 km eSpec DB ...'
+           defNewellDBFile     = 'eSpec_20160607_db--orbs_500-16361--BELOW_2000km--with_alternate_coords__mapping_factors__strict_Newell_interp.sav'
+           defSortNewellDBFile =  defNewellDBFile
+           DB_date             = '20160607'
+           DB_version          = 'v0.0'
+           DB_extras           = 'Below_2000km/with_alternate_coords/with_mapping_factors/strict_Newell_interp'
+        ENDIF
+
+        ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
 
 
+
+     END
+  ENDCASE
   defCoordDir            = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
   ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
 
@@ -179,6 +199,10 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                                   DB_VERSION=DB_version, $
                                   DB_EXTRAS=DB_extras, $
                                   REDUCE_DBSIZE=reduce_dbSize
+
+     IF KEYWORD_SET(upgoing) THEN BEGIN
+        eSpec.info.is_upgoing = 1B
+     ENDIF
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;What type of delta do you want?

@@ -1,12 +1,13 @@
 ;2016/06/07
 PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
+                       DOWNGOING=downgoing, $
                        ;; FAILCODES=failCodes, $
                        NEWELLDBDIR=NewellDBDir, $
                        NEWELLDBFILE=NewellDBFile, $
                        FORCE_LOAD_DB=force_load_db, $
                        DONT_LOAD_IN_MEMORY=nonMem, $
-                       DOWNGOING=downgoing, $
                        DONT_PERFORM_CORRECTION=dont_perform_SH_correction, $
+                       DONT_MAP_TO_100KM=no_mapping, $
                        DO_NOT_MAP_FLUXES=do_not_map_fluxes, $
                        DO_NOT_MAP_DELTA_T=do_not_map_delta_t, $
                        LOAD_DELTA_T=load_delta_t, $
@@ -132,6 +133,10 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
                                    DB_EXTRAS=DB_extras, $
                                    REDUCE_DBSIZE=reduce_dbSize, $
                                    IS_ALFNEWELL=is_AlfNewell
+
+     IF KEYWORD_SET(downgoing) THEN BEGIN
+        ion.info.is_downgoing = 1B
+     ENDIF
 
      IF ~KEYWORD_SET(dont_perform_SH_correction) THEN BEGIN
         ;;Correct fluxes
