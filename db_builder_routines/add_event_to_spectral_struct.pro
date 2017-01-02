@@ -3,10 +3,12 @@ PRO ADD_EVENT_TO_SPECTRAL_STRUCT,events,tempEvent,tSort_i, $
 
   ;; event = { time_e:[events.time_e,tempEvent.time_e], $ ; When are you?
 
+  COMPILE_OPT idl2
+
   IF N_ELEMENTS(tSort_i) GT 0 THEN BEGIN
      inds = tSort_i
   ENDIF ELSE BEGIN
-     inds = INDGEN(N_ELEMENTS(tempEvent.Je))
+     inds = LINDGEN(N_ELEMENTS(tempEvent.x))
   ENDELSE
 
   IF N_ELEMENTS(events) EQ 0 THEN BEGIN

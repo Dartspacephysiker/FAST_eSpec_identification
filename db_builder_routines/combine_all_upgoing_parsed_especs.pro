@@ -75,18 +75,19 @@ PRO COMBINE_ALL_UPGOING_PARSED_ESPECS
            mlt             = !NULL
            ilat            = !NULL
            tSort_i         = !NULL
+           nEvents         = !NULL
 
            RESTORE,tempFile
 
-           GET_ALT_MLT_ILAT_FROM_FAST_EPHEM,curOrb,tmpje_up.x, $
-                                     OUT_TSORTED_I=tSort_i, $
-                                     OUT_ALT=alt, $
-                                     OUT_MLT=mlt, $
-                                     OUT_ILAT=ilat, $
-                                     LOGLUN=logLun
-
-           nEvents         = (KEYWORD_SET(tSort_i) ? N_ELEMENTS(tSort_i) : $
-                              N_ELEMENTS(eSpecs_parsed.x))
+           GET_ALT_MLT_ILAT_FROM_FAST_EPHEM, $
+              curOrb, $
+              especs_parsed.x, $
+              OUT_TSORTED_I=tSort_i, $
+              OUT_ALT=alt, $
+              OUT_MLT=mlt, $
+              OUT_ILAT=ilat, $
+              OUT_NEVENTS=nEvents, $
+              LOGLUN=logLun
 
            IF KEYWORD_SET(tSort_i) THEN BEGIN
               eSpecs_parsed = {x:eSpecs_parsed.x[tSort_i], $
@@ -166,6 +167,8 @@ PRO COMBINE_ALL_UPGOING_PARSED_ESPECS
 
      ;;Some output
      PRINT,FORMAT='(I0,T12,I0,T24,I0,T36,I0,T48,I0,T60,I0,T72,I0)',chunkStartOrb,chunkEndOrb,nPredicted,nActual,nTotPredicted,nTotActual,orbCount
+
+     IF (nActual NE nPredicted) OR (nTotActual NE nTotPredicted) THEN STOP 
 
      ;;Now reset loop vars
      eSpecs          = !NULL

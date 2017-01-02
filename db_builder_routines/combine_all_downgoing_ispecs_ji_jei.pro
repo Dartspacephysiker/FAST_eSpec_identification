@@ -89,7 +89,7 @@ PRO COMBINE_ALL_DOWNGOING_ISPECS_JI_JEI
            nEvents         = (KEYWORD_SET(tSort_i) ? N_ELEMENTS(tSort_i) : $
                               N_ELEMENTS(ji_down.x))
 
-           IF (nEvents NE N_ELEMENTS(ji_down.x)) THEN STOP
+           ;; IF (nEvents NE N_ELEMENTS(ji_down.x)) THEN STOP
 
            IF N_ELEMENTS(tSort_i) GT 0 THEN BEGIN
               ji_down = {x:ji_down.x[tSort_i], $

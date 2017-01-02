@@ -15,7 +15,7 @@ PRO STITCH_COMBINED_ESPECS,UPGOING=upgoing, $
 
   outDir                    = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
 
-  skipSortTags              = ['MLT','ALT','ILAT','JI','JEI']
+  skipSortTags              = ['MLT','ALT','ILAT','JE','JEE','MONO','BROAD','DIFFUSE','NBAD_ESPEC']
   CASE 1 OF
      KEYWORD_SET(upgoing): BEGIN
         fPref    = "eSpec_up_"
