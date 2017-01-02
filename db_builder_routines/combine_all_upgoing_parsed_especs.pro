@@ -57,6 +57,14 @@ PRO COMBINE_ALL_UPGOING_PARSED_ESPECS
         ENDIF
         WHILE ~doneski DO BEGIN
 
+           CASE 1 OF
+              KEYWORD_SET(upgoing): BEGIN
+
+              END
+              ELSE: BEGIN
+
+              END
+           ENDCASE
            RESET_ESPEC_RESTOREFILE_VARS,especs_parsed, $
                                         ispec_down, $
                                         jei_down, $

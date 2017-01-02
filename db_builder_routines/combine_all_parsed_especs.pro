@@ -1,5 +1,6 @@
 ;;06/04/16
-PRO COMBINE_ALL_PARSED_ESPECS
+PRO COMBINE_ALL_PARSED_ESPECS, $
+   UPGOING=upgoing
 
   COMPILE_OPT IDL2
 
@@ -12,15 +13,26 @@ PRO COMBINE_ALL_PARSED_ESPECS
 
   newFileDateStr            = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
 
-  Newell_DB_dir             = '/SPENCEdata/software/sdt/batch_jobs/Alfven_study/20160520--get_Newell_identification_for_Alfven_events--NOT_despun/Newell_batch_output/'
-  Newell_filePref           = 'Newell_et_al_identification_of_electron_spectra--ions_included--Orbit_'
+  CASE 1 OF
+     KEYWORD_SET(upgoing): BEGIN
+        Newell_DB_dir       = '/SPENCEdata/software/sdt/batch_jobs/Alfven_study/20160520--get_Newell_identification_for_Alfven_events--NOT_despun/Newell_batch_output/downgoing_ions_upgoing_electrons/'
+        Newell_filePref     = 'Newell_et_al_identification_of_electron_spectra--downgoing_ions_upgoing_electrons--Orbit_'
+        pref                = "eSpec_up_"
+     END
+     ELSE: BEGIN
+        Newell_DB_dir       = '/SPENCEdata/software/sdt/batch_jobs/Alfven_study/20160520--get_Newell_identification_for_Alfven_events--NOT_despun/Newell_batch_output/ions_included/'
+        Newell_filePref     = 'Newell_et_al_identification_of_electron_spectra--ions_included--Orbit_'
+        pref                = "eSpec_"
+     END
+  ENDCASE
 
   outDir                    = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
 
   orbChunk_save_interval    = 500
   chunkNum                  = 0
   chunkDir                  = outDir+'fully_parsed/'
-  chunk_saveFile_pref       = STRING(FORMAT='("eSpec_",A0,"_db--PARSED--Orbs_",I0,"-",I0)', $
+  chunk_saveFile_pref       = STRING(FORMAT='(A0,A0,"_db--PARSED--Orbs_",I0,"-",I0)', $
+                                     pref, $
                                      newFileDateStr, $
                                      firstOrb, $
                                      lastOrb)
@@ -57,24 +69,86 @@ PRO COMBINE_ALL_PARSED_ESPECS
         ENDIF
         WHILE ~doneski DO BEGIN
 
-           RESET_ESPEC_RESTOREFILE_VARS,especs_parsed, $
-                                        ispec_up, $
-                                        jei_up, $
-                                        ji_up, $
-                                        out_sc_min_energy_ind, $
-                                        out_sc_min_energy_ind_i, $
-                                        out_sc_pot, $
-                                        out_sc_pot_i, $
-                                        out_sc_time, $
-                                        out_sc_time_i, $
-                                        tmpespec_lc, $
-                                        tmpjee_lc, $
-                                        tmpje_lc
+           CASE 1 OF
+              KEYWORD_SET(upgoing): BEGIN
+                 RESET_ESPEC_RESTOREFILE_VARS,especs_parsed, $
+                                              ispec_down, $
+                                              jei_down, $
+                                              ji_down, $
+                                              out_sc_min_energy_ind, $
+                                              out_sc_min_energy_ind_i, $
+                                              out_sc_pot, $
+                                              out_sc_pot_i, $
+                                              out_sc_time, $
+                                              out_sc_time_i, $
+                                              tmpespec_up, $
+                                              tmpjee_up, $
+                                              tmpje_up
+              END
+              ELSE: BEGIN
+                 RESET_ESPEC_RESTOREFILE_VARS,especs_parsed, $
+                                              ispec_up, $
+                                              jei_up, $
+                                              ji_up, $
+                                              out_sc_min_energy_ind, $
+                                              out_sc_min_energy_ind_i, $
+                                              out_sc_pot, $
+                                              out_sc_pot_i, $
+                                              out_sc_time, $
+                                              out_sc_time_i, $
+                                              tmpespec_lc, $
+                                              tmpjee_lc, $
+                                              tmpje_lc
+              END
+           ENDCASE
+
+           alt             = !NULL
+           mlt             = !NULL
+           ilat            = !NULL
+           tSort_i         = !NULL
+           nEvents         = !NULL
+
            RESTORE,tempFile
 
-           ADD_EVENT_TO_SPECTRAL_STRUCT,eSpecs,eSpecs_parsed
-           nEvents         = N_ELEMENTS(eSpecs_parsed.x)
-           cur_orbArr      = [cur_orbArr,MAKE_ARRAY(nEvents,VALUE=curOrb)]
+           GET_ALT_MLT_ILAT_FROM_FAST_EPHEM, $
+              curOrb, $
+              especs_parsed.x, $
+              OUT_TSORTED_I=tSort_i, $
+              OUT_ALT=alt, $
+              OUT_MLT=mlt, $
+              OUT_ILAT=ilat, $
+              OUT_NEVENTS=nEvents, $
+              LOGLUN=logLun
+
+           IF KEYWORD_SET(tSort_i) THEN BEGIN
+              eSpecs_parsed = {x:eSpecs_parsed.x[tSort_i], $
+                               orbit:MAKE_ARRAY(nEvents,VALUE=curOrb), $
+                               mlt:mlt, $
+                               ilat:ilat, $
+                               alt:alt, $
+                               mono:eSpecs_parsed.mono[tSort_i], $
+                               broad:eSpecs_parsed.broad[tSort_i], $
+                               diffuse:eSpecs_parsed.diffuse[tSort_i], $
+                               je:eSpecs_parsed.je[tSort_i], $
+                               jee:eSpecs_parsed.jee[tSort_i], $
+                               nbad_espec:eSpecs_parsed.nbad_espec[tSort_i]}
+           ENDIF ELSE BEGIN
+              eSpecs_parsed = {x:eSpecs_parsed.x, $
+                               orbit:MAKE_ARRAY(nEvents,VALUE=curOrb), $
+                               mlt:mlt, $
+                               ilat:ilat, $
+                               alt:alt, $
+                               mono:eSpecs_parsed.mono, $
+                               broad:eSpecs_parsed.broad, $
+                               diffuse:eSpecs_parsed.diffuse, $
+                               je:eSpecs_parsed.je, $
+                               jee:eSpecs_parsed.jee, $
+                               nbad_espec:eSpecs_parsed.nbad_espec}
+
+           ENDELSE
+
+           ADD_EVENT_TO_SPECTRAL_STRUCT,eSpecs,eSpecs_parsed,/HAS_ALT_AND_ORBIT
+           ;; cur_orbArr      = [cur_orbArr,MAKE_ARRAY(nEvents,VALUE=curOrb)]
 
            nPredicted                    += nEvents
 
@@ -90,16 +164,17 @@ PRO COMBINE_ALL_PARSED_ESPECS
      curOrb-- ;Fix the damage--trust me
      TOC,clock
      
-     eSpecs           = {x:eSpecs.x, $
-                         orbit:cur_orbArr, $
-                         mlt:eSpecs.mlt, $
-                         ilat:eSpecs.ilat, $
-                         mono:eSpecs.mono, $
-                         broad:eSpecs.broad, $
-                         diffuse:eSpecs.diffuse, $
-                         je:eSpecs.je, $
-                         jee:eSpecs.jee, $
-                         nbad_espec:eSpecs.nbad_espec}
+     ;; eSpecs           = {x:eSpecs.x, $
+     ;;                     orbit:cur_orbArr, $
+     ;;                     mlt:eSpecs.mlt, $
+     ;;                     ilat:eSpecs.ilat, $
+
+     ;;                     mono:eSpecs.mono, $
+     ;;                     broad:eSpecs.broad, $
+     ;;                     diffuse:eSpecs.diffuse, $
+     ;;                     je:eSpecs.je, $
+     ;;                     jee:eSpecs.jee, $
+     ;;                     nbad_espec:eSpecs.nbad_espec}
 
      ;; CREATE_STRUCT(eSpecs,"orbit",cur_orbArr)
 
@@ -119,6 +194,8 @@ PRO COMBINE_ALL_PARSED_ESPECS
      ;;Some output
      PRINT,FORMAT='(I0,T12,I0,T24,I0,T36,I0,T48,I0,T60,I0,T72,I0)',chunkStartOrb,chunkEndOrb,nPredicted,nActual,nTotPredicted,nTotActual,orbCount
 
+     IF (nActual NE nPredicted) OR (nTotActual NE nTotPredicted) THEN STOP 
+
      ;;Now reset loop vars
      eSpecs          = !NULL
      cur_orbArr      = !NULL
@@ -137,32 +214,32 @@ PRO COMBINE_ALL_PARSED_ESPECS
 
 END
 
-PRO RESET_ESPEC_RESTOREFILE_VARS,especs_parsed, $
-                                 ispec_up, $
-                                 jei_up, $
-                                 ji_up, $
-                                 out_sc_min_energy_ind, $
-                                 out_sc_min_energy_ind_i, $
-                                 out_sc_pot, $
-                                 out_sc_pot_i, $
-                                 out_sc_time, $
-                                 out_sc_time_i, $
-                                 tmpespec_lc, $
-                                 tmpjee_lc, $
-                                 tmpje_lc
+;; PRO RESET_ESPEC_RESTOREFILE_VARS,especs_parsed, $
+;;                                  ispec_up, $
+;;                                  jei_up, $
+;;                                  ji_up, $
+;;                                  out_sc_min_energy_ind, $
+;;                                  out_sc_min_energy_ind_i, $
+;;                                  out_sc_pot, $
+;;                                  out_sc_pot_i, $
+;;                                  out_sc_time, $
+;;                                  out_sc_time_i, $
+;;                                  tmpespec_lc, $
+;;                                  tmpjee_lc, $
+;;                                  tmpje_lc
 
-        especs_parsed                  = !NULL
-        ispec_up                       = !NULL
-        jei_up                         = !NULL
-        ji_up                          = !NULL
-        out_sc_min_energy_ind          = !NULL
-        out_sc_min_energy_ind_i        = !NULL
-        out_sc_pot                     = !NULL
-        out_sc_pot_i                   = !NULL
-        out_sc_time                    = !NULL
-        out_sc_time_i                  = !NULL
-        tmpespec_lc                    = !NULL
-        tmpjee_lc                      = !NULL
-        tmpje_lc                       = !NULL
+;;         especs_parsed                  = !NULL
+;;         ispec_up                       = !NULL
+;;         jei_up                         = !NULL
+;;         ji_up                          = !NULL
+;;         out_sc_min_energy_ind          = !NULL
+;;         out_sc_min_energy_ind_i        = !NULL
+;;         out_sc_pot                     = !NULL
+;;         out_sc_pot_i                   = !NULL
+;;         out_sc_time                    = !NULL
+;;         out_sc_time_i                  = !NULL
+;;         tmpespec_lc                    = !NULL
+;;         tmpjee_lc                      = !NULL
+;;         tmpje_lc                       = !NULL
 
-END
+;; END
