@@ -2,6 +2,7 @@
 ;;NOTE: We do not clean the current database. It's clean as a whistle.
 PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          UPGOING=upgoing, $
+                         GIGANTE=gigante, $
                          FAILCODES=failCode, $
                          USE_UNSORTED_FILE=use_unsorted_file, $
                          NEWELLDBDIR=NewellDBDir, $
@@ -65,10 +66,24 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         ENDIF
 
         ;;The file without failcodes
-        defNewellDBFile        = 'eSpec_up_20161229_db--PARSED--Orbs_500-16361.sav'
+        defSortNewellDBFile    = 'eSpec_up_20161229_db--PARSED--Orbs_500-16361.sav'
         DB_date                = '20161229'
         DB_version             = 'v0.0'
         DB_extras              = 'upgoing'
+
+     END
+     KEYWORD_SET(gigante): BEGIN
+
+        IF KEYWORD_SET(use_unsorted_file) THEN BEGIN
+           PRINT,"Can't use unsorted with upgoing eSpec DB!"
+           use_unsorted_file = 0
+        ENDIF
+
+        ;;The file without failcodes
+        defSortNewellDBFile    = 'eSpec_20170102_db--PARSED--Orbs_500-23999.sav'
+        DB_date                = '20170102'
+        DB_version             = 'v0.0'
+        DB_extras              = 'gigante'
 
      END
      ELSE: BEGIN

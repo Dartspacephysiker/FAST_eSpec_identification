@@ -8,7 +8,7 @@ PRO STITCH_COMBINED_ESPECS,UPGOING=upgoing, $
   loud                      = 0
 
   firstOrb                  = 500
-  lastOrb                   = 16361
+  lastOrb                   = 23999
 
   ;; newFileDateStr            = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) ;'20160607'
   newFileDateStr            = KEYWORD_SET(DBDate) ? DBDate : GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
