@@ -613,24 +613,25 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         ;;                                           (eSpec.broad EQ 2) )  ) )) $
         ;;                 * 100.
 
+        ;;;START COMMENT TO FORCE MYSELF TO LABORIOUSLY CHECK EVERY ORBIT
         ;;Now Je
-        good_je_i  = WHERE(dbStruct.je GE je_lims[0] AND $
-                           dbStruct.je LE je_lims[1],nGoodJe, $
-                           NCOMPLEMENT=nBadJe)
+        ;; good_je_i  = WHERE(dbStruct.je GE je_lims[0] AND $
+        ;;                    dbStruct.je LE je_lims[1],nGoodJe, $
+        ;;                    NCOMPLEMENT=nBadJe)
 
-        nGood      = N_ELEMENTS(good_i)
-        good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_je_i),COUNT=nKept)
-        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Je screening ...'
+        ;; nGood      = N_ELEMENTS(good_i)
+        ;; good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_je_i),COUNT=nKept)
+        ;; PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Je screening ...'
 
-        ;;Now Jee
-        good_jee_i = WHERE(dbStruct.jee GE jee_lims[0] AND $
-                           dbStruct.jee LE jee_lims[1],nGoodJee, $
-                           NCOMPLEMENT=nBadJee)
+        ;; ;;Now Jee
+        ;; good_jee_i = WHERE(dbStruct.jee GE jee_lims[0] AND $
+        ;;                    dbStruct.jee LE jee_lims[1],nGoodJee, $
+        ;;                    NCOMPLEMENT=nBadJee)
 
-        nGood      = N_ELEMENTS(good_i)
-        good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_jee_i),COUNT=nKept)
-        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
-
+        ;; nGood      = N_ELEMENTS(good_i)
+        ;; good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_jee_i),COUNT=nKept)
+        ;; PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
+        ;;;STOP COMMENT TO FORCE MYSELF TO LABORIOUSLY CHECK EVERY ORBIT
 
         ;; IF KEYWORD_SET(alfDB_plot_struct.eSpec__remove_outliers) AND ~is_ion THEN BEGIN
 
