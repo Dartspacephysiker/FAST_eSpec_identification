@@ -1,6 +1,6 @@
 ;***********************************************
 ;2016/06/07
-;This is like GET_CHASTON_IND for the electron and ion DBs
+;It's like GET_CHASTON_IND for the electron and ion DBs
 FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                               FOR_ALFVEN_DB=for_alfven_db, $
                               DESPUN_ALF_DB=despun_alf_db, $
