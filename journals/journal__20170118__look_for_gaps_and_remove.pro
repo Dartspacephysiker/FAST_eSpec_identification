@@ -3,7 +3,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
 
   COMPILE_OPT IDL2
 
-  startOrb    = 500 ;Otherwise it just picks the first orbit in eSpec
+  startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
   showPlots   = 1
   savePS      = 1
   PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/201701--trim_transitions/'
@@ -14,8 +14,8 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
   @common__newell_espec.pro
 
   ;; LOAD_NEWELL_ESPEC_DB,eSpec,!NULL,NEWELL__delta_t, $
-                          ;; /LOAD_DELTA_T, $
-                          ;; /NO_MEMORY_LOAD
+  ;; /LOAD_DELTA_T, $
+  ;; /NO_MEMORY_LOAD
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
      LOAD_NEWELL_ESPEC_DB,!NULL,!NULL,!NULL, $
                           /LOAD_DELTA_T
@@ -42,23 +42,26 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
   junkTransVal = 0
   junkStartVal = 1
   TSVal        = 2
-  Val0628      = 3
-  Val251       = 4
-  ValUnsafe    = 5
+  Val032       = 3
+  Val0628      = 4
+  Val251       = 5
+  ValUnsafe    = 6
 
   junkTransCol = 25
   junkStartCol = 50
   TSCol        = 75
-  Col0628      = 100
-  Col251       = 125
-  ColUnsafe    = 150
+  Col032       = 100
+  Col0628      = 125
+  Col251       = 150
+  ColUnsafe    = 175
 
   junkTransPSym = 1
   junkStartPSym = 2
   TSPSym        = 4
-  PSym0628      = 5
-  PSym251       = 6
-  PSymUnsafe    = 1
+  PSym032       = 5
+  PSym0628      = 6
+  PSym251       = 1
+  PSymUnsafe    = 2
 
   IF KEYWORD_SET(showPlots) THEN BEGIN
      IF KEYWORD_SET(savePS) THEN BEGIN
@@ -67,7 +70,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
      ENDELSE
   ENDIF
 
-  PRINT,FORMAT='(A0,T10,A0,T20,A0,T30,A0)',"Orbits","N Streak","N 2.51","N 0.628"
+  PRINT,FORMAT='(A0,T10,A0,T20,A0,T30,A0,T40,A0,T50,A0)',"Orbits","N Streak","N 2.51","N 0.628","N 0.32","N Unsafe"
   WHILE curOrb LE endOrb DO BEGIN
 
      ;;Reset inds for this orbit
@@ -170,11 +173,14 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
 
      samp251    = ABS(sampDT-2.51) LT 0.1
      samp0628   = ABS(sampDT-0.628) LT 0.05
+     samp032    = ABS(sampDT-0.32) LT 0.1
      w251       = WHERE(samp251,n251)
      w0628      = WHERE(samp0628,n0628)
-     safe       = WHERE(TEMPORARY(samp251) OR TEMPORARY(samp0628),nSafeStreaks,COMPLEMENT=wUnsafe,NCOMPLEMENT=nUnsafe)
+     w032       = WHERE(samp032,n032)
+     safe       = WHERE(TEMPORARY(samp251) OR TEMPORARY(samp0628) OR TEMPORARY(samp032), $
+                        nSafeStreaks,COMPLEMENT=wUnsafe,NCOMPLEMENT=nUnsafe)
 
-     PRINT,FORMAT='(A0,T10,I0,T20,I0,T30,I0)',orbString,nStreaks,n251,n0628,nUnsafe
+     PRINT,FORMAT='(A0,T10,I0,T20,I0,T30,I0,T40,I0,T50,I0)',orbString,nStreaks,n251,n0628,n032,nUnsafe
 
      IF nSafeStreaks NE nStreaks THEN BEGIN
         PRINT,FORMAT='(A0,": ","Unsafe sampDTs!! (",10(F0.2,:,", "),")")',orbSTring,sampDT[wUnsafe]
@@ -226,6 +232,21 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         ENDIF
      ENDFOR
 
+     ;;Junk all the places where we transition from 0.628-s sample period to something else
+     w032_ii = !NULL
+     FOR k=0,n032-1 DO BEGIN
+        tmpK       = w032[k]
+        w032_ii   = [w032_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
+        tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*2)) AND $
+                           (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*4)), $
+                           nTmpJunk)
+
+        IF nTmpJunk GT 0 THEN BEGIN
+           ;; junk_i  = [junk_i,tmp_i[tmpJunk_ii]]
+           junk_ii = [junk_ii,tmpJunk_ii]
+        ENDIF
+     ENDFOR
+
 
      IF KEYWORD_SET(showPlots) THEN BEGIN
 
@@ -254,56 +275,65 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
              YMARGIN=[8,2]
 
         OPLOT,tJul,MAKE_ARRAY(N_ELEMENTS(tJul),VALUE=TSVal), $
-             PSYM=TSPSym, $
-             COLOR=TSCol;, $
-             ;; XTICKFORMAT='LABEL_DATE', $
-             ;; XTICKUNITS=['Time','Time'], $
-             ;; XMARGIN=[12,2], $
-             ;; YRANGE=[-0.1,4.1], $
-             ;; YSTYLE=1, $
-             ;; YTICKV=[0,1,2,3,4], $
-             ;; YTICKNAME=["SRate Trans","Interv Start","T Series",'dt=0.628','dt=2.51'], $
-             ;; YMARGIN=[8,2]
+              PSYM=TSPSym, $
+              COLOR=TSCol       ;, $
+        ;; XTICKFORMAT='LABEL_DATE', $
+        ;; XTICKUNITS=['Time','Time'], $
+        ;; XMARGIN=[12,2], $
+        ;; YRANGE=[-0.1,4.1], $
+        ;; YSTYLE=1, $
+        ;; YTICKV=[0,1,2,3,4], $
+        ;; YTICKNAME=["SRate Trans","Interv Start","T Series",'dt=0.628','dt=2.51'], $
+        ;; YMARGIN=[8,2]
 
         IF N_ELEMENTS(junk_ii) GT 0 THEN BEGIN
            OPLOT,tJul[junk_ii],MAKE_ARRAY(N_ELEMENTS(junk_ii),VALUE=junkTransVal), $
                  PSYM=junkTransPSym, $
-                 COLOR=junkTransCol;, $
-                 ;; XTICKFORMAT='LABEL_DATE', $
-                 ;; XTICKUNITS=['Time','Time']
+                 COLOR=junkTransCol ;, $
+           ;; XTICKFORMAT='LABEL_DATE', $
+           ;; XTICKUNITS=['Time','Time']
         ENDIF
 
         IF N_ELEMENTS(befStart_ii) GT 0 THEN BEGIN
            OPLOT,tJul[befStart_ii],MAKE_ARRAY(N_ELEMENTS(befStart_ii),VALUE=junkStartVal), $
                  PSYM=junkStartPSym, $
-                 COLOR=junkStartCol;, $
-                 ;; XTICKFORMAT='LABEL_DATE', $
-                 ;; XTICKUNITS=['Time','Time']                 
+                 COLOR=junkStartCol ;, $
+           ;; XTICKFORMAT='LABEL_DATE', $
+           ;; XTICKUNITS=['Time','Time']                 
         ENDIF
 
         IF N_ELEMENTS(wUnsafe_ii) GT 0 THEN BEGIN
            OPLOT,tJul[wUnsafe_ii],MAKE_ARRAY(N_ELEMENTS(wUnsafe_ii),VALUE=ValUnsafe), $
                  PSYM=PSymUnsafe, $
-                 COLOR=ColUnsafe;, $
-                 ;; XTICKFORMAT='LABEL_DATE', $
-                 ;; XTICKUNITS=['Time','Time']                 
+                 COLOR=ColUnsafe ;, $
+           ;; XTICKFORMAT='LABEL_DATE', $
+           ;; XTICKUNITS=['Time','Time']                 
         ENDIF
 
         IF N_ELEMENTS(w251_ii) GT 0 THEN BEGIN
            OPLOT,tJul[w251_ii],MAKE_ARRAY(N_ELEMENTS(w251_ii),VALUE=Val251), $
                  PSYM=PSym251, $
-                 COLOR=Col251;, $
-                 ;; XTICKFORMAT='LABEL_DATE', $
-                 ;; XTICKUNITS=['Time','Time']                 
+                 COLOR=Col251   ;, $
+           ;; XTICKFORMAT='LABEL_DATE', $
+           ;; XTICKUNITS=['Time','Time']                 
         ENDIF
 
         IF N_ELEMENTS(w0628_ii) GT 0 THEN BEGIN
            OPLOT,tJul[w0628_ii],MAKE_ARRAY(N_ELEMENTS(w0628_ii),VALUE=Val0628), $
                  PSYM=PSym0628, $
-                 COLOR=Col0628;, $
-                 ;; XTICKFORMAT='LABEL_DATE', $
-                 ;; XTICKUNITS=['Time','Time']           
+                 COLOR=Col0628  ;, $
+           ;; XTICKFORMAT='LABEL_DATE', $
+           ;; XTICKUNITS=['Time','Time']           
         ENDIF
+
+        IF N_ELEMENTS(w032_ii) GT 0 THEN BEGIN
+           OPLOT,tJul[w032_ii],MAKE_ARRAY(N_ELEMENTS(w032_ii),VALUE=Val032), $
+                 PSYM=PSym032, $
+                 COLOR=Col032   ;, $
+           ;; XTICKFORMAT='LABEL_DATE', $
+           ;; XTICKUNITS=['Time','Time']           
+        ENDIF     
+
      ENDIF
 
      IF KEYWORD_SET(savePS) THEN BEGIN
