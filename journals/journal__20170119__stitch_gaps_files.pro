@@ -14,7 +14,7 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
   saveFilePref = "esa_transit_times--"
   ;; suffDir     = ''
 
-  orbRangeF   = STRING(FORMAT='(I0,"-",I0)',startOrb,endOrb-1)
+  orbRangeF   = STRING(FORMAT='(I0,"-",I0)',startOrb,endOrb)
   saveFile    = saveFilePref+orbRangeF+'--'+GET_TODAY_STRING(/DO_YYYYMMDD_FMT)+'.sav'
 
   @common__newell_espec.pro
