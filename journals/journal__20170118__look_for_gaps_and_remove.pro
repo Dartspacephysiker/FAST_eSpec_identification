@@ -36,7 +36,8 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
   befStart_i     = !NULL
   junkTimes      = !NULL
   befStartTimes  = !NULL
-
+  missingIntervals = !NULL
+  
   ;;vals for plot
   LOADCT2,39
   junkTransVal = 0
@@ -70,14 +71,18 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
      ENDELSE
   ENDIF
 
-  PRINT,FORMAT='(A0,T10,A0,T20,A0,T30,A0,T40,A0,T50,A0,T60,A0)',"Orbits","N Streak","N 2.51","N 0.628","N 0.312","N Unsafe","N Dupes"
+  PRINT,FORMAT='(A0,T10,A0,T20,A0,T30,A0,T40,A0,T50,' $
+        + 'A0,T60,A0,T70,A0)', $
+        "Orbits","N Streak","N 2.51","N 0.628","N 0.312", $
+        "N Unsafe","N Dupe Elems","MissedItvls"
   WHILE curOrb LE endOrb DO BEGIN
 
      ;;Reset inds for this orbit
      befStart_ii       = !NULL
      junk_ii           = !NULL
      nDupes            = 0
-     
+     nMissing          = 0
+
      IF curOrb GT (lastSavOrb + deltaSavOrb - 1) THEN BEGIN
         orbRangeString = STRING(FORMAT='(I0,"-",I0)',lastSavOrb,lastSavOrb+deltaSavOrb-1)
         orbSavFileName = STRING(FORMAT='("esa_transit_times--",A0,".sav")',orbRangeString)
@@ -87,6 +92,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
                      N_ELEMENTS(junk_i),N_ELEMENTS(befStart_i),orbRangeString,orbSavFileName)
 
         SAVE,junk_i,befStart_i,junkTimes,befStartTimes, $
+             missingIntervals, $
              eSpec_info, $
              FILENAME=saveDir+orbSavFileName
 
@@ -94,9 +100,9 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         befStart_i     = !NULL
         junkTimes      = !NULL
         befStartTimes  = !NULL
+        missingIntervals = !NULL 
         lastSavOrb += deltaSavOrb
      ENDIF
-
 
      orbString = STRCOMPRESS(curOrb,/REMOVE_ALL)
      tmp_i     = WHERE(NEWELL__eSpec.orbit EQ curOrb[0],NTmp)
@@ -106,7 +112,6 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         CONTINUE
      ENDIF
      
-
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;First we worry about junking the first ten seconds in each hemisphere
      this         = !NULL
@@ -119,13 +124,44 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         CHECK_SORTED,intStartTs,sorted_intervals,/QUIET
         IF ~sorted_intervals THEN STOP
         
-        interval_ii  = VALUE_CLOSEST2(NEWELL__eSpec.x[tmp_i],intStartTs)
+        interval_ii  = VALUE_CLOSEST2(NEWELL__eSpec.x[tmp_i],intStartTs, $
+                                      EXTREME_I=extreme_i, $
+                                      ONLY_HAVE_EXTREME=onlyExtreme)
 
-        goodIntMatch = WHERE(ABS(NEWELL__eSpec.x[tmp_i[interval_ii]]-intStartTs) LT 5,nGoodIntMatch)
+        goodIntMatch = WHERE(ABS(NEWELL__eSpec.x[tmp_i[interval_ii]]-intStartTs) LT 5, $
+                             nGoodIntMatch, $
+                             COMPLEMENT=badIntMatch, $
+                             NCOMPLEMENT=nBadIntMatch)
+
         IF nGoodIntMatch NE N_ELEMENTS(intStartTs) THEN BEGIN
-           PRINT,"Un lío! The number of times that NEWELL__eSpec matches the ESA interval start times is " + $
-                 "fewer than the number of ESA interval start times for this orbit!"
-           STOP
+
+           ;;Let's see if we just don't have times for this interval
+           intStopTs = tRanges[*,1] 
+           intStop_ii = VALUE_CLOSEST2(NEWELL__eSpec.x[tmp_i],intStopTs) 
+           goodStopMatch = WHERE(ABS(NEWELL__eSpec.x[tmp_i[intStop_ii]]-intStopTs) LT 5, $
+                                 nGoodStopMatch, $
+                                 COMPLEMENT=badStopMatch, $
+                                 NCOMPLEMENT=nBadStopMatch)
+
+           missingInterval = WHERE(badIntMatch EQ badStopMatch,nMissing)
+           IF nMissing GT 0 THEN BEGIN
+
+              IF (nMissing + nGoodIntMatch) EQ N_ELEMENTS(intStartTs) THEN BEGIN
+                 ;; PRINT,FORMAT='("K, so you''re missing these intervals: ",10(I0,:,", "))',badIntMatch[missingInterval]
+                 FOR m=0,nMissing-1 DO BEGIN
+                    missingIntervals = [[missingIntervals],[curOrb,badIntMatch[missingInterval[m]]]]
+                 ENDFOR
+
+              ENDIF ELSE BEGIN
+
+                 PRINT,"Un lío! The number of times that NEWELL__eSpec matches the ESA interval start times is " + $
+                       "fewer than the number of ESA interval start times for this orbit!" 
+                 STOP
+
+              ENDELSE
+
+           ENDIF
+
         ENDIF
 
         north_iii   = WHERE(NEWELL__eSpec.ilat[tmp_i[interval_ii]] GT 0.0,nNorth3)
@@ -390,7 +426,10 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
 
      ENDIF
 
-     PRINT,FORMAT='(A0,T10,I0,T20,I0,T30,I0,T40,I0,T50,I0,T60,I0)',orbString,nStreaks,n251,n0628,n0312,nUnsafe,nDupes
+     PRINT,FORMAT='(A0,T10,I0,T20,I0,T30,I0,T40,I0,T50,I0,' $
+           + 'T60,I0,T70,I0)', $
+           orbString,nStreaks,n251,n0628,n0312, $
+           nUnsafe,nDupes,nMissing
 
      curOrb           = (orbs[++orbInd])[0]
 
