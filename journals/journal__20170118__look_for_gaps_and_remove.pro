@@ -3,7 +3,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
 
   COMPILE_OPT IDL2
 
-  startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
+  startOrb    = 9500             ;Otherwise it just picks the first orbit in eSpec
   showPlots   = 1
   savePS      = 1
   PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/201701--trim_transitions/'
@@ -124,9 +124,24 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         CHECK_SORTED,intStartTs,sorted_intervals,/QUIET
         IF ~sorted_intervals THEN STOP
         
+        extreme_ii   = !NULL
         interval_ii  = VALUE_CLOSEST2(NEWELL__eSpec.x[tmp_i],intStartTs, $
-                                      EXTREME_I=extreme_i, $
+                                      EXTREME_I=extreme_ii, $
                                       ONLY_HAVE_EXTREME=onlyExtreme)
+
+        IF N_ELEMENTS(extreme_ii) GT 0 THEN BEGIN
+           lt0_iii = WHERE(extreme_ii EQ -1,nLT0)
+           gtN_iii = WHERE(extreme_ii EQ NTmp,nGTN)
+           
+           IF nLT0 GT 0 THEN BEGIN
+              interval_ii[lt0_iii] = 0
+           ENDIF
+
+           IF nGTN GT 0 THEN BEGIN
+              interval_ii[gtN_iii] = NTmp-1
+           ENDIF
+
+        ENDIF
 
         goodIntMatch = WHERE(ABS(NEWELL__eSpec.x[tmp_i[interval_ii]]-intStartTs) LT 5, $
                              nGoodIntMatch, $
@@ -219,85 +234,89 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
 
      sampDT    = !NULL
      nStreaks  = N_ELEMENTS(start_ii)
-     FOR k=0,nStreaks-1 DO BEGIN
-        ;; PRINT,tmpTime[(start_ii[k]+1):stop_ii[k]]-tmpTime[(start_ii[k]):(stop_ii[k]-1)]
-        sampDT = [sampDT,MEAN(tmpTime[(start_ii[k]+1):stop_ii[k]]-tmpTime[(start_ii[k]):(stop_ii[k]-1)])]
-     ENDFOR
-     IF (WHERE(sampDT LE 0))[0] NE -1 THEN BEGIN
-        PRINT,"A negative sample dt, huh? Tell me about it."
-        STOP
-     END
+     IF nStreaks GT 0 THEN BEGIN
 
-     samp251    = ABS(sampDT-2.51) LT 0.2
-     samp0628   = ABS(sampDT-0.624) LT 0.1
-     samp0312   = ABS(sampDT-0.312) LT 0.1
-     w251       = WHERE(samp251,n251)
-     w0628      = WHERE(samp0628,n0628)
-     w0312      = WHERE(samp0312,n0312)
-     safe       = WHERE(TEMPORARY(samp251) OR TEMPORARY(samp0628) OR TEMPORARY(samp0312), $
-                        nSafeStreaks,COMPLEMENT=wUnsafe,NCOMPLEMENT=nUnsafe)
+        FOR k=0,nStreaks-1 DO BEGIN
+           ;; PRINT,tmpTime[(start_ii[k]+1):stop_ii[k]]-tmpTime[(start_ii[k]):(stop_ii[k]-1)]
+           sampDT = [sampDT,MEAN(tmpTime[(start_ii[k]+1):stop_ii[k]]-tmpTime[(start_ii[k]):(stop_ii[k]-1)])]
+        ENDFOR
 
-     IF nSafeStreaks NE nStreaks THEN BEGIN
-        PRINT,FORMAT='(A0,": ","Unsafe sampDTs!! (",' + STRCOMPRESS(nUnsafe) + '(F0.2,:,", "),A0)',orbSTring,sampDT[wUnsafe],")"
-        ;; STOP
+        IF (WHERE(sampDT LE 0))[0] NE -1 THEN BEGIN
+           PRINT,"A negative sample dt, huh? Tell me about it."
+           STOP
+        END
+
+        samp251    = ABS(sampDT-2.51) LT 0.2
+        samp0628   = ABS(sampDT-0.624) LT 0.1
+        samp0312   = ABS(sampDT-0.312) LT 0.1
+        w251       = WHERE(samp251,n251)
+        w0628      = WHERE(samp0628,n0628)
+        w0312      = WHERE(samp0312,n0312)
+        safe       = WHERE(TEMPORARY(samp251) OR TEMPORARY(samp0628) OR TEMPORARY(samp0312), $
+                           nSafeStreaks,COMPLEMENT=wUnsafe,NCOMPLEMENT=nUnsafe)
+
+        IF nSafeStreaks NE nStreaks THEN BEGIN
+           PRINT,FORMAT='(A0,": ","Unsafe sampDTs!! (",' + STRCOMPRESS(nUnsafe) + '(F0.2,:,", "),A0)',orbSTring,sampDT[wUnsafe],")"
+           ;; STOP
+
+           ;;Junk all the places where we transition from 2.51-s sample period to something else
+           RM_INTERVAL,tmpTime,wUnsafe,wUnsafe_ii,nUnsafe,start_ii,stop_ii,sampDT,junk_ii
+           ;;    IF nTmpJunk GT 0 THEN BEGIN
+           ;;       ;; junk_i  = [junk_i,tmp_i[tmpJunk_ii]]
+           ;;       junk_ii = [junk_ii,tmpJunk_ii]
+           ;;    ENDIF
+           ;; ENDFOR
+        ENDIF
 
         ;;Junk all the places where we transition from 2.51-s sample period to something else
-        RM_INTERVAL,tmpTime,wUnsafe,wUnsafe_ii,nUnsafe,start_ii,stop_ii,sampDT,junk_ii
+        RM_INTERVAL,tmpTime,w251,w251_ii,n251,start_ii,stop_ii,sampDT,junk_ii
+        ;; w251_ii = !NULL
+        ;; FOR k=0,n251-1 DO BEGIN
+        ;;    tmpK       = w251[k]
+        ;;    w251_ii    = [w251_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
+        ;;    tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
+        ;;                       (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
+        ;;                       nTmpJunk)
+
         ;;    IF nTmpJunk GT 0 THEN BEGIN
         ;;       ;; junk_i  = [junk_i,tmp_i[tmpJunk_ii]]
         ;;       junk_ii = [junk_ii,tmpJunk_ii]
         ;;    ENDIF
         ;; ENDFOR
+
+        ;;Junk all the places where we transition from 0.628-s sample period to something else
+        w0628_ii = !NULL
+        RM_INTERVAL,tmpTime,w0628,w0628_ii,n0628,start_ii,stop_ii,sampDT,junk_ii
+        ;; FOR k=0,n0628-1 DO BEGIN
+        ;;    tmpK       = w0628[k]
+        ;;    w0628_ii   = [w0628_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
+        ;;    tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
+        ;;                       (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
+        ;;                       nTmpJunk)
+
+        ;;    IF nTmpJunk GT 0 THEN BEGIN
+        ;;       ;; junk_i  = [junk_i,tmp_i[tmpJunk_ii]]
+        ;;       junk_ii = [junk_ii,tmpJunk_ii]
+        ;;    ENDIF
+        ;; ENDFOR
+
+        ;;Junk all the places where we transition from 0.628-s sample period to something else
+        RM_INTERVAL,tmpTime,w0312,w0312_ii,n0312,start_ii,stop_ii,sampDT,junk_ii
+        ;; w0312_ii = !NULL
+        ;; FOR k=0,n0312-1 DO BEGIN
+        ;;    tmpK       = w0312[k]
+        ;;    w0312_ii   = [w0312_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
+        ;;    tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
+        ;;                       (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
+        ;;                       nTmpJunk)
+
+        ;;    IF nTmpJunk GT 0 THEN BEGIN
+        ;;       ;; junk_i  = [junk_i,tmp_i[tmpJunk_ii]]
+        ;;       junk_ii = [junk_ii,tmpJunk_ii]
+        ;;    ENDIF
+        ;; ENDFOR
+
      ENDIF
-
-     ;;Junk all the places where we transition from 2.51-s sample period to something else
-     RM_INTERVAL,tmpTime,w251,w251_ii,n251,start_ii,stop_ii,sampDT,junk_ii
-     ;; w251_ii = !NULL
-     ;; FOR k=0,n251-1 DO BEGIN
-     ;;    tmpK       = w251[k]
-     ;;    w251_ii    = [w251_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
-     ;;    tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
-     ;;                       (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
-     ;;                       nTmpJunk)
-
-     ;;    IF nTmpJunk GT 0 THEN BEGIN
-     ;;       ;; junk_i  = [junk_i,tmp_i[tmpJunk_ii]]
-     ;;       junk_ii = [junk_ii,tmpJunk_ii]
-     ;;    ENDIF
-     ;; ENDFOR
-
-     ;;Junk all the places where we transition from 0.628-s sample period to something else
-     w0628_ii = !NULL
-     RM_INTERVAL,tmpTime,w0628,w0628_ii,n0628,start_ii,stop_ii,sampDT,junk_ii
-     ;; FOR k=0,n0628-1 DO BEGIN
-     ;;    tmpK       = w0628[k]
-     ;;    w0628_ii   = [w0628_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
-     ;;    tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
-     ;;                       (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
-     ;;                       nTmpJunk)
-
-     ;;    IF nTmpJunk GT 0 THEN BEGIN
-     ;;       ;; junk_i  = [junk_i,tmp_i[tmpJunk_ii]]
-     ;;       junk_ii = [junk_ii,tmpJunk_ii]
-     ;;    ENDIF
-     ;; ENDFOR
-
-     ;;Junk all the places where we transition from 0.628-s sample period to something else
-     RM_INTERVAL,tmpTime,w0312,w0312_ii,n0312,start_ii,stop_ii,sampDT,junk_ii
-     ;; w0312_ii = !NULL
-     ;; FOR k=0,n0312-1 DO BEGIN
-     ;;    tmpK       = w0312[k]
-     ;;    w0312_ii   = [w0312_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
-     ;;    tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
-     ;;                       (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
-     ;;                       nTmpJunk)
-
-     ;;    IF nTmpJunk GT 0 THEN BEGIN
-     ;;       ;; junk_i  = [junk_i,tmp_i[tmpJunk_ii]]
-     ;;       junk_ii = [junk_ii,tmpJunk_ii]
-     ;;    ENDIF
-     ;; ENDFOR
-
 
      IF KEYWORD_SET(showPlots) THEN BEGIN
 
