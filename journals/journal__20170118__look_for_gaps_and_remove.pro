@@ -82,7 +82,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         orbSavFileName = STRING(FORMAT='("esa_transit_times--",A0,".sav")',orbRangeString)
 
         eSpec_info     = NEWELL__eSpec.info
-        PRINT,STRING(FORMAT='("Saving ",I0," junk inds and ",I0," befStart inds for orbs ",A0,T25," to file : ")', $
+        PRINT,STRING(FORMAT='("Saving ",I0," junk inds and ",I0," befStart inds for orbs ",A0," to file : ",A0)', $
                      N_ELEMENTS(junk_i),N_ELEMENTS(befStart_i),orbRangeString,orbSavFileName)
 
         SAVE,junk_i,befStart_i,junkTimes,befStartTimes, $
@@ -131,7 +131,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         south_iii   = WHERE(NEWELL__eSpec.ilat[tmp_i[interval_ii]] LT 0.0,nSouth3)
 
         IF nNorth3 GT 0 THEN BEGIN
-           tmpBefStart_ii  = WHERE(NEWELL__eSpec.x[tmp_i] LE (intStartTs[north_iii[0]]+10),nBefStart)
+           tmpBefStart_ii  = WHERE(ABS(NEWELL__eSpec.x[tmp_i] - (intStartTs[north_iii[0]])) LE 10,nBefStart)
            IF nBefStart GT 0 THEN BEGIN
               ;; befStart_i   = [befStart_i,tmp_i[tmpBefStart_ii]]
               befStart_ii  = [befStart_ii,tmpBefStart_ii]
@@ -150,13 +150,13 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         ;; PRINT,"No junkstart inds here!"
      ENDELSE
 
-
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Now we worry about transitions between sampling rates
      tmpTime = NEWELL__eSpec.x[tmp_i]
+     delta   = 0.1
      GET_DOUBLE_BUFS__NTH_DECIMAL_PLACE,tmpTime,-1, $
                                         N=n, $
-                                        DELTA=0.1, $
+                                        DELTA=delta, $
                                         START_I=start_ii, $
                                         STOP_I=stop_ii, $
                                         STREAKLENS=streakLens, $
@@ -171,9 +171,9 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         sampDT = [sampDT,MEAN(tmpTime[(start_ii[k]+1):stop_ii[k]]-tmpTime[(start_ii[k]):(stop_ii[k]-1)])]
      ENDFOR
 
-     samp251    = ABS(sampDT-2.51) LT 0.1
-     samp0628   = ABS(sampDT-0.628) LT 0.05
-     samp032    = ABS(sampDT-0.32) LT 0.1
+     samp251    = ABS(sampDT-2.51) LT delta
+     samp0628   = ABS(sampDT-0.628) LT delta
+     samp032    = ABS(sampDT-0.32) LT delta
      w251       = WHERE(samp251,n251)
      w0628      = WHERE(samp0628,n0628)
      w032       = WHERE(samp032,n032)
@@ -191,8 +191,8 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         FOR k=0,nUnsafe-1 DO BEGIN
            tmpK       = wUnsafe[k]
            wUnsafe_ii = [wUnsafe_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
-           tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*2)) AND $
-                              (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*4)), $
+           tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
+                              (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
                               nTmpJunk)
 
            IF nTmpJunk GT 0 THEN BEGIN
@@ -207,8 +207,8 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
      FOR k=0,n251-1 DO BEGIN
         tmpK       = w251[k]
         w251_ii    = [w251_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
-        tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*2)) AND $
-                           (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*4)), $
+        tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
+                           (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
                            nTmpJunk)
 
         IF nTmpJunk GT 0 THEN BEGIN
@@ -222,8 +222,8 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
      FOR k=0,n0628-1 DO BEGIN
         tmpK       = w0628[k]
         w0628_ii   = [w0628_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
-        tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*2)) AND $
-                           (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*4)), $
+        tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
+                           (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
                            nTmpJunk)
 
         IF nTmpJunk GT 0 THEN BEGIN
@@ -237,8 +237,8 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
      FOR k=0,n032-1 DO BEGIN
         tmpK       = w032[k]
         w032_ii   = [w032_ii,[start_ii[tmpK]:stop_ii[tmpK]]]
-        tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*2)) AND $
-                           (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*4)), $
+        tmpJunk_ii = WHERE((tmpTime GE (tmpTime[stop_ii[tmpK]]-sampDT[tmpK]*3.1)) AND $
+                           (tmpTime LE (tmpTime[stop_ii[tmpK]]+sampDT[tmpK]*3.1)), $
                            nTmpJunk)
 
         IF nTmpJunk GT 0 THEN BEGIN
@@ -268,10 +268,10 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
              XTICKFORMAT='LABEL_DATE', $
              XTICKUNITS=['Time','Time'], $
              XMARGIN=[12,2], $
-             YRANGE=[-0.1,5.1], $
+             YRANGE=[-0.1,6.1], $
              YSTYLE=1, $
-             YTICKV=[0,1,2,3,4,5], $
-             YTICKNAME=["SRate Trans","Interv Start","T Series",'dt=0.628','dt=2.51','dt=unsafe'], $
+             YTICKV=[0,1,2,3,4,5,6], $
+             YTICKNAME=["SRate Trans","Interv Start","T Series",'dt=0.32','dt=0.628','dt=2.51','dt=unsafe'], $
              YMARGIN=[8,2]
 
         OPLOT,tJul,MAKE_ARRAY(N_ELEMENTS(tJul),VALUE=TSVal), $
