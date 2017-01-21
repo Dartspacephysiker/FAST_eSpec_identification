@@ -372,20 +372,31 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         region_i          = CGSETINTERSECTION(ilat_i,mlt_i)
      ENDELSE
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     ;;And if we kill stuff right now?
+     killGap_file = GET_NEWELL_ESPEC_KILLGAP_FILE(dbStruct, $
+                                                  NEWELLDBDIR=dbDir, $
+                                                  /STOP_IF_NOEXIST)
+     RESTORE,killGap_file
+
+     nGood       = N_ELEMENTS(region_i)
+     region_i    = CGSETINTERSECTION(region_i,TEMPORARY(keep_i),COUNT=nKept)
+     PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the killedGap ind thing ...'
+
+
+     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Want just Holzworth/Meng statistical auroral oval?
      IF KEYWORD_SET(alfDB_plot_struct.HwMAurOval) THEN BEGIN
         region_i = CGSETINTERSECTION(region_i, $
                                      WHERE(ABS(dbStruct.ilat) GT AURORAL_ZONE(dbStruct.mlt,HwMKpInd,/lat)/(!DPI)*180.))
      ENDIF
 
-  ;;;;;;;;;;;;;;;;;;;;;;
+     ;;;;;;;;;;;;;;;;;;;;;;
      ;;Now combine them all
      IF KEYWORD_SET(do_lShell) THEN BEGIN
      ENDIF ELSE BEGIN
      ENDELSE
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;
+     ;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Limits on orbits to use?
      test = !NULL
      STR_ELEMENT,alfDB_plot_struct,'orbRange',test
@@ -424,28 +435,28 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
            STOP
         ENDELSE
      ENDIF     
-;; IF KEYWORD_SET(orbRange) THEN BEGIN
-;;         MIMC__orbRange        = orbRange
-;;         CASE N_ELEMENTS(orbRange) OF
-;;            1: BEGIN
-;;               MIMC__orbRange  = [orbRange,orbRange]
-;;            END
-;;            2: BEGIN
-;;               MIMC__orbRange  = orbRange
-;;            END
-;;            ELSE: BEGIN
-;;               PRINTF,lun,"Incorrect input for keyword 'orbRange'!!"
-;;               PRINTF,lun,"Please use orbRange=[minOrb maxOrb] or a single element"
-;;               RETURN, -1
-;;            END
-;;         ENDCASE
-;;         ;; IF N_ELEMENTS(orbRange) EQ 2 THEN BEGIN
-;;         orb_i                 = GET_ORBRANGE_INDS(dbStruct,MIMC__orbRange[0],MIMC__orbRange[1],LUN=lun)
-;;         region_i              = CGSETINTERSECTION(region_i,orb_i)
-;;         ;; ENDIF ELSE BEGIN
-;;         ;; ENDELSE
-;;      ENDIF
-     
+     ;; IF KEYWORD_SET(orbRange) THEN BEGIN
+     ;;         MIMC__orbRange        = orbRange
+     ;;         CASE N_ELEMENTS(orbRange) OF
+     ;;            1: BEGIN
+     ;;               MIMC__orbRange  = [orbRange,orbRange]
+     ;;            END
+     ;;            2: BEGIN
+     ;;               MIMC__orbRange  = orbRange
+     ;;            END
+     ;;            ELSE: BEGIN
+     ;;               PRINTF,lun,"Incorrect input for keyword 'orbRange'!!"
+     ;;               PRINTF,lun,"Please use orbRange=[minOrb maxOrb] or a single element"
+     ;;               RETURN, -1
+     ;;            END
+     ;;         ENDCASE
+     ;;         ;; IF N_ELEMENTS(orbRange) EQ 2 THEN BEGIN
+     ;;         orb_i                 = GET_ORBRANGE_INDS(dbStruct,MIMC__orbRange[0],MIMC__orbRange[1],LUN=lun)
+     ;;         region_i              = CGSETINTERSECTION(region_i,orb_i)
+     ;;         ;; ENDIF ELSE BEGIN
+     ;;         ;; ENDELSE
+     ;;      ENDIF
+        
 
      ;;limits on altitudes to use?
      test = !NULL
@@ -720,12 +731,6 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
         RESTORE,safed_eSpecIndsFile
 
-        killGap_file = GET_NEWELL_ESPEC_KILLGAP_FILE(dbStruct, $
-                                                     NEWELLDBDIR=dbDir, $
-                                                     /STOP_IF_NOEXIST)
-
-        RESTORE,killGap_file
-
         IF N_ELEMENTS(dbStruct.orbit) NE eSpec_clean_info.totChecked THEN BEGIN
            PRINT,"Is there a database mix-up here? The answer is apparently yes."
            STOP
@@ -734,9 +739,18 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         good_i      = CGSETINTERSECTION(good_i,TEMPORARY(cleaned_eSpec_i),COUNT=nKept)
         PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the safety ind thing ...'
 
-        nGood       = N_ELEMENTS(good_i)
-        good_i      = CGSETINTERSECTION(good_i,TEMPORARY(keep_i),COUNT=nKept)
-        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the killedGap ind thing ...'
+
+        ;;Now kill dat
+        ;; killGap_file = GET_NEWELL_ESPEC_KILLGAP_FILE(dbStruct, $
+        ;;                                              NEWELLDBDIR=dbDir, $
+        ;;                                              /STOP_IF_NOEXIST)
+
+        ;; RESTORE,killGap_file
+
+        ;; nGood       = N_ELEMENTS(good_i)
+        ;; good_i      = CGSETINTERSECTION(good_i,TEMPORARY(keep_i),COUNT=nKept)
+        ;; PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the killedGap ind thing ...'
+
         ;; IF N_ELEMENTS(NWLL_ALF__cleaned_i) EQ 0 THEN BEGIN
            ;; NWLL_ALF__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)
         ;;    NWLL_ALF__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)

@@ -3,7 +3,7 @@ PRO JOURNAL__20170120__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED
 
   COMPILE_OPT IDL2
 
-  startOrb    = 8000            ;Otherwise it just picks the first orbit in eSpec
+  startOrb    = 9843            ;Otherwise it just picks the first orbit in eSpec
   showPlots   = 1
   savePS      = 1
   PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/201701--trim_transitions/je_jee_chare/'
