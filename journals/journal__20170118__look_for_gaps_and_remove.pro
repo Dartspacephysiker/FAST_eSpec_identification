@@ -9,7 +9,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
   PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/201701--trim_transitions/'
   PSPref      = 'junk_transitions--'
   
-  saveDir     = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
+  saveDir     = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/instrument_oddity_times/'
 
   @common__newell_espec.pro
 
@@ -20,7 +20,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
      LOAD_NEWELL_ESPEC_DB,!NULL,!NULL,!NULL, $
                           /LOAD_DELTA_T
   ENDIF
-  DBString       = GET_NEWELL_DB_STRING(NEWELL__eSpec)+'--killedGap_inds'
+  DBString       = GET_NEWELL_DB_STRING(NEWELL__eSpec)+'--killedGap_inds--'
   CHECK_SORTED,NEWELL__eSpec.orbit,is_sorted,/QUIET
 
   IF ~is_sorted THEN STOP
