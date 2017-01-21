@@ -604,8 +604,11 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         je_lims  = [0,3.36e9] ;Drop 1.0% of all
         jee_lims = [0,3.1172] ;Drop 1.0% of all
 
-        je_lims  = [0,1e10] ;Drop ... less than 1.0% (by rounding up to nearest decade)
-        jee_lims = [0,10.0] ;Drop ... less than 1.0% (by rounding up to nearest decade)
+        ;; je_lims  = [0,1e10] ;Drop ... less than 1.0% (by rounding up to nearest decade)
+        ;; jee_lims = [0,10.0] ;Drop ... less than 1.0% (by rounding up to nearest decade)
+
+        je_lims  = [0,1e11] ;Drop ... less than 1.0% (by rounding up to nearest decade)
+        jee_lims = [0,100.0] ;Drop ... less than 1.0% (by rounding up to nearest decade)
 
         ;; percentToDrop = N_ELEMENTS(WHERE( ( (espec.broad EQ 1) OR (eSpec.broad EQ 2) ) AND $
         ;;                                   ( eSpec.je GT 4e10 ) ) ) / $
@@ -615,22 +618,22 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
         ;;;START COMMENT TO FORCE MYSELF TO LABORIOUSLY CHECK EVERY ORBIT
         ;;Now Je
-        ;; good_je_i  = WHERE(dbStruct.je GE je_lims[0] AND $
-        ;;                    dbStruct.je LE je_lims[1],nGoodJe, $
-        ;;                    NCOMPLEMENT=nBadJe)
+        good_je_i  = WHERE(dbStruct.je GE je_lims[0] AND $
+                           dbStruct.je LE je_lims[1],nGoodJe, $
+                           NCOMPLEMENT=nBadJe)
 
-        ;; nGood      = N_ELEMENTS(good_i)
-        ;; good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_je_i),COUNT=nKept)
-        ;; PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Je screening ...'
+        nGood      = N_ELEMENTS(good_i)
+        good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_je_i),COUNT=nKept)
+        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Je screening ...'
 
-        ;; ;;Now Jee
-        ;; good_jee_i = WHERE(dbStruct.jee GE jee_lims[0] AND $
-        ;;                    dbStruct.jee LE jee_lims[1],nGoodJee, $
-        ;;                    NCOMPLEMENT=nBadJee)
+        ;;Now Jee
+        good_jee_i = WHERE(dbStruct.jee GE jee_lims[0] AND $
+                           dbStruct.jee LE jee_lims[1],nGoodJee, $
+                           NCOMPLEMENT=nBadJee)
 
-        ;; nGood      = N_ELEMENTS(good_i)
-        ;; good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_jee_i),COUNT=nKept)
-        ;; PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
+        nGood      = N_ELEMENTS(good_i)
+        good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_jee_i),COUNT=nKept)
+        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
         ;;;STOP COMMENT TO FORCE MYSELF TO LABORIOUSLY CHECK EVERY ORBIT
 
         ;; IF KEYWORD_SET(alfDB_plot_struct.eSpec__remove_outliers) AND ~is_ion THEN BEGIN
@@ -717,6 +720,12 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
         RESTORE,safed_eSpecIndsFile
 
+        killGap_file = GET_NEWELL_ESPEC_KILLGAP_FILE(dbStruct, $
+                                                     NEWELLDBDIR=dbDir, $
+                                                     /STOP_IF_NOEXIST)
+
+        RESTORE,killGap_file
+
         IF N_ELEMENTS(dbStruct.orbit) NE eSpec_clean_info.totChecked THEN BEGIN
            PRINT,"Is there a database mix-up here? The answer is apparently yes."
            STOP
@@ -725,6 +734,9 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
         good_i      = CGSETINTERSECTION(good_i,TEMPORARY(cleaned_eSpec_i),COUNT=nKept)
         PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the safety ind thing ...'
 
+        nGood       = N_ELEMENTS(good_i)
+        good_i      = CGSETINTERSECTION(good_i,TEMPORARY(keep_i),COUNT=nKept)
+        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the killedGap ind thing ...'
         ;; IF N_ELEMENTS(NWLL_ALF__cleaned_i) EQ 0 THEN BEGIN
            ;; NWLL_ALF__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)
         ;;    NWLL_ALF__cleaned_i                     = fastloc_cleaner(dbStruct,LUN=lun)

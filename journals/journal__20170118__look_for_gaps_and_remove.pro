@@ -3,7 +3,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
 
   COMPILE_OPT IDL2
 
-  startOrb    = 9500             ;Otherwise it just picks the first orbit in eSpec
+  startOrb    = 16000             ;Otherwise it just picks the first orbit in eSpec
   showPlots   = 1
   savePS      = 1
   PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/201701--trim_transitions/'
@@ -20,6 +20,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
      LOAD_NEWELL_ESPEC_DB,!NULL,!NULL,!NULL, $
                           /LOAD_DELTA_T
   ENDIF
+  DBString       = GET_NEWELL_DB_STRING(NEWELL__eSpec)+'--killedGap_inds'
   CHECK_SORTED,NEWELL__eSpec.orbit,is_sorted,/QUIET
 
   IF ~is_sorted THEN STOP
@@ -75,6 +76,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         + 'A0,T60,A0,T70,A0)', $
         "Orbits","N Streak","N 2.51","N 0.628","N 0.312", $
         "N Unsafe","N Dupe Elems","MissedItvls"
+  final = 0
   WHILE curOrb LE endOrb DO BEGIN
 
      ;;Reset inds for this orbit
@@ -83,9 +85,9 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
      nDupes            = 0
      nMissing          = 0
 
-     IF curOrb GT (lastSavOrb + deltaSavOrb - 1) THEN BEGIN
+     IF (curOrb GT (lastSavOrb + deltaSavOrb - 1)) OR final THEN BEGIN
         orbRangeString = STRING(FORMAT='(I0,"-",I0)',lastSavOrb,lastSavOrb+deltaSavOrb-1)
-        orbSavFileName = STRING(FORMAT='("esa_transit_times--",A0,".sav")',orbRangeString)
+        orbSavFileName = STRING(FORMAT='(A0,A0,".sav")',DBString,orbRangeString)
 
         eSpec_info     = NEWELL__eSpec.info
         PRINT,STRING(FORMAT='("Saving ",I0," junk inds and ",I0," befStart inds for orbs ",A0," to file : ",A0)', $
@@ -102,6 +104,8 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
         befStartTimes  = !NULL
         missingIntervals = !NULL 
         lastSavOrb += deltaSavOrb
+
+        IF final THEN BREAK
      ENDIF
 
      orbString = STRCOMPRESS(curOrb,/REMOVE_ALL)
@@ -452,8 +456,28 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
 
      curOrb           = (orbs[++orbInd])[0]
 
+     IF curOrb EQ endOrb THEN final = 1
+
   ENDWHILE
 
+  ;;Finish up
+  IF curOrb GT lastSavOrb THEN BEGIN
+     orbRangeString = STRING(FORMAT='(I0,"-",I0)',lastSavOrb,curOrb)
+     orbSavFileName = STRING(FORMAT='("esa_transit_times--",A0,".sav")',orbRangeString)
+
+     eSpec_info     = NEWELL__eSpec.info
+     PRINT,STRING(FORMAT='("Saving ",I0," junk inds and ",I0," befStart inds for orbs ",A0," to file : ",A0)', $
+                  N_ELEMENTS(junk_i),N_ELEMENTS(befStart_i),orbRangeString,orbSavFileName)
+
+     SAVE,junk_i,befStart_i,junkTimes,befStartTimes, $
+          missingIntervals, $
+          eSpec_info, $
+          FILENAME=saveDir+orbSavFileName
+
+  ENDIF
+
+  PRINT,"FINISHED!"
+  STOP
 
 END
 
