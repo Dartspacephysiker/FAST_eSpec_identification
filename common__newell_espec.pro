@@ -7,4 +7,5 @@
      ;; NEWELL__cleaned_i, $
      NEWELL__dbFile, $
      NEWELL__dbDir, $
-     NEWELL__RECALCULATE
+     NEWELL__RECALCULATE, $
+     NEWELL__charE

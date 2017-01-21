@@ -14,6 +14,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          DONT_MAP_TO_100KM=no_mapping, $
                          DO_NOT_MAP_FLUXES=do_not_map_fluxes, $
                          DO_NOT_MAP_DELTA_T=do_not_map_delta_t, $
+                         LOAD_CHARE=load_charE, $
                          LOAD_DELTA_T=load_delta_t, $
                          COORDINATE_SYSTEM=coordinate_system, $
                          USE_AACGM_COORDS=use_aacgm, $
@@ -209,11 +210,18 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                     info       : eSpec.info}
      ENDIF
 
+     ;;want characteristic energy?
+     IF KEYWORD_SET(load_charE) THEN BEGIN
+        STR_ELEMENT,eSpec,'charE',ABS(eSpec.jee/eSpec.je)*6.242*1.0e11,/ADD_REPLACE
+     ENDIF
+
      NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                                   DB_DATE=DB_date, $
                                   DB_VERSION=DB_version, $
                                   DB_EXTRAS=DB_extras, $
                                   REDUCE_DBSIZE=reduce_dbSize
+
+     eSpec.info.has_charE     = BYTE(KEYWORD_SET(load_charE))
 
      IF KEYWORD_SET(upgoing) THEN BEGIN
         eSpec.info.is_upgoing = 1B

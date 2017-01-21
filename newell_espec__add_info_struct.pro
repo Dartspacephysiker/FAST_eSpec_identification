@@ -18,6 +18,7 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                  DB_date          : '', $
                  DB_version       : '', $
                  DB_extras        : '', $
+                 has_charE        : 0B, $
                  is_AlfNewell     : BYTE(KEYWORD_SET(is_AlfNewell)), $
                  is_mapped        : 0B, $
                  is_downgoing     : 0B, $
@@ -35,6 +36,7 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                  DB_date          : '', $
                  DB_version       : '', $
                  DB_extras        : '', $
+                 has_charE        : 0B, $
                  is_AlfNewell     : BYTE(KEYWORD_SET(is_AlfNewell)), $
                  is_mapped        : 0B, $
                  is_upgoing       : 0B, $

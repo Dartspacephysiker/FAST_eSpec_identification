@@ -3,7 +3,7 @@ PRO JOURNAL__20170120__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED
 
   COMPILE_OPT IDL2
 
-  startOrb    = 500            ;Otherwise it just picks the first orbit in eSpec
+  startOrb    = 8000            ;Otherwise it just picks the first orbit in eSpec
   showPlots   = 1
   savePS      = 1
   PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/201701--trim_transitions/je_jee_chare/'
@@ -19,39 +19,53 @@ PRO JOURNAL__20170120__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED
   ;; /NO_MEMORY_LOAD
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
      LOAD_NEWELL_ESPEC_DB,!NULL,!NULL,!NULL, $
-                          /LOAD_DELTA_T
+                          /LOAD_CHARE
   ENDIF
   CHECK_SORTED,NEWELL__eSpec.orbit,is_sorted,/QUIET
   IF ~is_sorted THEN STOP
   
-  chare          = ABS(NEWELL__eSpec.jee/NEWELL__eSpec.je)*6.242*1.0e11
-  DBString       = GET_NEWELL_DB_STRING(NEWELL__eSpec)+'--killedGap_inds--'
+  ;;Get the goodies (baddies?)
+  NewellDBDir   = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
+  DBString      = GET_NEWELL_DB_STRING(NEWELL__eSpec)+'--killedGap_inds--'
+
+  killGap_file  = GET_NEWELL_ESPEC_KILLGAP_FILE(NEWELL__eSpec, $
+                                                NEWELLDBDIR=NewellDBDir, $
+                                                /STOP_IF_NOEXIST)
+
+  RESTORE,killGap_file
 
   uniqOrb_i      = UNIQ(NEWELL__eSpec.orbit)
   
   orbs           = NEWELL__eSpec.orbit[uniqOrb_i]
+  orbInd         = KEYWORD_SET(startOrb) ? WHERE(orbs EQ startOrb) : 0
+  WHILE orbInd[0] EQ -1 DO BEGIN
+     startOrb++
+     orbInd      = WHERE(orbs EQ startOrb)
+  ENDWHILE
   curOrb         = KEYWORD_SET(startOrb) ? startOrb : orbs[0]
-  endOrb         = orbs[-1]
-  lastSavOrb     = curOrb
-  deltaSavOrb    = 500
-  orbInd         = KEYWORD_SET(startOrb) ? WHERE(orbs EQ startOrb,/NULL) : 0
-  junk_i         = !NULL
-  befStart_i     = !NULL
-  junkTimes      = !NULL
-  befStartTimes  = !NULL
-  missingIntervals = !NULL
+  endOrb         = KEYWORD_SET(endOrb  ) ? endOrb   : orbs[-1]
+
+  ;; lastSavOrb     = curOrb
+  ;; deltaSavOrb    = 500
+  ;; orbInd         = -1
+
+  ;; junk_i         = !NULL
+  ;; befStart_i     = !NULL
+  ;; junkTimes      = !NULL
+  ;; befStartTimes  = !NULL
+  ;; missingIntervals = !NULL
   
   ;;plot setup
   LOADCT2,39
 
-  junkTransCol = 100
-  junkStartCol = 160
+  ;; junkTransCol = 100
+  ;; junkStartCol = 160
 
-  junkTransPSym = 1
-  junkStartPSym = 2
-  TSPSym        = 3
+  ;; junkTransPSym = 1
+  ;; junkStartPSym = 2
+  ;; TSPSym        = 3
 
-  TSSymSize     = 50.0
+  ;; TSSymSize     = 50.0
 
   IF KEYWORD_SET(showPlots) THEN BEGIN
      IF KEYWORD_SET(savePS) THEN BEGIN
@@ -61,50 +75,51 @@ PRO JOURNAL__20170120__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED
   ENDIF
 
   final = 0
+  ;; firstOrbThisLoop = lastSavOrb
+  ;; lastOrbThisLoop  = lastSavOrb+deltaSavOrb-1
+  loaded           = 0B
   WHILE curOrb LE endOrb DO BEGIN
 
-     IF curOrb EQ lastSavOrb THEN BEGIN
-        ;;clear vars 
-        junk_i         = !NULL
-        befStart_i     = !NULL
-        junkTimes      = !NULL
-        befStartTimes  = !NULL
-        missingIntervals = !NULL 
+     ;; IF (curOrb EQ lastSavOrb) OR ~loaded THEN BEGIN
+     ;;    firstOrbThisLoop = lastSavOrb
+     ;;    lastOrbThisLoop  = lastSavOrb+deltaSavOrb-1
 
-        orbRangeString = STRING(FORMAT='(I0,"-",I0)',lastSavOrb,lastSavOrb+deltaSavOrb-1)
-        orbSavFileName = STRING(FORMAT='(A0,A0,".sav")',DBString,orbRangeString)
+     ;;    orbRangeString = STRING(FORMAT='(I0,"-",I0)',lastSavOrb,lastSavOrb+deltaSavOrb-1)
+     ;;    orbSavFileName = STRING(FORMAT='(A0,A0,".sav")',DBString,orbRangeString)
 
-        RESTORE,saveDir+orbSavFileName
+     ;;    RESTORE,saveDir+orbSavFileName
 
-        PRINT,STRING(FORMAT='("Restored ",I0," junk inds and ",I0," befStart inds for orbs ",A0," to file : ",A0)', $
-                     N_ELEMENTS(junk_i),N_ELEMENTS(befStart_i),orbRangeString,orbSavFileName)
+     ;;    PRINT,STRING(FORMAT='("Restored ",I0," junk inds and ",I0," befStart inds for orbs ",A0," to file : ",A0)', $
+     ;;                 N_ELEMENTS(junk_i),N_ELEMENTS(befStart_i),orbRangeString,orbSavFileName)
 
-        lastSavOrb += deltaSavOrb
+     ;;    lastSavOrb += deltaSavOrb
+     ;;    loaded = 1B
 
-        IF final THEN BREAK
-     ENDIF
+     ;;    IF final THEN BREAK
+     ;; ENDIF
 
      ;;Ind things
-     orbString = STRCOMPRESS(curOrb,/REMOVE_ALL)
-     tmp_i     = WHERE(NEWELL__eSpec.orbit EQ curOrb[0],NBef)
+     orbString  = STRCOMPRESS(curOrb,/REMOVE_ALL)
+     tmp_i      = WHERE(NEWELL__eSpec.orbit EQ curOrb[0],NBef)
      firstLastT = NEWELL__eSpec.x[[tmp_i[0],tmp_i[-1]]]
 
      IF NBef EQ 0 THEN BEGIN
         PRINT,"no inds for orbit " + STRCOMPRESS(curOrb,/REMOVE_ALL) + ". Move it on down."
-        curOrb = (orbs[++orbInd])[0]
+        curOrb  = (orbs[++orbInd])[0]
         CONTINUE
      ENDIF
      
-     tmp_i     = CGSETDIFFERENCE(tmp_i,junk_i,COUNT=nAftJunk)
+     tmp_i      = CGSETDIFFERENCE(tmp_i,junk_i,COUNT=nAftJunk)
      IF nAftJunk EQ 0 THEN STOP
 
-     tmp_i     = CGSETDIFFERENCE(tmp_i,befStart_i,COUNT=nAftBefTimes)
-     tmpTime   = NEWELL__eSpec.x[tmp_i]
+     tmp_i      = CGSETDIFFERENCE(tmp_i,befStart_i,COUNT=nAftBefTimes)
+     tmpTime    = NEWELL__eSpec.x[tmp_i]
      IF nAftBefTimes EQ 0 THEN STOP
+
+     IF ~KEYWORD_SET(quiet) THEN PRINT,curOrb,N_ELEMENTS(tmp_i)
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Plots
-
      IF KEYWORD_SET(showPlots) THEN BEGIN
 
         IF KEYWORD_SET(savePS) THEN BEGIN
@@ -114,105 +129,102 @@ PRO JOURNAL__20170120__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED
                  /QUIET,/LAND
         ENDIF
 
-        ;;For the first two paneaux
-        date_label = LABEL_DATE(DATE_FORMAT='')
+        PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY,curOrb, $
+                                           NEWELL2009_PANEL=Newell2009_panel, $
+                                           /USE_MY_JUNK_AND_BEFSTART, $
+                                           JUNK_I=junk_i, $
+                                           BEFSTART_I=befStart_i
 
-        tJul       = UTC_TO_JULDAY(tmpTime)
-        tJunk      = UTC_TO_JULDAY(NEWELL__eSpec.x[junk_i])
-        tBefStart  = UTC_TO_JULDAY(NEWELL__eSpec.x[befStart_i])
-        tRange     = UTC_TO_JULDAY(firstLastT)
+        ;;;;For the first two paneaux
+        ;; date_label = LABEL_DATE(DATE_FORMAT='')
 
-        PLOT,tJul,NEWELL__eSpec.je[tmp_i], $
-             /NODATA, $
-             TITLE='Orbit ' + orbString + ' (' + TIME_TO_STR(tmpTime[0],/MS) + ')', $
-             ;; PSYM=TSPSym, $
-             ;; COLOR=TSCol, $
-             ;; SYMSIZE=TSSymSize, $
-             XTICKFORMAT='(A1)', $
-             XTICKUNITS='Time', $
-             XRANGE=tRange, $
-             /YLOG, $
-             YRANGE=[1e6,5e11], $
-             YTITLE='Je (#/cm!U2!N-s)', $
-             YTICKV=[1e6,1e7,1e8,1e9,1e10,1e11], $
-             YTICKNAME=['1e6','1e7','1e8','1e9','1e10','1e11'], $
-             YSTYLE=1, $
-             YMARGIN=[0,2]
+        ;; tJul       = UTC_TO_JULDAY(tmpTime)
+        ;; tJunk      = UTC_TO_JULDAY(NEWELL__eSpec.x[junk_i])
+        ;; tBefStart  = UTC_TO_JULDAY(NEWELL__eSpec.x[befStart_i])
+        ;; tRange     = UTC_TO_JULDAY(firstLastT)
 
-        OPLOT,tJul,NEWELL__eSpec.je[tmp_i], $
-             PSYM=TSPsym, $
-             COLOR=TSCol, $
-             SYMSIZE=TSSymSize
+        ;; PLOT,tJul,NEWELL__eSpec.je[tmp_i], $
+        ;;      /NODATA, $
+        ;;      TITLE='Orbit ' + orbString + ' (' + TIME_TO_STR(tmpTime[0],/MS) + ')', $
+        ;;      XTICKFORMAT='(A1)', $
+        ;;      XTICKUNITS='Time', $
+        ;;      XRANGE=tRange, $
+        ;;      /YLOG, $
+        ;;      YRANGE=[1e6,5e11], $
+        ;;      YTITLE='Je (#/cm!U2!N-s)', $
+        ;;      YTICKV=[1e6,1e7,1e8,1e9,1e10,1e11], $
+        ;;      YTICKNAME=['1e6','1e7','1e8','1e9','1e10','1e11'], $
+        ;;      YSTYLE=1, $
+        ;;      YMARGIN=[0,2]
 
-        OPLOT,tJunk,NEWELL__eSpec.je[junk_i], $
-             PSYM=junkTransPSym, $
-             COLOR=junkTransCol
+        ;; OPLOT,tJul,NEWELL__eSpec.je[tmp_i], $
+        ;;      PSYM=TSPsym, $
+        ;;      COLOR=TSCol, $
+        ;;      SYMSIZE=TSSymSize
 
-        OPLOT,tBefStart,NEWELL__eSpec.je[befStart_i], $
-             PSYM=JunkStartPSym, $
-             COLOR=junkStartCol
+        ;; OPLOT,tJunk,NEWELL__eSpec.je[junk_i], $
+        ;;      PSYM=junkTransPSym, $
+        ;;      COLOR=junkTransCol
 
-        PLOT,tJul,NEWELL__eSpec.jee[tmp_i], $
-             /NODATA, $
-             ;; PSYM=TSPSym, $
-             ;; COLOR=TSCol, $
-             ;; SYMSIZE=TSSymSize, $
-             XTICKFORMAT='(A1)', $
-             XTICKUNITS='Time', $
-             XRANGE=tRange, $
-             /YLOG, $
-             YRANGE=[1e-3,3e3], $
-             YTITLE='Jee (mW/m!U2!N)', $
-             YTICKV=[1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3], $
-             YTICKNAME=['1e-3','1e-2','1e-1','1e0','1e1','1e2','1e3'], $
-             YSTYLE=1, $
-             YMARGIN=[0,1]
+        ;; OPLOT,tBefStart,NEWELL__eSpec.je[befStart_i], $
+        ;;      PSYM=JunkStartPSym, $
+        ;;      COLOR=junkStartCol
 
-        OPLOT,tJul,NEWELL__eSpec.jee[tmp_i], $
-             PSYM=TSPsym, $
-             COLOR=TSCol, $
-             SYMSIZE=TSSymSize
+        ;; PLOT,tJul,NEWELL__eSpec.jee[tmp_i], $
+        ;;      /NODATA, $
+        ;;      XTICKFORMAT='(A1)', $
+        ;;      XTICKUNITS='Time', $
+        ;;      XRANGE=tRange, $
+        ;;      /YLOG, $
+        ;;      YRANGE=[1e-3,3e3], $
+        ;;      YTITLE='Jee (mW/m!U2!N)', $
+        ;;      YTICKV=[1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3], $
+        ;;      YTICKNAME=['1e-3','1e-2','1e-1','1e0','1e1','1e2','1e3'], $
+        ;;      YSTYLE=1, $
+        ;;      YMARGIN=[0,1]
 
-        OPLOT,tJunk,NEWELL__eSpec.jee[junk_i], $
-             PSYM=junkTransPSym, $
-             COLOR=junkTransCol
+        ;; OPLOT,tJul,NEWELL__eSpec.jee[tmp_i], $
+        ;;      PSYM=TSPsym, $
+        ;;      COLOR=TSCol, $
+        ;;      SYMSIZE=TSSymSize
 
-        OPLOT,tBefStart,NEWELL__eSpec.jee[befStart_i], $
-             PSYM=JunkStartPSym, $
-             COLOR=junkStartCol
+        ;; OPLOT,tJunk,NEWELL__eSpec.jee[junk_i], $
+        ;;      PSYM=junkTransPSym, $
+        ;;      COLOR=junkTransCol
 
-        ;;Now chare, with dates
-        date_label = LABEL_DATE(DATE_FORMAT=['%I:%S','%D-%H'])
+        ;; OPLOT,tBefStart,NEWELL__eSpec.jee[befStart_i], $
+        ;;      PSYM=JunkStartPSym, $
+        ;;      COLOR=junkStartCol
 
-        PLOT,tJul,chare[tmp_i], $
-             /NODATA, $
-             ;; PSYM=TSPSym, $
-             ;; COLOR=TSCol, $
-             ;; SYMSIZE=TSSymSize, $
-             XTICKFORMAT='LABEL_DATE', $
-             XTICKUNITS=['Time','Time'], $
-             XRANGE=tRange, $
-             /YLOG, $
-             YRANGE=[4,3e4], $
-             YTITLE='Char E (eV)', $
-             YTICKV=[1e1,1e2,1e3,1e4], $
-             YTICKNAME=['1e1','1e2','1e3','1e4'], $
-             YMARGIN=[6,1], $
-             XMARGIN=[10,3], $
-             YSTYLE=1
+        ;; ;;Now chare, with dates
+        ;; date_label = LABEL_DATE(DATE_FORMAT=['%I:%S','%D-%H'])
 
-        OPLOT,tJul,chare[tmp_i], $
-             PSYM=TSPsym, $
-             COLOR=TSCol, $
-             SYMSIZE=TSSymSize
+        ;; PLOT,tJul,NEWELL__eSpec.charE[tmp_i], $
+        ;;      /NODATA, $
+        ;;      XTICKFORMAT='LABEL_DATE', $
+        ;;      XTICKUNITS=['Time','Time'], $
+        ;;      XRANGE=tRange, $
+        ;;      /YLOG, $
+        ;;      YRANGE=[4,3e4], $
+        ;;      YTITLE='Char E (eV)', $
+        ;;      YTICKV=[1e1,1e2,1e3,1e4], $
+        ;;      YTICKNAME=['1e1','1e2','1e3','1e4'], $
+        ;;      YMARGIN=[6,1], $
+        ;;      XMARGIN=[10,3], $
+        ;;      YSTYLE=1
 
-        OPLOT,tJunk,chare[junk_i], $
-             PSYM=junkTransPSym, $
-             COLOR=junkTransCol
+        ;; OPLOT,tJul,NEWELL__eSpec.charE[tmp_i], $
+        ;;      PSYM=TSPsym, $
+        ;;      COLOR=TSCol, $
+        ;;      SYMSIZE=TSSymSize
 
-        OPLOT,tBefStart,chare[befStart_i], $
-             PSYM=JunkStartPSym, $
-             COLOR=junkStartCol
+        ;; OPLOT,tJunk,NEWELL__eSpec.charE[junk_i], $
+        ;;      PSYM=junkTransPSym, $
+        ;;      COLOR=junkTransCol
+
+        ;; OPLOT,tBefStart,NEWELL__eSpec.charE[befStart_i], $
+        ;;      PSYM=JunkStartPSym, $
+        ;;      COLOR=junkStartCol
 
 
      ENDIF
@@ -227,6 +239,15 @@ PRO JOURNAL__20170120__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED
      ENDIF
 
      curOrb           = (orbs[++orbInd])[0]
+
+     ;; IF curOrb GE lastOrbThisLoop THEN BEGIN
+     ;;    ;;clear vars 
+     ;;    junk_i           = !NULL
+     ;;    befStart_i       = !NULL
+     ;;    junkTimes        = !NULL
+     ;;    befStartTimes    = !NULL
+     ;;    missingIntervals = !NULL 
+     ;; ENDIF
 
      IF curOrb EQ endOrb THEN final = 1
 
