@@ -501,7 +501,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                dbStruct, $
                                alfDB_plot_struct.charERange[0], $
                                alfDB_plot_struct.charERange[1], $
-                               NEWELL_THE_CUSP=alfDB_plot_struct.charE__Newell_the_cusp, $
+                               NEWELL_THE_CUSP=alfDB_plot_struct.fluxPlots__Newell_the_cusp, $
                                /FOR_ESPEC_DB, $
                                LUN=lun)
 
