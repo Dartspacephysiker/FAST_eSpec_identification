@@ -24,10 +24,13 @@ PRO PLOT_KH_PRECIPITATION_STRUCT,struct, $
                                  ABS_X=abs_x, $
                                  ABS_Y=abs_y, $
                                  DERIV__ABS_Y=abs_y_deriv, $
+                                 PSYM=pSym, $
+                                 SYMSIZE=symSize, $
                                  FFT=fft, $
                                  UNEVEN_FFT=FFT__uneven, $
                                  SIGNIFICANCE_FFT=FFT_overplot_significance, $
                                  FILENAME=fileName, $
+                                 MOSTRECENT_KH_FILE=mostRecent_KH_file, $
                                  PLOTNAMEPREF=plotNamePref, $
                                  LOADDIR=loadDir, $
                                  PLOTDIR=plotDir, $
@@ -91,14 +94,25 @@ PRO PLOT_KH_PRECIPITATION_STRUCT,struct, $
   ENDELSE
 
 
+  defLDir   = '/SPENCEdata/Research/Satellites/FAST/espec_identification/saves_output_etc/KH_stuff/'
   IF KEYWORD_SET(loadDir) THEN BEGIN
      lDir   = loadDir
   ENDIF ELSE BEGIN
-     lDir   = '/SPENCEdata/Research/Satellites/FAST/espec_identification/saves_output_etc/KH_stuff/'
+     lDir   = defLDir
   ENDELSE
 
   IF (N_ELEMENTS(struct) EQ 0) THEN BEGIN
      
+     IF KEYWORD_SET(mostRecent_KH_file) THEN BEGIN
+        SPAWN,'cat ' + defLDir + 'mostRecent_KH_file.txt',fileName
+        IF ~FILE_TEST(fileName) THEN BEGIN
+           PRINT,"WHAT!?!? Couldn't get mostRecent KH file ..."
+           STOP
+        ENDIF
+
+        RESTORE,fileName
+     ENDIF
+
      IF (N_ELEMENTS(fileName) EQ 0) THEN BEGIN
         PRINT,"No data provided! Let's choose a file."
 
@@ -857,7 +871,7 @@ PRO PLOT_KH_PRECIPITATION_STRUCT,struct, $
 
                  ;; tmpTmpX = tmpTmpX - tmpTmpX[0]
 
-                 IF ~tmpTmpX_tConv THEN BEGIN
+                 IF ~tmpX_tConv THEN BEGIN
                     tmpTmpX         = UTC_TO_JULDAY(tmpTmpX)
                     tmpTmpX_tConv   = 1
                  ENDIF
@@ -899,17 +913,24 @@ PRO PLOT_KH_PRECIPITATION_STRUCT,struct, $
              XTICKUNITS=xTickUnits, $
              XTICKFORMAT=xTickFormat, $
              XMARGIN=[12,3], $
-             CHARSIZE=cs        ;, $
+             YSTYLE=1, $
+             CHARSIZE=cs, $
+             PSYM=pSym, $
+             SYMSIZE=symSize    ;, $
         ;; YRANGE=[-ysize,ysize]
 
         IF KEYWORD_SET(overplot_smoothed) THEN BEGIN
            OPLOT,tmpTmpX[tmp_i],SMOOTH(tmpY[tmp_i],5), $
-                 COLOR=250
+                 COLOR=250, $
+                 PSYM=pSym, $
+                 SYMSIZE=symSize
         ENDIF
 
         FFT_overplot_significance = 1
         IF KEYWORD_SET(FFT) AND KEYWORD_SET(FFT_overplot_significance) THEN BEGIN
-           OPLOT,tmpTmpX[tmp_i],sigPwArr,COLOR=250
+           OPLOT,tmpTmpX[tmp_i],sigPwArr,COLOR=250, $
+                 PSYM=pSym, $
+                 SYMSIZE=symSize
         ENDIF
            
         IF KEYWORD_SET(postscript) THEN BEGIN

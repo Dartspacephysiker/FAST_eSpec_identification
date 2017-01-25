@@ -3,14 +3,15 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
    NEWELL2009_PANEL=Newell2009_panel, $
    USE_MY_JUNK_AND_BEFSTART=use_my_junk_and_befStart, $
    JUNK_I=junk_i, $
-   BEFSTART_I=befStart_i
+   BEFSTART_I=befStart_i, $
+   WINID=winID
 
   COMPILE_OPT IDL2
 
   @common__newell_espec.pro
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
      LOAD_NEWELL_ESPEC_DB,/LOAD_CHARE, $
-                          /DONT_PERFORM_CORRECTION
+                          /DONT_CONVERT_TO_STRICT_NEWELL
   ENDIF
 
   ;;Some plot things
@@ -28,7 +29,10 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   
   IF !D.NAME EQ 'X' THEN BEGIN
      
-     WINDOW,0,XSIZE=800,YSIZE=1000
+     wID = KEYWORD_SET(winID) ? winID : 0
+
+     WINDOW,wID, $
+            XSIZE=800,YSIZE=1000
 
      LOADCT2,39
      oldCharSize = !P.CHARSIZE
@@ -189,7 +193,8 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
 
   TPLOT,tPlt_vars,VAR=['ALT','ILAT','MLT'], $
         TRANGE=firstLastT, $
-        TITLE='Orbit ' + orbString + ' (' + TIME_TO_STR(tmpTime[0],/MS) + ')'
+        TITLE='Orbit ' + orbString + ' (' + TIME_TO_STR(tmpTime[0],/MS) + ')', $
+        WINDOW=wID
 
 
   TPLOT_PANEL,VARIABLE='Je',OPLOTVAR='Je_junk',PSYM=junkTransPSym
