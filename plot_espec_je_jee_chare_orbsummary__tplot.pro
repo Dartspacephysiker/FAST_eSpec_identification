@@ -21,7 +21,7 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   junkStartPSym = 2
   TSPSym        = 3
 
-  TSSymSize     = 2.0
+  TSSymSize     = (!D.NAME EQ 'X' ) ? 2.0 : 1.1
 
   ;; !P.MULTI      = [0,1,3+KEYWORD_SET(Newell2009_panel),0,0]
   
