@@ -90,7 +90,7 @@ PRO PLOT_KH_PRECIPITATION_STRUCT,struct, $
   IF KEYWORD_SET(pubSettings) THEN BEGIN
      cs = 1.8
   ENDIF ELSE BEGIN
-     cs = 2.0
+     cs = 2.5
   ENDELSE
 
 
@@ -877,11 +877,11 @@ PRO PLOT_KH_PRECIPITATION_STRUCT,struct, $
                  ENDIF
 
                  xTickUnits   = 'TIME'
-                 xTickFormat  = 'LABEL_DATE'
+                 xTickFormat  = (l EQ nYVars-1) ? 'LABEL_DATE' : '(A1)'
                  dummy        = LABEL_DATE(DATE_FORMAT='%H:%I:%S')
               ENDIF ELSE BEGIN
                  xTickUnits   = !NULL
-                 xTickFormat  = !NULL
+                 xTickFormat  = (l EQ nYVars-1) ? !NULL : '(A1)'
               ENDELSE
 
               IF STRMATCH(STRUPCASE(tmpYNavn),'*TIME*') THEN BEGIN
@@ -913,6 +913,7 @@ PRO PLOT_KH_PRECIPITATION_STRUCT,struct, $
              XTICKUNITS=xTickUnits, $
              XTICKFORMAT=xTickFormat, $
              XMARGIN=[12,3], $
+             XSTYLE=1, $
              YSTYLE=1, $
              CHARSIZE=cs, $
              PSYM=pSym, $
