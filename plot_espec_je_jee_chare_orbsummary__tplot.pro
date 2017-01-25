@@ -21,8 +21,9 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   junkStartPSym = 2
   TSPSym        = 3
 
-  TSSymSize     = (!D.NAME EQ 'X' ) ? 2.0 : 1.1
-
+  TSSymSize     = (!D.NAME EQ 'X' ) ? 50.0 : 50.0
+  junkSymSize   = 0.9
+  NewellSymSize = 0.3
   ;; !P.MULTI      = [0,1,3+KEYWORD_SET(Newell2009_panel),0,0]
   
   IF !D.NAME EQ 'X' THEN BEGIN
@@ -94,11 +95,11 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   YLIM,var_name,1e6,5e11,1
   
   STORE_DATA,var_name+'_junk',DATA={x:NEWELL__eSpec.x[junk_i],y:NEWELL__eSpec.je[junk_i]}
-  OPTIONS,var_name+'_junk','symsize',TSSymSize
+  OPTIONS,var_name+'_junk','symsize',junkSymSize
   OPTIONS,var_name+'_junk','color',junkTransCol
 
   STORE_DATA,var_name+'_befStart',DATA={x:NEWELL__eSpec.x[befStart_i],y:NEWELL__eSpec.je[befStart_i]}
-  OPTIONS,var_name+'_befStart','symsize',TSSymSize
+  OPTIONS,var_name+'_befStart','symsize',junkSymSize
   OPTIONS,var_name+'_befStart','color',junkStartCol
 
   ;; tmpVarNames = [var_name,var_name+'_junk',var_name+'_befStart']
@@ -118,11 +119,11 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   YLIM,var_name,1e-3,3e3,1
   
   STORE_DATA,var_name+'_junk',DATA={x:NEWELL__eSpec.x[junk_i],y:NEWELL__eSpec.jee[junk_i]}
-  OPTIONS,var_name+'_junk','symsize',TSSymSize
+  OPTIONS,var_name+'_junk','symsize',junkSymSize
   OPTIONS,var_name+'_junk','color',junkTransCol
 
   STORE_DATA,var_name+'_befStart',DATA={x:NEWELL__eSpec.x[befStart_i],y:NEWELL__eSpec.jee[befStart_i]}
-  OPTIONS,var_name+'_befStart','symsize',TSSymSize
+  OPTIONS,var_name+'_befStart','symsize',junkSymSize
   OPTIONS,var_name+'_befStart','color',junkStartCol
 
   ;; tmpVarNames = [var_name,var_name+'_junk',var_name+'_befStart']
@@ -143,11 +144,11 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   YLIM,var_name,4,3e4,1
   
   STORE_DATA,var_name+'_junk',DATA={x:NEWELL__eSpec.x[junk_i],y:NEWELL__eSpec.charE[junk_i]}
-  OPTIONS,var_name+'_junk','symsize',TSSymSize
+  OPTIONS,var_name+'_junk','symsize',junkSymSize
   OPTIONS,var_name+'_junk','color',junkTransCol
 
   STORE_DATA,var_name+'_befStart',DATA={x:NEWELL__eSpec.x[befStart_i],y:NEWELL__eSpec.charE[befStart_i]}
-  OPTIONS,var_name+'_befStart','symsize',TSSymSize
+  OPTIONS,var_name+'_befStart','symsize',junkSymSize
   OPTIONS,var_name+'_befStart','color',junkStartCol
 
   ;; tmpVarNames = [var_name,var_name+'_junk',var_name+'_befStart']
@@ -167,6 +168,7 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
                                                TPLOT_NAME=var_name, $
                                                /NO_STRICT_TYPES, $
                                                /CONVERT_TO_NEWELL_INTERP, $
+                                               SYMSIZE=NewellSymSize, $
                                                YTITLE='2009 Interp'
 
      IF (N_ELEMENTS(tPlt_vars) EQ 0) THEN tPlt_vars = [var_name] ELSE tPlt_vars = [tPlt_vars,var_name]
@@ -176,6 +178,7 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
                                                TPLOT_NAME=var_name, $
                                                /FAVOR_BROADSTRICT_OVER_MONO, $
                                                /NO_STRICT_TYPES, $
+                                               SYMSIZE=NewellSymSize, $
                                                YTITLE='Favor broadStrict'
 
      IF (N_ELEMENTS(tPlt_vars) EQ 0) THEN tPlt_vars = [var_name] ELSE tPlt_vars = [tPlt_vars,var_name]
