@@ -162,6 +162,68 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY,curOrb, $
         PSYM=JunkStartPSym, $
         COLOR=junkStartCol
 
+  IF KEYWORD_SET(Newell2009_panel) THEN BEGIN
+
+     ;; IF ~KEYWORD_SET(no_stri
+
+     ;; IF KEYWORD_SET(no_strict_types) THEN BEGIN
+     ;;    GET_ESPEC_INDS_BY_TYPE,NEWELL__eSpec,m_i,b_i,d_i, $
+     ;;                           USER_INDS=tmp_i
+
+     ;;    names = ['Mono','Broad','Diffuse' ]
+     ;;    add_str_element,plotstuff ,'ytickname',names
+     ;;    add_str_element,oplotstuff,'ytickname',names
+     ;;    add_str_element,plotstuff,'yticks',2,/REPLACE
+     ;;    add_str_element,oplotstuff,'yticks',2,/REPLACE
+     ;;    add_str_element,plotstuff,'ytickv',[1,3,5],/REPLACE
+     ;;    add_str_element,oplotstuff,'ytickv',[1,3,5],/REPLACE
+     ;;    col  =   [ 100      ,250   ,!p.color]
+     ;; ENDIF ELSE BEGIN
+     ;;    GET_ESPEC_INDS_BY_TYPE,NEWELL__eSpec,m_i,b_i,d_i, $
+     ;;                           USER_INDS=tmp_i, $
+     ;;                           ,/ONLY_NONSTRICT
+
+     ;;    GET_ESPEC_INDS_BY_TYPE,NEWELL__eSpec,mS_i,bS_i,d_i, $
+     ;;                           USER_INDS=tmp_i, $
+     ;;                           ,/ONLY_STRICT
+
+     ;;    names = ['Mono','Strict Mono','Broad','Strict Broad','Diffuse' ]
+     ;;    add_str_element,plotstuff ,'ytickname',names
+     ;;    add_str_element,oplotstuff,'ytickname',names
+     ;;    add_str_element,plotstuff,'yticks',4,/REPLACE
+     ;;    add_str_element,oplotstuff,'yticks',4,/REPLACE
+     ;;    add_str_element,plotstuff,'ytickv',[1,2,3,4,5],/REPLACE
+     ;;    add_str_element,oplotstuff,'ytickv',[1,2,3,4,5],/REPLACE
+     ;;    col  =   [ 100      ,120   ,250   ,30    ,!p.color]
+     ;; ENDELSE
+
+     PLOT_SPECTRAL_TYPE__NEWELL_ET_AL_2009__TPLOT,DATA={x       : NEWELL__eSpec.x[tmp_i], $
+                                                        mono    : NEWELL__eSpec.mono[tmp_i], $
+                                                        broad   : NEWELL__eSpec.broad[tmp_i], $
+                                                        diffuse : NEWELL__eSpec.diffuse[tmp_i]}
+
+  ;; PLOT,tJul,NEWELL__eSpec.charE[tmp_i], $
+  ;;      /NODATA, $
+  ;;      CHARSIZE=charSize, $
+  ;;      XTICKFORMAT='LABEL_DATE', $
+  ;;      XTICKUNITS=['Time','Time'], $
+  ;;      XRANGE=tRange, $
+  ;;      /YLOG, $
+  ;;      YRANGE=[4,3e4], $
+  ;;      YTITLE='Char E (eV)', $
+  ;;      YTICKV=[1e1,1e2,1e3,1e4], $
+  ;;      YTICKNAME=['1e1','1e2','1e3','1e4'], $
+  ;;      YMARGIN=[6,1], $
+  ;;      XMARGIN=[10,3], $
+  ;;      YSTYLE=1
+
+  ;; OPLOT,tJul,NEWELL__eSpec.charE[tmp_i], $
+  ;;       PSYM=TSPsym, $
+  ;;       COLOR=TSCol, $
+  ;;       SYMSIZE=TSSymSize
+
+  ENDIF
+
   IF !D.NAME EQ 'X' THEN BEGIN
      !P.CHARSIZE = oldCharSize
   ENDIF
