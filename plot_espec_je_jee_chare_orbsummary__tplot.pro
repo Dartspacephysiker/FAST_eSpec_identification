@@ -10,7 +10,7 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   @common__newell_espec.pro
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
      LOAD_NEWELL_ESPEC_DB,/LOAD_CHARE, $
-                          /DONT_PERFORM_CORRECTION
+                          /DONT_CONVERT_TO_STRICT_NEWELL
   ENDIF
 
   ;;Some plot things
