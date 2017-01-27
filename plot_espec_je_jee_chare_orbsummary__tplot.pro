@@ -3,7 +3,13 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
    NEWELL2009_PANEL=Newell2009_panel, $
    USE_MY_JUNK_AND_BEFSTART=use_my_junk_and_befStart, $
    JUNK_I=junk_i, $
-   BEFSTART_I=befStart_i
+   BEFSTART_I=befStart_i, $
+   MINMLT=minM, $
+   MAXMLT=maxM, $
+   MINILAT=minI, $
+   MAXILAT=maxI, $
+   HEMI=hemi, $
+   WINID=winID
 
   COMPILE_OPT IDL2
 
@@ -28,7 +34,10 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   
   IF !D.NAME EQ 'X' THEN BEGIN
      
-     WINDOW,0,XSIZE=800,YSIZE=1000
+     wID = KEYWORD_SET(winID) ? winID : 0
+
+     WINDOW,wID, $
+            XSIZE=800,YSIZE=1000
 
      LOADCT2,39
      oldCharSize = !P.CHARSIZE
@@ -57,8 +66,19 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   ENDIF
   
   ;;Ind things
-  orbString = STRCOMPRESS(curOrb,/REMOVE_ALL)
-  tmp_i     = WHERE(NEWELL__eSpec.orbit EQ curOrb[0],NBef)
+  orbString  = STRCOMPRESS(curOrb,/REMOVE_ALL)
+  tmp_i      = WHERE(NEWELL__eSpec.orbit EQ curOrb[0],NBef)
+
+  IF KEYWORD_SET(minM) OR KEYWORD_SET(maxM) THEN BEGIN
+     mlt_i   = GET_MLT_INDS(NEWELL__eSpec,minM,maxM)
+     tmp_i   = CGSETINTERSECTION(tmp_i,mlt_i,COUNT=count)
+  ENDIF
+
+  IF KEYWORD_SET(minI) OR KEYWORD_SET(maxI) THEN BEGIN
+     ilat_i  = GET_ILAT_INDS(NEWELL__eSpec,minI,maxI,hemi)
+     tmp_i   = CGSETINTERSECTION(tmp_i,ilat_i,COUNT=count)
+  ENDIF
+
   firstLastT = NEWELL__eSpec.x[[tmp_i[0],tmp_i[-1]]]
 
   IF NBef EQ 0 THEN BEGIN
@@ -189,7 +209,8 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
 
   TPLOT,tPlt_vars,VAR=['ALT','ILAT','MLT'], $
         TRANGE=firstLastT, $
-        TITLE='Orbit ' + orbString + ' (' + TIME_TO_STR(tmpTime[0],/MS) + ')'
+        TITLE='Orbit ' + orbString + ' (' + TIME_TO_STR(tmpTime[0],/MS) + ')', $
+        WINDOW=wID
 
 
   TPLOT_PANEL,VARIABLE='Je',OPLOTVAR='Je_junk',PSYM=junkTransPSym

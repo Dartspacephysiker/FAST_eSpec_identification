@@ -1,8 +1,10 @@
 ;;12/15/16
 FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
    ENERGY_ELECTRONS=energy_electrons, $
+   USE_SC_POT_FOR_MIN_ENERGY=use_sc_pot, $
    ELECTRON_ANGLERANGE=electron_angleRange, $
    EEB_OR_EES=eeb_or_ees, $
+   REMOVE_ESA_TRANSITIONS=remove_ESA_transitions, $
    MINMLT=minM, $
    MAXMLT=maxM, $
    DAWNSECTOR=dawnSector, $
@@ -12,6 +14,7 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
    AURORAL_OVAL=auroral_oval, $
    MINILAT=minI, $
    MAXILAT=maxI, $
+   HEMI=hemi, $
    PLOTNAMEPREF=plotNamePref, $
    LOADDIR=loadDir, $
    PLOTDIR=plotDir, $
@@ -21,15 +24,16 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
   COMPILE_OPT IDL2
 
   IF N_ELEMENTS(energy_electrons) EQ 0 THEN BEGIN
-     energy_electrons = [30,3e4]
+     energy_electrons = [KEYWORD_SET(sc_pot) ? 0 : 30,3e4]
   ENDIF
 
   IF ~KEYWORD_SET(eeb_or_ees) THEN eeb_OR_ees = 'ees'
 
+  defLDir   = '/SPENCEdata/Research/Satellites/FAST/espec_identification/saves_output_etc/KH_stuff/'
   IF KEYWORD_SET(loadDir) THEN BEGIN
      lDir   = loadDir
   ENDIF ELSE BEGIN
-     lDir   = '/SPENCEdata/Research/Satellites/FAST/espec_identification/saves_output_etc/KH_stuff/'
+     lDir   = defLDir
   ENDELSE
 
   IF KEYWORD_SET(plotDir) THEN BEGIN
@@ -48,6 +52,24 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
                      KEYWORD_SET(dayside) + $
                      KEYWORD_SET(nightside) + $
                      (KEYWORD_SET(minM) AND KEYWORD_SET(maxM))
+
+  IF N_ELEMENTS(hemi) EQ 0 THEN BEGIN
+     IF KEYWORD_SET(minI) AND KEYWORD_SET(maxI) THEN BEGIN
+        CASE 1 OF
+           minI GT 0: BEGIN
+              hemi = 'NORTH'
+           END
+           maxI LT 0: BEGIN
+              hemi = 'SOUTH'
+           END
+           ELSE: BEGIN
+              hemi = 'BOTH'
+           END
+        ENDCASE
+     ENDIF ELSE BEGIN
+        hemi = 'BOTH'
+     ENDELSE
+  ENDIF
 
   haveILATInfo     = (KEYWORD_SET(minI) AND KEYWORD_SET(maxI)) + KEYWORD_SET(hemi)
 
@@ -70,21 +92,21 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
      END
   ENDCASE
 
-  CASE haveILATInfo OF
-     0: BEGIN
-        PRINT,'Grabbing all ILATs ...'
-     END
-     1:
-     ELSE: BEGIN
-        PRINT,"ILAT opts"
-        PRINT,"hemi         : ",KEYWORD_SET(hemi        ) ? hemi           : ''
-        PRINT,"auroral_oval : ",KEYWORD_SET(auroral_oval) ? auroral_oval   : 0B
-        PRINT,"minI         : ",KEYWORD_SET(minI        ) ? minI           : 0B
-        PRINT,"maxI         : ",KEYWORD_SET(maxI        ) ? maxI           : 0B
-        PRINT,"Please don't set all of these at once. K? Chill out."
-        RETURN,-1
-     END
-  ENDCASE
+  ;; CASE haveILATInfo OF
+  ;;    0: BEGIN
+  ;;       PRINT,'Grabbing all ILATs ...'
+  ;;    END
+  ;;    1:
+  ;;    ELSE: BEGIN
+  ;;       PRINT,"ILAT opts"
+  ;;       PRINT,"hemi         : ",KEYWORD_SET(hemi        ) ? hemi           : ''
+  ;;       PRINT,"auroral_oval : ",KEYWORD_SET(auroral_oval) ? auroral_oval   : 0B
+  ;;       PRINT,"minI         : ",KEYWORD_SET(minI        ) ? minI           : 0B
+  ;;       PRINT,"maxI         : ",KEYWORD_SET(maxI        ) ? maxI           : 0B
+  ;;       PRINT,"Please don't set all of these at once. K? Chill out."
+  ;;       RETURN,-1
+  ;;    END
+  ;; ENDCASE
 
   ;;Now get some dater
   this             = GET_ESA_TIMERANGES(BURST=(STRUPCASE(eeb_or_ees) EQ 'EEB'), $
@@ -155,47 +177,76 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
                      STRING(FORMAT='("eAngle_",I0,"-",I0,"_")', $
                             ROUND(e_angle[0]), $
                             ROUND(e_angle[1]))           + $
-                     STRING(FORMAT='("eEnergy_",I0,"-",I0,"_")', $
-                            ROUND(energy_electrons[0]), $
+                     STRING(FORMAT='("eEnergy_",A0,"-",I0,"_")', $
+                            KEYWORD_SET(use_sc_pot) ? 'scPot' : STRCOMPRESS(ROUND(energy_electrons[0])), $
                             ROUND(energy_electrons[1]))           + $
+                     (KEYWORD_SET(remove_ESA_transitions) ? 'rmESAtrans_' : '') + $
                      GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
   ENDELSE
 
 
 
-  GET_2DT,'je_2d_fs','fa_' + eeb_or_ees + '_c', $
-          NAME='Jee', $
-          T1=t1, $
-          T2=t2, $
-          ENERGY=energy_electrons, $
-          ANGLE=e_angle, $
-          CALIB=(N_ELEMENTS(calib) GT 0 ? calib : 1)
+  CASE 1 OF
+     KEYWORD_SET(use_sc_pot): BEGIN
+        GET_SC_POTENTIAL,T1=t1,T2=t2,DATA=sc_pot
 
-  GET_2DT,'j_2d_fs','fa_' + eeb_or_ees + '_c', $
-          NAME='Je', $
-          T1=t1, $
-          T2=t2, $
-          ENERGY=energy_electrons, $
-          ANGLE=e_angle, $
-          CALIB=(N_ELEMENTS(calib) GT 0 ? calib : 1)
+        GET_2DT_TS_POT,'je_2d_fs','fa_' + eeb_or_ees, $
+                       NAME='Jee', $
+                       T1=t1, $
+                       T2=t2, $
+                       ENERGY=energy_electrons, $
+                       SC_POT=sc_pot, $
+                       ANGLE=e_angle, $
+                       CALIB=(N_ELEMENTS(calib) GT 0 ? calib : 1)
+
+        GET_2DT_TS_POT,'j_2d_fs','fa_' + eeb_or_ees, $
+                       NAME='Je', $
+                       T1=t1, $
+                       T2=t2, $
+                       ENERGY=energy_electrons, $
+                       SC_POT=sc_pot, $
+                       ANGLE=e_angle, $
+                       CALIB=(N_ELEMENTS(calib) GT 0 ? calib : 1)
+
+     END
+     ELSE: BEGIN
+        GET_2DT,'je_2d_fs','fa_' + eeb_or_ees + '_c', $
+                NAME='Jee', $
+                T1=t1, $
+                T2=t2, $
+                ENERGY=energy_electrons, $
+                ANGLE=e_angle, $
+                CALIB=(N_ELEMENTS(calib) GT 0 ? calib : 1)
+
+        GET_2DT,'j_2d_fs','fa_' + eeb_or_ees + '_c', $
+                NAME='Je', $
+                T1=t1, $
+                T2=t2, $
+                ENERGY=energy_electrons, $
+                ANGLE=e_angle, $
+                CALIB=(N_ELEMENTS(calib) GT 0 ? calib : 1)
+     END
+  ENDCASE
 
   GET_DATA,'Jee',DATA=Jee
   GET_DATA,'Je',DATA=Je
 
+  IF KEYWORD_SET(remove_ESA_transitions) THEN BEGIN
+     ESA__LOOK_FOR_GAPS_AND_REMOVE__SINGLE_ORBIT,Je.x, $
+        KEEP_I=keep
+  ENDIF ELSE BEGIN
+     keep = LINDGEN(N_ELEMENTS(Je.x))
+  ENDELSE
 
   IF N_ELEMENTS(Jee.y) NE N_ELEMENTS(Je.y) THEN STOP
 
-  keep = WHERE(FINITE(je.y) AND FINITE(jee.y))
-  je.x = je.x[keep]
-  je.y = je.y[keep]
-  je.x = je.x[keep]
-  je.y = je.y[keep]
+  keep = CGSETINTERSECTION(keep,WHERE(FINITE(je.y) AND FINITE(jee.y)))
+  je   = {x:je.x[keep] ,y:je.y[keep]}
+  jee  = {x:jee.x[keep],y:jee.y[keep]}
   
   time_order = SORT(je.x)
-  je.x  = je.x[time_order]
-  je.y  = je.y[time_order]
-  jee.x = jee.x[time_order]
-  jee.y = jee.y[time_order]
+  je   = {x:je.x[keep],y:je.y[keep]}
+  jee  = {x:jee.x[keep],y:jee.y[keep]}
 
   GET_FA_ORBIT,Je.x,/TIME_ARRAY
   GET_DATA,'MLT',DATA=mlt
@@ -281,13 +332,18 @@ FUNCTION MAKE_KH_PRECIPITATION_PACKAGE, $
      counter   = 1
      WHILE FILE_TEST(lDir+testFName) DO BEGIN
         testFName = outName + $
-                    STRING(FORMAT='("_",I02)',counter) + $
+                    STRING(FORMAT='("_",I02)',counter++) + $
                     saveSuff
      ENDWHILE
      finalName = testFName
      PRINT,"Saving KH package to " + finalName
      SAVE,struct,FILENAME=lDir+finalName
   ENDIF
+
+  OPENW,lun,defLDir+'mostRecent_KH_file.txt',/GET_LUN
+  PRINTF,lun,defLDir+finalName
+  CLOSE,lun
+  FREE_LUN,lun
 
   CASE 1 OF
      KEYWORD_SET(return_struct): BEGIN
