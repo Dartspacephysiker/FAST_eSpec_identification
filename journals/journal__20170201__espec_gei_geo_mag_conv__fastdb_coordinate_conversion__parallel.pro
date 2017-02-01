@@ -3,7 +3,7 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
 
   COMPILE_OPT IDL2
   
-  outFile_pref            = 'eSpec_DB'
+  outFile_pref            = 'eSpec_DB_20160607'
   dry_run                 = 0
 
   ;; nCPUsToRun              = 7
@@ -15,9 +15,9 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
 
   create_timeStamps       = 0
   get_GEI_coords          = 0
-  do_GEO_MAG_conversions  = 1
+  do_GEO_MAG_conversions  = 0
   do_AACGM_conversions    = 0
-  stitch_files            = 0
+  stitch_files            = 1
 
   ;; test_single             = 0
 

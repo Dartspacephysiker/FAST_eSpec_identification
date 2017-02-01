@@ -18,8 +18,10 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          LOAD_DELTA_T=load_delta_t, $
                          COORDINATE_SYSTEM=coordinate_system, $
                          USE_AACGM_COORDS=use_aacgm, $
-                         USE_GEO_COORDS=use_geo, $
-                         USE_MAG_COORDS=use_mag, $
+                         USE_GEI_COORDS=use_GEI, $
+                         USE_GEO_COORDS=use_GEO, $
+                         USE_MAG_COORDS=use_MAG, $
+                         USE_SDT_COORDS=use_SDT, $
                          ;; JUST_TIMES=just_times, $
                          ;; OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
@@ -102,6 +104,13 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
         defSortNewellDBFile    =  "sorted--" + defNewellDBFile
 
+        ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
+
+        GEI_file             = 'eSpec_DB_20160607-GEI.sav'
+        GEO_file             = 'eSpec_DB_20160607-GEO.sav'
+        MAG_file             = 'eSpec_DB_20160607-MAG.sav'
+        SDT_file             = 'eSpec_DB_20160607-SDT.sav'
+
         ;;the 2000 km file
         IF KEYWORD_SET(use_2000km_file) THEN BEGIN
            PRINT,'Using 2000 km eSpec DB ...'
@@ -110,6 +119,9 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
            DB_date             = '20160607'
            DB_version          = 'v0.0'
            DB_extras           = 'Below_2000km/with_alternate_coords/with_mapping_factors/strict_Newell_interp'
+           AACGM_file          = !NULL
+           GEO_file            = !NULL
+           MAG_file            = !NULL
         ENDIF
 
         ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
@@ -119,10 +131,6 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      END
   ENDCASE
   defCoordDir            = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
-  ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
-
-  ;; GEO_file             = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--GEO_coords.sav'
-  ;; MAG_file             = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--MAG_coords.sav'
 
 
   IF N_ELEMENTS(quiet) EQ 0 THEN quiet = 0
@@ -354,18 +362,36 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      CASE STRUPCASE(coordinate_system) OF
         'AACGM': BEGIN
            use_aacgm = 1
+           use_gei   = 0
            use_geo   = 0
            use_mag   = 0
+           use_SDT   = 0
+        END
+        'GEI'  : BEGIN
+           use_aacgm = 0
+           use_gei   = 1
+           use_geo   = 0
+           use_mag   = 0
+           use_SDT   = 0
         END
         'GEO'  : BEGIN
            use_aacgm = 0
+           use_gei   = 0
            use_geo   = 1
            use_mag   = 0
+           use_SDT   = 0
         END
         'MAG'  : BEGIN
            use_aacgm = 0
            use_geo   = 0
            use_mag   = 1
+           use_SDT   = 0
+        END
+        'SDT'  : BEGIN
+           use_aacgm = 0
+           use_geo   = 0
+           use_mag   = 0
+           use_SDT   = 1
         END
      ENDCASE
   ENDIF
@@ -378,29 +404,68 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
      ;; PRINT,'Using AACGM lat, MLT, and alt ...'
 
+     coordStr  = TEMPORARY(AACGM)
+     coordName = 'AACGM'
      ;; RESTORE,defCoordDir+AACGM_file
 
      ;; ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_AACGM,'AACGM'
 
   ENDIF
 
-  ;; IF KEYWORD_SET(use_geo) THEN BEGIN
-  ;;    PRINT,'Using GEO lat and alt ...'
+  IF KEYWORD_SET(use_GEI) THEN BEGIN
+     PRINT,'Using GEI lat and alt ...'
 
-  ;;    RESTORE,defCoordDir+GEO_file
+     RESTORE,defCoordDir+GEI_file
 
-  ;;    ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_GEO,'GEO'
+     coordStr  = TEMPORARY(GEI)
+     coordName = 'GEI'
 
-  ;; ENDIF
+  ENDIF
 
-  ;; IF KEYWORD_SET(use_mag) THEN BEGIN
-  ;;    PRINT,'Using MAG lat and alt ...'
+  IF KEYWORD_SET(use_GEO) THEN BEGIN
+     PRINT,'Using GEO lat and alt ...'
 
-  ;;    RESTORE,defCoordDir+MAG_file
+     RESTORE,defCoordDir+GEO_file
 
-  ;;    ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_MAG,'MAG'
+     coordStr  = TEMPORARY(GEO)
+     coordName = 'GEO'
 
-  ;; ENDIF
+  ENDIF
+
+  IF KEYWORD_SET(use_MAG) THEN BEGIN
+     PRINT,'Using MAG lat and alt ...'
+
+     RESTORE,defCoordDir+MAG_file
+
+     coordStr  = TEMPORARY(MAG)
+     coordName = 'MAG'
+
+  ENDIF
+
+  IF ~KEYWORD_SET(noMem) THEN BEGIN
+     IF ~(KEYWORD_SET(use_AACGM) OR KEYWORD_SET(use_MAG) OR KEYWORD_SET(use_GEO)) THEN BEGIN
+        IF STRUPCASE(eSpec.info.coords) NE 'SDT' THEN BEGIN
+           use_SDT = 1
+        ENDIF 
+     ENDIF
+  ENDIF
+
+  IF KEYWORD_SET(use_SDT) THEN BEGIN
+
+     RESTORE,defCoordDir+SDT_file
+
+     coordName = 'SDT'
+     coordStr  = TEMPORARY(SDT)
+
+  ENDIF
+
+  IF N_ELEMENTS(coordName) GT 0 THEN BEGIN
+     ALFDB_SWITCH_COORDS, $
+        eSpec, $
+        coordStr, $
+        coordName, $
+        SUCCESS=success
+  ENDIF
 
   IF ~KEYWORD_SET(nonMem) THEN BEGIN
      NEWELL__eSpec          = TEMPORARY(eSpec)
