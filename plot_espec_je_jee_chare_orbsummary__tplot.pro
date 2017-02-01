@@ -42,7 +42,7 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
      LOADCT2,39
      oldCharSize = !P.CHARSIZE
 
-     charSize    = 1.0
+     charSize    = 0.8
      !P.CHARSIZE = charSize
   ENDIF
 
@@ -189,7 +189,8 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
                                                /NO_STRICT_TYPES, $
                                                /CONVERT_TO_NEWELL_INTERP, $
                                                SYMSIZE=NewellSymSize, $
-                                               YTITLE='2009 Interp'
+                                               YTITLE='2009'
+     OPTIONS,var_name,'panel_size',0.5
 
      IF (N_ELEMENTS(tPlt_vars) EQ 0) THEN tPlt_vars = [var_name] ELSE tPlt_vars = [tPlt_vars,var_name]
 
@@ -199,7 +200,8 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
                                                /FAVOR_BROADSTRICT_OVER_MONO, $
                                                /NO_STRICT_TYPES, $
                                                SYMSIZE=NewellSymSize, $
-                                               YTITLE='Favor broadStrict'
+                                               YTITLE='broadS'
+     OPTIONS,var_name,'panel_size',0.5
 
      IF (N_ELEMENTS(tPlt_vars) EQ 0) THEN tPlt_vars = [var_name] ELSE tPlt_vars = [tPlt_vars,var_name]
 
@@ -210,6 +212,7 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT,curOrb, $
   TPLOT,tPlt_vars,VAR=['ALT','ILAT','MLT'], $
         TRANGE=firstLastT, $
         TITLE='Orbit ' + orbString + ' (' + TIME_TO_STR(tmpTime[0],/MS) + ')', $
+        ;; TITLE=' ', $
         WINDOW=wID
 
 

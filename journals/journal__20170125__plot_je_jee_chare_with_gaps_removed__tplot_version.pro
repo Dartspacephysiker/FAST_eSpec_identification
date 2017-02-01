@@ -3,12 +3,13 @@ PRO JOURNAL__20170125__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED__TPLOT_VERSION
 
   COMPILE_OPT IDL2
 
-  startOrb    = 1129            ;Otherwise it just picks the first orbit in eSpec
+  startOrb    = 1381            ;Otherwise it just picks the first orbit in eSpec
   endOrb      = 16361
-  showPlots   = 1
   savePS      = 1
   PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/20170125--trim_transitions__tplot/'
   PSPref      = 'je_jee_chare_sans_transitions--'
+
+  check_existing = 1
   
   @common__newell_espec.pro
 
@@ -47,12 +48,11 @@ PRO JOURNAL__20170125__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED__TPLOT_VERSION
   ;;plot setup
   LOADCT2,39
 
-  IF KEYWORD_SET(showPlots) THEN BEGIN
-     IF KEYWORD_SET(savePS) THEN BEGIN
-     ENDIF ELSE BEGIN
-        WINDOW,0,XSIZE=800,YSIZE=600
-     ENDELSE
-  ENDIF
+
+  IF KEYWORD_SET(savePS) THEN BEGIN
+  ENDIF ELSE BEGIN
+     WINDOW,0,XSIZE=800,YSIZE=600
+  ENDELSE
 
   final = 0
   loaded           = 0B
@@ -62,6 +62,25 @@ PRO JOURNAL__20170125__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED__TPLOT_VERSION
      orbString  = STRCOMPRESS(curOrb,/REMOVE_ALL)
      tmp_i      = WHERE(NEWELL__eSpec.orbit EQ curOrb[0],NBef)
      firstLastT = NEWELL__eSpec.x[[tmp_i[0],tmp_i[-1]]]
+
+     outPlot    = PSDir+PSPref+orbString
+
+     IF KEYWORD_SET(check_existing) THEN BEGIN
+        fT1     = FILE_TEST(outPlot+'.ps')
+        fT2     = FILE_TEST(outPlot+'00.png')
+        IF fT1 THEN gotEr = outPlot+'.ps' $
+        ELSE IF fT2 THEN gotEr = outPlot+'.ps'
+
+        IF fT1 OR fT2 THEN BEGIN
+           PRINT,"File exists: " + gotEr + '! Skipping ...'
+
+           curOrb = (orbs[++orbInd])[0]
+           IF curOrb EQ endOrb THEN final = 1
+
+           CONTINUE
+
+        ENDIF
+     ENDIF
 
      IF NBef EQ 0 THEN BEGIN
         PRINT,"no inds for orbit " + STRCOMPRESS(curOrb,/REMOVE_ALL) + ". Move it on down."
@@ -80,34 +99,34 @@ PRO JOURNAL__20170125__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED__TPLOT_VERSION
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Plots
-     IF KEYWORD_SET(showPlots) THEN BEGIN
 
-        IF KEYWORD_SET(savePS) THEN BEGIN
-           POPEN,PSDir+PSPref+orbString, $
-                 XSIZE=6, $
-                 YSIZE=8, $
-                 /QUIET
+     IF KEYWORD_SET(savePS) THEN BEGIN
+        POPEN,outPlot, $
+              XSIZE=12, $
+              YSIZE=8, $
+              /QUIET
 
-           LOADCT2,39
-        ENDIF
-
-        PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT, $
-           curOrb, $
-           /NEWELL2009_PANEL, $
-           /USE_MY_JUNK_AND_BEFSTART, $
-           JUNK_I=junk_i, $
-           BEFSTART_I=befStart_i
-
+        LOADCT2,39
      ENDIF
+
+     PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY__TPLOT, $
+        curOrb, $
+        /NEWELL2009_PANEL, $
+        /USE_MY_JUNK_AND_BEFSTART, $
+        JUNK_I=junk_i, $
+        BEFSTART_I=befStart_i
 
      IF KEYWORD_SET(savePS) THEN BEGIN
         PCLOSE,/QUIET
-        EPS2PDF,PSDir+PSPref+orbString, $
+        EPS2PDF,outPlot, $
                 /PS, $
                 /TO_PNG, $
                 /REMOVE_EPS, $
                 /QUIET
-     ENDIF
+     ENDIF ELSE BEGIN
+        PRINT,"Stopped because otherwise I'm just going to show a million plots, probably for no good reason."
+        STOP
+     ENDELSE
 
      curOrb           = (orbs[++orbInd])[0]
 
