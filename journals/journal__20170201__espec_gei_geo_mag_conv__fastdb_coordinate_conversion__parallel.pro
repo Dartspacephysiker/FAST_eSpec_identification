@@ -13,9 +13,9 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
 
   check_if_exists         = 1
 
-  create_timeStamps       = 1
+  create_timeStamps       = 0
   get_GEI_coords          = 0
-  do_GEO_MAG_conversions  = 0
+  do_GEO_MAG_conversions  = 1
   do_AACGM_conversions    = 0
   stitch_files            = 0
 
