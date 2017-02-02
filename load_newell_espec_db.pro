@@ -17,6 +17,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          LOAD_CHARE=load_charE, $
                          LOAD_DELTA_T=load_delta_t, $
                          COORDINATE_SYSTEM=coordinate_system, $
+                         USE_LNG=PASIS__MIMC_struct.use_lng, $
                          USE_AACGM_COORDS=use_AACGM, $
                          USE_GEI_COORDS=use_GEI, $
                          USE_GEO_COORDS=use_GEO, $
@@ -465,6 +466,17 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         coordStr, $
         coordName, $
         SUCCESS=success
+  ENDIF
+
+  IF KEYWORD_SET(use_lng) THEN BEGIN
+     index = -1
+     STR_ELEMENT,eSpec,'lng',INDEX=index
+     IF index NE -1 THEN BEGIN
+        flip = WHERE(eSpec.lng LT 0.)
+        IF flip[0] NE -1 THEN BEGIN
+           eSpec.lng[flip] += 360.
+        ENDIF
+     ENDIF
   ENDIF
 
   IF ~KEYWORD_SET(nonMem) THEN BEGIN

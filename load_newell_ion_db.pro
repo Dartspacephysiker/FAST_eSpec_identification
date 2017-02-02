@@ -12,9 +12,12 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
                        DO_NOT_MAP_DELTA_T=do_not_map_delta_t, $
                        LOAD_DELTA_T=load_delta_t, $
                        COORDINATE_SYSTEM=coordinate_system, $
-                       USE_AACGM_COORDS=use_aacgm, $
-                       USE_GEO_COORDS=use_geo, $
-                       USE_MAG_COORDS=use_mag, $
+                       USE_LNG=use_lng, $
+                       USE_AACGM_COORDS=use_AACGM, $
+                       USE_GEI_COORDS=use_GEI, $
+                       USE_GEO_COORDS=use_GEO, $
+                       USE_MAG_COORDS=use_MAG, $
+                       USE_SDT_COORDS=use_SDT, $
                        JUST_TIMES=just_times, $
                        OUT_TIMES=out_times, $
                        LOAD_DELTA_ILAT_FOR_WIDTH_TIME=load_dILAT, $
@@ -191,19 +194,38 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
   IF KEYWORD_SET(coordinate_system) THEN BEGIN
      CASE STRUPCASE(coordinate_system) OF
         'AACGM': BEGIN
-           use_aacgm = 1
-           use_geo   = 0
-           use_mag   = 0
+           use_AACGM = 1
+           use_GEI   = 0
+           use_GEO   = 0
+           use_MAG   = 0
+        END
+        'GEI'  : BEGIN
+           use_AACGM = 0
+           use_GEI   = 1
+           use_GEO   = 0
+           use_MAG   = 0
+           use_SDT   = 0
         END
         'GEO'  : BEGIN
-           use_aacgm = 0
-           use_geo   = 1
-           use_mag   = 0
+           use_AACGM = 0
+           use_GEI   = 0
+           use_GEO   = 1
+           use_MAG   = 0
+           use_SDT   = 0
         END
         'MAG'  : BEGIN
-           use_aacgm = 0
-           use_geo   = 0
-           use_mag   = 1
+           use_AACGM = 0
+           use_GEI   = 0
+           use_GEO   = 0
+           use_MAG   = 1
+           use_SDT   = 0
+        END
+        'SDT'  : BEGIN
+           use_AACGM = 0
+           use_GEI   = 0
+           use_GEO   = 0
+           use_MAG   = 0
+           use_SDT   = 1
         END
      ENDCASE
 
