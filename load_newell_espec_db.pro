@@ -17,7 +17,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          LOAD_CHARE=load_charE, $
                          LOAD_DELTA_T=load_delta_t, $
                          COORDINATE_SYSTEM=coordinate_system, $
-                         USE_AACGM_COORDS=use_aacgm, $
+                         USE_AACGM_COORDS=use_AACGM, $
                          USE_GEI_COORDS=use_GEI, $
                          USE_GEO_COORDS=use_GEO, $
                          USE_MAG_COORDS=use_MAG, $
