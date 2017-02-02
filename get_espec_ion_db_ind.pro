@@ -350,14 +350,18 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
      MIMC__north          = KEYWORD_SET(MIMC_struct.north)
      MIMC__south          = KEYWORD_SET(MIMC_struct.south)
      MIMC__both_hemis     = KEYWORD_SET(MIMC_struct.both_hemis)
+     MIMC__globe          = KEYWORD_SET(MIMC_struct.globe)
      IF KEYWORD_SET(do_lShell) THEN BEGIN
 
         MIMC__minLshell   = MIMC_struct.minL
         MIMC__maxLshell   = MIMC_struct.maxL
         MIMC__binLshell   = MIMC_struct.binL
 
-        lshell_i          = GET_LSHELL_INDS(dbStruct,MIMC__minLshell,MIMC__maxLshell,MIMC__hemi, $
-                                            N_LSHELL=n_lshell,N_NOT_LSHELL=n_not_lshell,LUN=lun)
+        lshell_i          = GET_LSHELL_INDS(dbStruct,MIMC__minLshell,MIMC__maxLshell, $
+                                            MIMC__hemi, $
+                                            N_LSHELL=n_lshell, $
+                                            N_NOT_LSHELL=n_not_lshell, $
+                                            LUN=lun)
         region_i          = CGSETINTERSECTION(lshell_i,mlt_i)
      ENDIF ELSE BEGIN
 
@@ -367,8 +371,11 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
         MIMC__EA_binning  = KEYWORD_SET(alfDB_plot_struct.EA_binning)
 
-        ilat_i            = GET_ILAT_INDS(dbStruct,MIMC__minILAT,MIMC__maxILAT,MIMC__hemi, $
-                                          N_ILAT=n_ilat,N_NOT_ILAT=n_not_ilat,LUN=lun)
+        ilat_i            = GET_ILAT_INDS(dbStruct,MIMC__minILAT,MIMC__maxILAT, $
+                                          MIMC__hemi, $
+                                          N_ILAT=n_ilat, $
+                                          N_NOT_ILAT=n_not_ilat, $
+                                          LUN=lun)
         region_i          = CGSETINTERSECTION(ilat_i,mlt_i)
      ENDELSE
 
@@ -380,8 +387,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
      nGood       = N_ELEMENTS(region_i)
      region_i    = CGSETINTERSECTION(region_i,TEMPORARY(keep_i),COUNT=nKept)
-     PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the killedGap ind thing ...'
-
+     PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + $
+           ' inds to the killedGap ind thing ...'
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Want just Holzworth/Meng statistical auroral oval?
