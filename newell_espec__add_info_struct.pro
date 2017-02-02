@@ -2,6 +2,7 @@
 ;;Update the eSpec DBs with an info struct
 PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                                   IONS=ions, $
+                                  DB_DIR=DB_dir, $
                                   DB_DATE=DB_date, $
                                   DB_VERSION=DB_version, $
                                   DB_EXTRAS=DB_extras, $
@@ -15,6 +16,7 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
         info  = {converted        : 0B, $
                  correctedFluxes  : 0B, $
                  is_reduced       : BYTE(KEYWORD_SET(reduce_dbSize)), $
+                 DB_dir           : '', $
                  DB_date          : '', $
                  DB_version       : '', $
                  DB_extras        : '', $
@@ -33,6 +35,7 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                  Newell2009interp : 0B, $
                  correctedFluxes  : 0B, $
                  is_reduced       : BYTE(KEYWORD_SET(reduce_dbSize)), $
+                 DB_dir           : '', $
                  DB_date          : '', $
                  DB_version       : '', $
                  DB_extras        : '', $
@@ -47,6 +50,11 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                  coords           : 'SDT'}
      END
   ENDCASE
+
+  IF KEYWORD_SET(DB_dir) THEN BEGIN
+     info.DB_dir     = DB_dir
+  ENDIF
+
   IF KEYWORD_SET(DB_date) THEN BEGIN
      info.DB_date    = DB_date
   ENDIF

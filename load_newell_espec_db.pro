@@ -225,6 +225,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      ENDIF
 
      NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
+                                  DB_DIR=NewellDBDir, $
                                   DB_DATE=DB_date, $
                                   DB_VERSION=DB_version, $
                                   DB_EXTRAS=DB_extras, $

@@ -131,6 +131,7 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
 
      NEWELL_ESPEC__ADD_INFO_STRUCT,ion, $
                                    /IONS, $
+                                   DB_DIR=NewellDBDir, $
                                    DB_DATE=DB_date, $
                                    DB_VERSION=DB_version, $
                                    DB_EXTRAS=DB_extras, $
