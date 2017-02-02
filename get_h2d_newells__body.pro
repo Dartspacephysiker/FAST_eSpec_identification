@@ -12,7 +12,7 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
                           T_PROBOCCURRENCE=t_probOccurrence, $
                           T_PROBOCC_PLOTRANGE=t_probOcc_plotRange, $
                           THISTDENOMINATOR=tHistDenominator, $
-                          COMBINE_ACCELERATED=comb_accelerated, $
+                          COMB_ACCELERATED=comb_accelerated, $
                           TMPLT_H2DSTR=tmplt_h2dStr, $
                           H2DSTRS=h2dStrs, $
                           H2DFLUXN=h2dFluxN, $

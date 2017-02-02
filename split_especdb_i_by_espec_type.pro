@@ -14,7 +14,7 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
                                   OUT_I_LIST=out_i_list, $
                                   OUT_II_LIST=out_ii_list, $
                                   RM_II_LIST=rm_ii_list, $
-                                  COMBINE_ACCELERATED=comb_accelerated, $
+                                  COMB_ACCELERATED=comb_accelerated, $
                                   ;; DESPUN_ALF_DB=despun_alf_db, $
                                   SUM_LUN=sum_lun
 
