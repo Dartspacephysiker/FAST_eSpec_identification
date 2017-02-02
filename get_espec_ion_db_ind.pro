@@ -395,6 +395,11 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
      PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + $
            ' inds to the killedGap ind thing ...'
 
+     ;;Kill everything below 35 deg MAG lat (trust me, see the output from JOURNAL__20170201__ESPEC_PLOTS__DURING_STORMPHASES__ALTERNATE_COORDS
+     GET_INDS_ABOVE_35_MAGLAT,dBStruct,region_i, $
+                              FOR_ESPEC_DB=~is_ion, $
+                              FOR_ION_DB=is_ion
+
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Want just Holzworth/Meng statistical auroral oval?
      IF KEYWORD_SET(alfDB_plot_struct.HwMAurOval) THEN BEGIN
