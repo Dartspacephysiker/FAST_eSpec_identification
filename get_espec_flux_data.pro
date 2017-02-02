@@ -17,10 +17,10 @@ PRO GET_ESPEC_FLUX_DATA, $
    INDICES__ESPEC=eSpec_i, $
    INDICES__ION=ion_i, $
    ESPEC__MLTS=eSpec__mlts, $
-   ESPEC__ILATS=eSpec__ilats, $
+   ;; ESPEC__ILATS=eSpec__ilats, $
    ESPEC__INFO=eSpec_info, $
    ION__MLTS=ion__mlts, $
-   ION__ILATS=ion__ilats, $
+   ;; ION__ILATS=ion__ilats, $
    ION__INFO=ion_info, $
    CHARIERANGE=charIERange, $
    RESET_OMNI_INDS=reset_omni_inds, $
@@ -417,13 +417,13 @@ PRO GET_ESPEC_FLUX_DATA, $
   ;;Electrons
   IF KEYWORD_SET(get_eSpec) THEN BEGIN
      eSpec__mlts             = 1
-     eSpec__ilats            = 1
+     ;; eSpec__ilats            = 1
   ENDIF
 
   ;;Ions
   IF KEYWORD_SET(iFluxData) OR KEYWORD_SET(iNumFluxData) THEN BEGIN
      ion__mlts               = 1
-     ion__ilats              = 1
+     ;; ion__ilats              = 1
   ENDIF
 
   IF KEYWORD_SET(for_IMF_screening) THEN BEGIN
