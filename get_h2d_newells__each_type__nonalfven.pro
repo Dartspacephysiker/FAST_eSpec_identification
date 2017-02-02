@@ -57,6 +57,10 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                  diffuse : NEWELL__eSpec.diffuse[eSpec_i]   , $
                  info    : NEWELL__eSpec.info               }              ; , $
 
+  IF KEYWORD_SET(MIMC_struct.use_Lng) THEN BEGIN
+     STR_ELEMENT,tmp_eSpec,'lng',NEWELL__eSpec.lng[eSpec_i],/ADD_REPLACE
+  ENDIF
+
   IF KEYWORD_SET(t_probOccurrence) THEN BEGIN
      STR_ELEMENT,tmp_eSpec,'delta_t',NEWELL__delta_t[eSpec_i],/ADD_REPLACE
   ENDIF

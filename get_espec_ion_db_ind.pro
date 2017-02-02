@@ -335,14 +335,19 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
      ;;;;;;;;;;;;
      ;;Handle longitudes
-     MIMC__minMLT         = MIMC_struct.minM
-     MIMC__maxMLT         = MIMC_struct.maxM
-     MIMC__binMLT         = MIMC_struct.binM
+     MIMC__minMLT         = MIMC_struct.minM * (KEYWORD_SET(MIMC_struct.use_Lng) ? 15. : 1.)
+     MIMC__maxMLT         = MIMC_struct.maxM * (KEYWORD_SET(MIMC_struct.use_Lng) ? 15. : 1.)
+     MIMC__binMLT         = MIMC_struct.binM * (KEYWORD_SET(MIMC_struct.use_Lng) ? 15. : 1.)
      MIMC__dayside        = KEYWORD_SET(dayside)
      MIMC__nightside      = KEYWORD_SET(nightside)
-     mlt_i                = GET_MLT_INDS(dbStruct,MIMC__minMLT,MIMC__maxMLT, $
-                                         DAYSIDE=MIMC__dayside,NIGHTSIDE=MIMC__nightside, $
-                                         N_MLT=n_mlt,N_OUTSIDE_MLT=n_outside_MLT,LUN=lun)
+     mlt_i                = GET_MLT_INDS(dbStruct,MIMC__minMLT, $
+                                         MIMC__maxMLT, $
+                                         DAYSIDE=MIMC__dayside, $
+                                         NIGHTSIDE=MIMC__nightside, $
+                                         N_MLT=n_mlt, $
+                                         N_OUTSIDE_MLT=n_outside_MLT, $
+                                         USE_LNG=MIMC_struct.use_Lng, $
+                                         LUN=lun)
      
      ;;;;;;;;;;;;
      ;;Handle latitudes, combine with mlt

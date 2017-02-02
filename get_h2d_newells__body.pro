@@ -36,25 +36,32 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
      i_list    = LIST(broad_i,diffuse_i,mono_i)
   ENDIF
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;MLTs
-  mlt_broad    = eSpec.mlt[broad_i]-MIMC_struct.shiftM
-  mlt_diffuse  = eSpec.mlt[diffuse_i]-MIMC_struct.shiftM
-  mlt_mono     = eSpec.mlt[mono_i]-MIMC_struct.shiftM
+  ;;MLTs (unless they're longitudes
+  IF KEYWORD_SET(MIMC_struct.use_Lng) THEN BEGIN
+     mlt_broad    = eSpec.lng[broad_i]-MIMC_struct.shiftLng
+     mlt_diffuse  = eSpec.lng[diffuse_i]-MIMC_struct.shiftLng
+     mlt_mono     = eSpec.lng[mono_i]-MIMC_struct.shiftLng
+  ENDIF ELSE BEGIN
+     mlt_broad    = eSpec.mlt[broad_i]-MIMC_struct.shiftM
+     mlt_diffuse  = eSpec.mlt[diffuse_i]-MIMC_struct.shiftM
+     mlt_mono     = eSpec.mlt[mono_i]-MIMC_struct.shiftM
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;Screen 'em for negs
-  bNegMLT = WHERE(mlt_broad LT 0)
-  dNegMLT = WHERE(mlt_diffuse LT 0)
-  mNegMLT = WHERE(mlt_mono LT 0)
-  IF bNegMLT[0] NE -1 THEN BEGIN
-     mlt_broad[bNegMLT]   = mlt_broad[bNegMLT] + 24
-  ENDIF
-  IF dNegMLT[0] NE -1 THEN BEGIN
-     mlt_diffuse[dNegMLT] = mlt_diffuse[dNegMLT] + 24
-  ENDIF
-  IF mNegMLT[0] NE -1 THEN BEGIN
-     mlt_mono[mNegMLT]    = mlt_mono[mNegMLT] + 24
-  ENDIF
+     ;;Screen 'em for negs
+     bNegMLT = WHERE(mlt_broad LT 0)
+     dNegMLT = WHERE(mlt_diffuse LT 0)
+     mNegMLT = WHERE(mlt_mono LT 0)
+     IF bNegMLT[0] NE -1 THEN BEGIN
+        mlt_broad[bNegMLT]   = mlt_broad[bNegMLT] + 24
+     ENDIF
+     IF dNegMLT[0] NE -1 THEN BEGIN
+        mlt_diffuse[dNegMLT] = mlt_diffuse[dNegMLT] + 24
+     ENDIF
+     IF mNegMLT[0] NE -1 THEN BEGIN
+        mlt_mono[mNegMLT]    = mlt_mono[mNegMLT] + 24
+     ENDIF
+  ENDELSE
+
   mlt_list      = LIST(TEMPORARY(mlt_broad),TEMPORARY(mlt_diffuse),TEMPORARY(mlt_mono))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -74,11 +81,15 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
   IF KEYWORD_SET(comb_accelerated) THEN BEGIN
      comb_i    = CGSETUNION(mono_i,broad_i)
 
-     mlt_comb  = eSpec.mlt[comb_i]-MIMC_struct.shiftM
-     cNegMLT   = WHERE(mlt_comb LT 0)
-     IF cNegMLT[0] NE -1 THEN BEGIN
-        mlt_comb[cNegMLT] = mlt_comb[cNegMLT] + 24
-     ENDIF
+     IF KEYWORD_SET(MIMC_struct.use_Lng) THEN BEGIN
+        mlt_comb  = eSpec.lng[comb_i]-MIMC_struct.shiftLng
+     ENDIF ELSE BEGIN
+        mlt_comb  = eSpec.mlt[comb_i]-MIMC_struct.shiftM
+        cNegMLT   = WHERE(mlt_comb LT 0)
+        IF cNegMLT[0] NE -1 THEN BEGIN
+           mlt_comb[cNegMLT] = mlt_comb[cNegMLT] + 24
+        ENDIF
+     ENDELSE
      
      ilat_comb  = eSpec.ilat[comb_i]
 
