@@ -92,25 +92,38 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      END
      ELSE: BEGIN
         ;;The file with failcodes
-        defNewellDBFile        = 'eSpec_failCodes_20160609_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
-        DB_date                = '20160609'
-        DB_version             = 'v0.0'
-        DB_extras              = 'failcodes'
+        ;; defNewellDBFile        = 'eSpec_failCodes_20160609_db--PARSED--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+        ;; DB_date                = '20160609'
+        ;; DB_version             = 'v0.0'
+        ;; DB_extras              = 'failcodes'
 
         ;;The file without failcodes
-        defNewellDBFile        = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav' ;;This file does not need to be cleaned
-        DB_date                = '20160607'
+        ;; defNewellDBFile        = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+        ;; DB_date                = '20160607'
+        ;; DB_version             = 'v0.0'
+        ;; DB_extras              = 'with_mapping_factors'
+
+        ;; defSortNewellDBFile    =  "sorted--" + defNewellDBFile
+
+        ;; GEI_file             = 'eSpec_DB_20160607-GEI.sav'
+        ;; GEO_file             = 'eSpec_DB_20160607-GEO.sav'
+        ;; MAG_file             = 'eSpec_DB_20160607-MAG.sav'
+        ;; SDT_file             = 'eSpec_DB_20160607-SDT.sav'
+
+        ;;The latest
+        defNewellDBFile        = 'eSpec_20170203_db--PARSED--Orbs_500-24634.sav' ;;This file does not need to be cleaned
+        DB_date                = '20170203'
         DB_version             = 'v0.0'
         DB_extras              = 'with_mapping_factors'
 
-        defSortNewellDBFile    =  "sorted--" + defNewellDBFile
+        defSortNewellDBFile    =  defNewellDBFile
+
+        GEI_file             = 'eSpec_DB_20170203-GEI.sav'
+        GEO_file             = 'eSpec_DB_20170203-GEO.sav'
+        MAG_file             = 'eSpec_DB_20170203-MAG.sav'
+        SDT_file             = 'eSpec_DB_20170203-SDT.sav'
 
         ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
-
-        GEI_file             = 'eSpec_DB_20160607-GEI.sav'
-        GEO_file             = 'eSpec_DB_20160607-GEO.sav'
-        MAG_file             = 'eSpec_DB_20160607-MAG.sav'
-        SDT_file             = 'eSpec_DB_20160607-SDT.sav'
 
         ;;the 2000 km file
         IF KEYWORD_SET(use_2000km_file) THEN BEGIN
