@@ -20,19 +20,21 @@ PRO JOURNAL__20161008__GET_ESPECDB_FOOTPOINTS_AND_MAGFIELD_RATIOS__SDT_STYLE
   stitch_footpoint_files = 0
   apply_ratios_to_db     = 1
 
-  LOAD_NEWELL_ESPEC_DB,!NULL, $
-                       OUT_TIMES=t, $
-                       /JUST_TIMES, $
-                       /DONT_LOAD_IN_MEMORY, $
-                       /DONT_CONVERT_TO_STRICT_NEWELL, $
-                       /QUIET
-
+  @common__newell_espec.pro
+  IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
+     LOAD_NEWELL_ESPEC_DB, $
+        ;; OUT_TIMES=t, $
+        ;; /JUST_TIMES, $
+        ;; /DONT_LOAD_IN_MEMORY, $
+        /DONT_CONVERT_TO_STRICT_NEWELL, $
+        /QUIET
+  ENDIF
 
   need_div = KEYWORD_SET(create_footpoint_files) OR $
              KEYWORD_SET(stitch_footpoint_files)
 
   IF need_div THEN BEGIN
-     div = DIVVY_INDICES(N_ELEMENTS(t),delta,kDecPlace,lens)
+     div = DIVVY_INDICES(N_ELEMENTS(NEWELL__eSpec.x),delta,kDecPlace,lens)
   ENDIF
 
   IF KEYWORD_SET(create_footpoint_files) THEN BEGIN
@@ -86,6 +88,8 @@ PRO CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,tmpDir, $
   
   COMPILE_OPT idl2
 
+  @common__newell_espec.pro
+
   IF ~MAKE_SURE_FILES_EXIST(div,kDecPlace,outFilePref,tmpDir) THEN RETURN
 
   strtK = N_ELEMENTS(start_k) GT 0 ? start_k : 0
@@ -98,19 +102,19 @@ PRO CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,tmpDir, $
 
      inds = [div[0,k]:div[1,k]]
 
-     LOAD_NEWELL_ESPEC_DB,!NULL, $
-                          OUT_TIMES=t, $
-                          /JUST_TIMES, $
-                          /DONT_LOAD_IN_MEMORY, $
-                          /DONT_CONVERT_TO_STRICT_NEWELL, $
-                          /QUIET
+     ;; LOAD_NEWELL_ESPEC_DB,eSpec, $
+     ;;                      ;; OUT_TIMES=t, $
+     ;;                      ;; /JUST_TIMES, $
+     ;;                      ;; /DONT_LOAD_IN_MEMORY, $
+     ;;                      /DONT_CONVERT_TO_STRICT_NEWELL, $
+     ;;                      /QUIET
 
      PRINT,FORMAT='("Getting the next ",I0," inds (",I0," through ",I0,") ...")', $
            lens[k],inds[0],inds[-1]
      outFileSuff = STRING(FORMAT='(I0'+STRCOMPRESS(kDecPlace,/REMOVE_ALL)+')',k)
 
-     tmpT = t[inds]
-     t    = !NULL
+     tmpT = NEWELL__eSpec.x[inds]
+     ;; t    = !NULL
 
      GET_FA_ORBIT,tmpT,/TIME_ARRAY,/ALL
      get_data,'ILAT',DATA=ilat
@@ -221,16 +225,19 @@ PRO APPLY_RATIOS_TO_DB,finalMappedDB,finalFile,outDir
   PRINT,'Restoring mapRatio DB ...'
   RESTORE,outDir+finalFile
 
-  LOAD_NEWELL_ESPEC_DB,eSpec, $
-                       NEWELLDBDIR=NewellDBDir, $
-                       /DONT_LOAD_IN_MEMORY, $
-                       /DONT_CONVERT_TO_STRICT_NEWELL, $
-                       /QUIET
+  @common__newell_espec.pro
+  IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
+     LOAD_NEWELL_ESPEC_DB,eSpec, $
+                          NEWELLDBDIR=NewellDBDir, $
+                          /DONT_LOAD_IN_MEMORY, $
+                          /DONT_CONVERT_TO_STRICT_NEWELL, $
+                          /QUIET
+  ENDIF
   
-  STR_ELEMENT,eSpec,'mapFactor',INDEX=index
+  STR_ELEMENT,NEWELL__eSpec,'mapFactor',INDEX=index
 
   IF index EQ -2 THEN BEGIN
-     PRINT,"Something's up, children. There's no eSpec DB to be had ..."
+     PRINT,"Something's up, children. There's no NEWELL__eSpec DB to be had ..."
      RETURN
   ENDIF
 
@@ -241,18 +248,18 @@ PRO APPLY_RATIOS_TO_DB,finalMappedDB,finalFile,outDir
 
 
 
-  IF N_ELEMENTS(mapRatio.mag1) NE N_ELEMENTS(eSpec.je) THEN STOP ELSE BEGIN
+  IF N_ELEMENTS(mapRatio.mag1) NE N_ELEMENTS(NEWELL__eSpec.je) THEN STOP ELSE BEGIN
      PRINT,'K, same number of elements at any rate ...'
      PRINT,"Application!"
   ENDELSE
 
-  ;; eSpec.Je  * mapRatio.ratio
-  ;; eSpec.Jee * mapRatio.ratio
+  ;; NEWELL__eSpec.Je  * mapRatio.ratio
+  ;; NEWELL__eSpec.Jee * mapRatio.ratio
 
-  eSpec = CREATE_STRUCT(eSpec,'mapFactor',mapRatio.ratio)
+  NEWELL__eSpec = CREATE_STRUCT(NEWELL__eSpec,'mapFactor',mapRatio.ratio)
 
-  PRINT,'Saving updated eSpec to ' + finalMappedDB + ' ...'
-  SAVE,eSpec,FILENAME=NewellDBDir+finalMappedDB
+  PRINT,'Saving updated NEWELL__eSpec to ' + finalMappedDB + ' ...'
+  SAVE,NEWELL__eSpec,FILENAME=NewellDBDir+finalMappedDB
 
 END
 

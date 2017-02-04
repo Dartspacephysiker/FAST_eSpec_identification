@@ -7,20 +7,20 @@ PRO COMBINE_ALL_PARSED_ESPECS, $
   ;;Running options
   loud                      = 0
 
-  firstOrb                  = 2000
-  lastOrb                   = 24634
+  firstOrb                  = 24500
+  lastOrb                   = 27831
 
 
   newFileDateStr            = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
 
   CASE 1 OF
      KEYWORD_SET(upgoing): BEGIN
-        Newell_DB_dir       = '/SPENCEdata/software/sdt/batch_jobs/Alfven_study/20160520--get_Newell_identification_for_Alfven_events--NOT_despun/Newell_batch_output/downgoing_ions_upgoing_electrons/'
+        Newell_DB_dir       = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/do_the_Newell_2009/Newell_batch_output/downgoing_ions_upgoing_electrons/'
         Newell_filePref     = 'Newell_et_al_identification_of_electron_spectra--downgoing_ions_upgoing_electrons--Orbit_'
         pref                = "eSpec_up_"
      END
      ELSE: BEGIN
-        Newell_DB_dir       = '/SPENCEdata/software/sdt/batch_jobs/Alfven_study/20160520--get_Newell_identification_for_Alfven_events--NOT_despun/Newell_batch_output/ions_included/'
+        Newell_DB_dir       = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/do_the_Newell_2009/Newell_batch_output/ions_included/'
         Newell_filePref     = 'Newell_et_al_identification_of_electron_spectra--ions_included--Orbit_'
         pref                = "eSpec_"
      END
@@ -51,6 +51,7 @@ PRO COMBINE_ALL_PARSED_ESPECS, $
 
      chunkStartOrb   = curOrb
      chunkEndOrb     = (curOrb + orbChunk_save_interval-1) < lastOrb
+     chunkMapRatio   = !NULL
      ;; tmp_interval    = chunkEndOrb-chunkStartOrb
      clock           = TIC(STRING(FORMAT='("combine_all_parsed_especs--Orbs_",I0,"-",I0)',chunkStartOrb,chunkEndOrb))
      WHILE curOrb LE chunkEndOrb DO BEGIN
@@ -105,6 +106,7 @@ PRO COMBINE_ALL_PARSED_ESPECS, $
            alt             = !NULL
            mlt             = !NULL
            ilat            = !NULL
+           mapRatio        = !NULL
            tSort_i         = !NULL
            nEvents         = !NULL
 
@@ -117,6 +119,7 @@ PRO COMBINE_ALL_PARSED_ESPECS, $
               OUT_ALT=alt, $
               OUT_MLT=mlt, $
               OUT_ILAT=ilat, $
+              OUT_MAPRATIO=mapRatio, $
               OUT_NEVENTS=nEvents, $
               LOGLUN=logLun
 
@@ -146,8 +149,10 @@ PRO COMBINE_ALL_PARSED_ESPECS, $
                                nbad_espec:eSpecs_parsed.nbad_espec}
 
            ENDELSE
+           chunkMapRatio = [chunkMapRatio,mapRatio]
 
            ADD_EVENT_TO_SPECTRAL_STRUCT,eSpecs,eSpecs_parsed,/HAS_ALT_AND_ORBIT
+           PRINT,"N_ELEMENTS(eSpecs.x):",N_ELEMENTS(eSpecs.x)
            ;; cur_orbArr      = [cur_orbArr,MAKE_ARRAY(nEvents,VALUE=curOrb)]
 
            nPredicted                    += nEvents
@@ -184,7 +189,7 @@ PRO COMBINE_ALL_PARSED_ESPECS, $
                               chunkStartOrb, $
                               chunkEndOrb)
      PRINT,"Saving " + chunkTempFName + '...'
-     SAVE,eSpecs,FILENAME=chunkDir+chunkTempFName
+     SAVE,eSpecs,chunkMapRatio,FILENAME=chunkDir+chunkTempFName
 
      ;;Check: did we hose it?
      nActual         = N_ELEMENTS(eSpecs.x)
@@ -196,8 +201,11 @@ PRO COMBINE_ALL_PARSED_ESPECS, $
 
      IF (nActual NE nPredicted) OR (nTotActual NE nTotPredicted) THEN STOP 
 
+     IF N_ELEMENTS(chunkMapRatio) NE nActual THEN STOP
+
      ;;Now reset loop vars
      eSpecs          = !NULL
+     chunkMapRatio   = !NULL
      cur_orbArr      = !NULL
 
      nPredicted      = 0
