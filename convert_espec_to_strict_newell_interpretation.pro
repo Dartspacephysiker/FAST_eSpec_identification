@@ -1,4 +1,7 @@
 ;2016/05/26 The idea is to convert to an interpretation of each event based strictly on Newell et al. [2009]
+;;2017/02/04 You were wrong, Spence. You haven't been doing the strict Newell thing at all! your FAVOR_BROADSTRICT_OVER_MONO is
+;the real Newell et al. [2009] interpretation, you see. (Newell et al. [2009], ¶21)
+;;
 PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
    NB_CONVTOM_=nB_ConvToM_, $
    NB_CONVTOMS=nB_ConvToMS, $
@@ -62,6 +65,7 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
 
 
   ;Drop the broads if there's any competition between mono EQ 1 and broad EQ 1
+  ;2017/02/04 The statement above is false! You only call 'em broadband if there's competition between STRICTS!
   i_B_ConvToM_          = CGSETINTERSECTION(monoGood      ,broadGood      ,COUNT=nB_ConvToM_)
   i_B_ConvToMS          = CGSETINTERSECTION(monoGoodStrict,broadGood      ,COUNT=nB_ConvToMS)
   i_BSConvToMS          = CGSETINTERSECTION(monoGoodStrict,broadGoodStrict,COUNT=nBSConvToMS)
@@ -97,21 +101,24 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
      eSpec_interpreted.mono[i_BSConvToMS]  = 2
      IF KEYWORD_SET(verbose) THEN PRINT,"nBSConv_to_MS  " + STRCOMPRESS(nBSConvToMS,/REMOVE_ALL)
   ENDIF
+
+  ;;2017/02/04 Here's where you're wrong. There's no call for favoring mono over broadStrict (Newell et al. [2009], ¶21)
   IF nM_ConvToBS GT 0 THEN BEGIN
-     IF KEYWORD_SET(favor_broadStrict_over_mono) THEN BEGIN
+     ;; IF KEYWORD_SET(favor_broadStrict_over_mono) THEN BEGIN
         eSpec_interpreted.mono[i_M_ConvToBS]  = 255-10-1
         eSpec_interpreted.broad[i_M_ConvToBS] = 2
         IF KEYWORD_SET(verbose) THEN PRINT,"nM_Conv_to_BS  " + STRCOMPRESS(nM_ConvToBS,/REMOVE_ALL)
-     ENDIF ELSE BEGIN
-        eSpec_interpreted.mono[i_M_ConvToBS]  = 1
-        eSpec_interpreted.broad[i_M_ConvToBS] = 255-10-2
-        IF KEYWORD_SET(verbose) THEN PRINT,"nBS_Conv_to_M  " + STRCOMPRESS(nM_ConvToBS,/REMOVE_ALL)
-     ENDELSE
+     ;; ENDIF ELSE BEGIN
+     ;;    eSpec_interpreted.mono[i_M_ConvToBS]  = 1
+     ;;    eSpec_interpreted.broad[i_M_ConvToBS] = 255-10-2
+     ;;    IF KEYWORD_SET(verbose) THEN PRINT,"nBS_Conv_to_M  " + STRCOMPRESS(nM_ConvToBS,/REMOVE_ALL)
+     ;; ENDELSE
   ENDIF
 
   ;;Let everyone know what you did
-  eSpec_interpreted.info.converted        = 1
-  eSpec_interpreted.info.Newell2009interp = BYTE(~KEYWORD_SET(favor_broadStrict_over_mono))
+  eSpec_interpreted.info.converted        = 1B
+  ;; eSpec_interpreted.info.Newell2009interp = BYTE(~KEYWORD_SET(favor_broadStrict_over_mono)) ;2017/02/04 Wrong, you dreamed this up
+  eSpec_interpreted.info.Newell2009interp = 1B
 
   ;;Details
   IF KEYWORD_SET(verbose) THEN BEGIN

@@ -7,8 +7,8 @@ PRO COMBINE_ALL_PARSED_ESPECS, $
   ;;Running options
   loud                      = 0
 
-  firstOrb                  = 21000
-  lastOrb                   = 23999
+  firstOrb                  = 2000
+  lastOrb                   = 24634
 
 
   newFileDateStr            = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
