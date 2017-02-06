@@ -5,17 +5,17 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
 
   ;; startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
   ;; endOrb      = 9500
+  ;; startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
+  ;; endOrb      = 16361 
   startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
-  endOrb      = 16361 
+  endOrb      = 24634
   deltaSavOrb = 500
 
   saveDir     = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
   suffDir     = 'instrument_oddity_times/'  
-  saveFilePref = "esa_transit_times--"
   ;; suffDir     = ''
 
   orbRangeF   = STRING(FORMAT='(I0,"-",I0)',startOrb,endOrb)
-  saveFile    = saveFilePref+orbRangeF+'--'+GET_TODAY_STRING(/DO_YYYYMMDD_FMT)+'.sav'
 
   @common__newell_espec.pro
 
@@ -24,12 +24,26 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
   ;; /NO_MEMORY_LOAD
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
      LOAD_NEWELL_ESPEC_DB,!NULL,!NULL,!NULL, $
-                          /LOAD_DELTA_T
+                          /DONT_MAP_TO_100KM, $
+                          /DO_NOT_MAP_DELTA_T, $
+                          /DONT_CONVERT_TO_STRICT_NEWELL
+                          ;; /LOAD_DELTA_T
 
   ENDIF
-  hjar = WHERE(NEWELL__eSpec.orbit GE startOrb AND $
-               NEWELL__eSpec.orbit LE endOrb,nHjar )
-  ;; CHECK_SORTED,NEWELL__eSpec.orbit,is_sorted,/QUIET
+  ;; saveFilePref = "esa_transit_times--"
+  prefSuff       = '__oddity_times--'
+  saveFilePref   = GET_NEWELL_DB_STRING(NEWELL__eSpec) + prefSuff
+
+  saveFile    = saveFilePref+orbRangeF+'--'+GET_TODAY_STRING(/DO_YYYYMMDD_FMT)+'.sav'
+
+  je              = NEWELL__eSpec.je
+  jee             = NEWELL__eSpec.jee
+  times           = NEWELL__eSpec.x
+  orbit           = (TEMPORARY(NEWELL__eSpec)).orbit
+
+  hjar = WHERE(orbit GE startOrb AND $
+               orbit LE endOrb,nHjar )
+  ;; CHECK_SORTED,orbit,is_sorted,/QUIET
   ;; IF ~is_sorted THEN STOP
   
   lastSavOrb           = startOrb
@@ -127,7 +141,7 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
 
   badTimes = [junkTimes,befStartTimes]
   badTimes = badTimes[SORT(badTimes)]
-  this     = VALUE_CLOSEST2(NEWELL__eSpec.x,badTimes)
+  this     = VALUE_CLOSEST2(times,badTimes)
 
   allJunk_i = CGSETUNION(junk_i,befstart_i)
   keep_i = CGSETDIFFERENCE(hjar,allJunk_i)
@@ -140,14 +154,14 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
   binSize  = 0.1
   maxVal   = 0.01
   !P.MULTI = [0,1,2,0,0] 
-  CGHISTOPLOT,ALOG10(NEWELL__espec.je[allJunk_i]), $
+  CGHISTOPLOT,ALOG10(je[allJunk_i]), $
               MAXINPUT=maxin, $
               MININPUT=minin, $
               TITLE='Junk', $
               /FREQUENCY, $
               BINSIZE=binSize, $
               MAX_VALUE=maxVal
-  CGHISTOPLOT,ALOG10(NEWELL__espec.je[keep_i]), $
+  CGHISTOPLOT,ALOG10(je[keep_i]), $
               MAXINPUT=maxin, $
               MININPUT=minin, $
               TITLE='Not junk', $
@@ -162,14 +176,14 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
   binSize  = 0.1
   maxVal   = 0.01
   !P.MULTI = [0,1,2,0,0] 
-  CGHISTOPLOT,ALOG10(NEWELL__espec.jee[allJunk_i]), $
+  CGHISTOPLOT,ALOG10(jee[allJunk_i]), $
               MAXINPUT=maxin, $
               MININPUT=minin, $
               TITLE='Junk Jee', $
               /FREQUENCY, $
               BINSIZE=binSize, $
               MAX_VALUE=maxVal
-  CGHISTOPLOT,ALOG10(NEWELL__espec.jee[keep_i]), $
+  CGHISTOPLOT,ALOG10(jee[keep_i]), $
               MAXINPUT=maxin, $
               MININPUT=minin, $
               TITLE='Not junk Jee', $
@@ -181,14 +195,14 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
   hugeJee            = 1e2
   
   ;;Huge Je?
-  junkHugeJeFrac     = N_ELEMENTS(WHERE(NEWELL__eSpec.je[allJunk_i] GE hugeJe))/ $
+  junkHugeJeFrac     = N_ELEMENTS(WHERE(je[allJunk_i] GE hugeJe))/ $
                        FLOAT(N_ELEMENTS(allJunk_i))*100
-  notJunkHugeJeFrac  = N_ELEMENTS(WHERE(NEWELL__eSpec.je[keep_i] GE hugeJe))/ $
+  notJunkHugeJeFrac  = N_ELEMENTS(WHERE(je[keep_i] GE hugeJe))/ $
                        FLOAT(N_ELEMENTS(keep_i))*100
   ;;Huge Jee?
-  junkHugeJeeFrac    = N_ELEMENTS(WHERE(NEWELL__eSpec.jee[allJunk_i] GE hugeJee))/ $
+  junkHugeJeeFrac    = N_ELEMENTS(WHERE(jee[allJunk_i] GE hugeJee))/ $
                        FLOAT(N_ELEMENTS(allJunk_i))*100
-  notJunkHugeJeeFrac = N_ELEMENTS(WHERE(NEWELL__eSpec.jee[keep_i] GE hugeJee))/ $
+  notJunkHugeJeeFrac = N_ELEMENTS(WHERE(jee[keep_i] GE hugeJee))/ $
                        FLOAT(N_ELEMENTS(keep_i))*100
 
   PRINT,"Junk    Huge Je  % : ",junkHugeJeFrac
@@ -197,7 +211,7 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
   PRINT,"Junk    Huge Jee % : ",junkHugeJeeFrac
   PRINT,"notJunk Huge Jee % : ",notJunkHugeJeeFrac
 
-  IF N_ELEMENTS(NEWELL__eSpec.x) NE $
+  IF N_ELEMENTS(times) NE $
      (N_ELEMENTS(keep_i)+N_ELEMENTS(allJunk_i)) $
   THEN BEGIN
      PRINT,"Ooooohhh yeah. Got a problem."

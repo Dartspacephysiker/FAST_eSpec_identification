@@ -7,12 +7,28 @@ FUNCTION GET_NEWELL_ESPEC_KILLGAP_FILE,eSpec, $
   COMPILE_OPT IDL2
 
   IF KEYWORD_SET(maximus) THEN BEGIN
+     ;; killGapFile = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/' + $
+     ;;               'eSpecDB_20160607_v0_0--with_mapping_factors--killedGap_inds.sav'
      killGapFile = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/' + $
                    'eSpecDB_20160607_v0_0--with_mapping_factors--killedGap_inds.sav'
+     ;; killGapDate = '20170206'
+     ;; isOK        = 
   ENDIF ELSE BEGIN
+     file20160607 = STRMATCH(GET_NEWELL_DB_STRING(eSpec),'*20160607*',/FOLD_CASE)
+     file20170203 = STRMATCH(GET_NEWELL_DB_STRING(eSpec),'*20170203*',/FOLD_CASE)
+
+     CASE 1 OF
+        KEYWORD_SET(file20160607): BEGIN
+           killGapFileSuff = '--killedGap_inds.sav'
+        END
+        KEYWORD_SET(file20170203): BEGIN
+           killGapFileSuff = '--killedGap_inds--500-24634--20170206.sav'
+        END
+     ENDCASE
+
      killGapFile = NewellDBDir + $
-                   GET_NEWELL_DB_STRING(eSpec) + $
-                   '--killedGap_inds.sav'
+                   GET_NEWELL_DB_STRING(eSpec) + killGapFileSuff
+
   ENDELSE
 
   IF KEYWORD_SET(stop_if_noExist) THEN BEGIN
