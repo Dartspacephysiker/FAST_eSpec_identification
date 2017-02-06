@@ -6,10 +6,14 @@ FUNCTION GET_NEWELL_ESPEC_KILLGAP_FILE,eSpec, $
 
   COMPILE_OPT IDL2
 
+  defNewellDir   = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
+  NewellDBDir    = KEYWORD_SET(NewellDBDir) ? NewellDBDir : defNewellDir
+  killGapDir     = 'instrument_oddity_times/'
+
   IF KEYWORD_SET(maximus) THEN BEGIN
      ;; killGapFile = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/' + $
      ;;               'eSpecDB_20160607_v0_0--with_mapping_factors--killedGap_inds.sav'
-     killGapFile = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/' + $
+     killGapFile = NewellDBDir + killGapDir + $
                    'eSpecDB_20160607_v0_0--with_mapping_factors--killedGap_inds.sav'
      ;; killGapDate = '20170206'
      ;; isOK        = 
@@ -26,7 +30,7 @@ FUNCTION GET_NEWELL_ESPEC_KILLGAP_FILE,eSpec, $
         END
      ENDCASE
 
-     killGapFile = NewellDBDir + $
+     killGapFile = NewellDBDir + killGapDir + $
                    GET_NEWELL_DB_STRING(eSpec) + killGapFileSuff
 
   ENDELSE
