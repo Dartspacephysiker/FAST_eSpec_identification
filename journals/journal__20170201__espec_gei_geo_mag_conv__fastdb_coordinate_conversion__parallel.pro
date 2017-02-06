@@ -8,14 +8,17 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
   dry_run                 = 0
 
   ;; nCPUsToRun              = 7
-  ;; startCPU                = 0
+  startCPU                = 0
+  stopCPU                 = 1
 
   diag                    = 0 ;diagnostic mode
 
   check_if_exists         = 1
 
-  create_timeStampsArr      = [1,0,0,0]
-  get_GEI_coordsArr         = [0,1,0,0]
+  ;; create_timeStampsArr      = [1,0,0,0]
+  ;; get_GEI_coordsArr         = [0,1,0,0]
+  create_timeStampsArr      = [0,0,0,0]
+  get_GEI_coordsArr         = [1,0,0]
   do_GEO_MAG_conversionsArr = [0,0,1,0]
   do_AACGM_conversionsArr   = [0,0,0,0]
   stitch_filesArr           = [0,0,0,1]
@@ -31,7 +34,8 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
 
   times = (TEMPORARY(eSpec)).x
 
-  nThang = N_ELEMENTS(create_timeStampsArr)
+  ;; nThang = N_ELEMENTS(create_timeStampsArr)
+  nThang = N_ELEMENTS(create_timeStampsArr)-1
   FOR k=0,nThang-1 DO BEGIN
 
      ;;set 'er up
@@ -53,6 +57,7 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
         times, $
         NCPUSTORUN=nCPUsToRun, $
         STARTCPU=startCPU, $
+        STOPCPU=stopCPU, $
         CREATE_TIMESTAMPS=create_timeStamps, $
         GET_GEI_COORDS=get_GEI_coords, $
         DO_GEO_MAG_CONVERSIONS=do_GEO_MAG_conversions, $
