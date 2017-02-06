@@ -1,15 +1,18 @@
-;;01/18/17
-PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
+;;2017/01/19
+PRO JOURNAL__20170119__LOOK_FOR_GAPS_AND_REMOVE__SLEEK
 
   COMPILE_OPT IDL2
 
   startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
-  showPlots   = 1
-  savePS      = 1
-  PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/201701--trim_transitions/'
+  showPlots   = 0
+  savePS      = 0
+  PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/201702--trim_transitions/'
   PSPref      = 'junk_transitions--'
   
+
+  ;; filePref    = "esa_transit_times--"
   saveDir     = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
+  suffDir     = 'instrument_oddity_times/'  
 
   @common__newell_espec.pro
 
@@ -18,20 +21,31 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
   ;; /NO_MEMORY_LOAD
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
      LOAD_NEWELL_ESPEC_DB,!NULL,!NULL,!NULL, $
-                          /LOAD_DELTA_T
+                          /DONT_MAP_TO_100KM, $
+                          /DO_NOT_MAP_DELTA_T, $
+                          /DONT_CONVERT_TO_STRICT_NEWELL
+                          ;; /LOAD_DELTA_T, $
+                          
   ENDIF
   CHECK_SORTED,NEWELL__eSpec.orbit,is_sorted,/QUIET
 
+  prefSuff       = '--with_mapping_factors__oddity_times--'
+  saveFilePref   = GET_NEWELL_DB_STRING(NEWELL__eSpec) + prefSuff
+
   IF ~is_sorted THEN STOP
   
-  uniqOrb_i      = UNIQ(NEWELL__eSpec.orbit)
+  eSpec_info     = NEWELL__eSpec.info
+  ilat           = NEWELL__eSpec.ilat
+  times          = NEWELL__eSpec.x
+  orbit           = (TEMPORARY(NEWELL__eSpec)).orbit
+  uniqOrb_i      = UNIQ(orbit)
   
-  orbs           = NEWELL__eSpec.orbit[uniqOrb_i]
-  curOrb         = KEYWORD_SET(startOrb) ? startOrb : orbs[0]
-  endOrb         = orbs[-1]
+  uniqOrbs       = orbit[uniqOrb_i]
+  curOrb         = KEYWORD_SET(startOrb) ? startOrb : uniqOrbs[0]
+  endOrb         = uniqOrbs[-1]
   lastSavOrb     = curOrb
   deltaSavOrb    = 500
-  orbInd         = KEYWORD_SET(startOrb) ? WHERE(orbs EQ startOrb,/NULL) : 0
+  orbInd         = KEYWORD_SET(startOrb) ? WHERE(uniqOrbs EQ startOrb,/NULL) : 0
   junk_i         = !NULL
   befStart_i     = !NULL
   junkTimes      = !NULL
@@ -62,16 +76,15 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
 
      IF curOrb GT (lastSavOrb + deltaSavOrb - 1) THEN BEGIN
         orbRangeString = STRING(FORMAT='(I0,"-",I0)',lastSavOrb,lastSavOrb+deltaSavOrb-1)
-        orbSavFileName = STRING(FORMAT='("esa_transit_times--",A0,".sav")',orbRangeString)
+        orbSavFileName = STRING(FORMAT='(A0,A0,".sav")',filePref,orbRangeString)
 
-        eSpec_info     = NEWELL__eSpec.info
         PRINT,STRING(FORMAT='("Saving ",I0," junk inds and ",I0," befStart inds for orbs ",A0," to file : ",A0)', $
                      N_ELEMENTS(junk_i),N_ELEMENTS(befStart_i),orbRangeString,orbSavFileName)
 
         SAVE,junk_i,befStart_i,junkTimes,befStartTimes, $
              missingIntervals, $
              eSpec_info, $
-             FILENAME=saveDir+orbSavFileName
+             FILENAME=saveDir+suffDir+orbSavFileName
 
         junk_i         = !NULL
         befStart_i     = !NULL
@@ -82,17 +95,17 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
      ENDIF
 
      orbString = STRCOMPRESS(curOrb,/REMOVE_ALL)
-     tmp_i     = WHERE(NEWELL__eSpec.orbit EQ curOrb[0],NTmp)
+     tmp_i     = WHERE(orbit EQ curOrb[0],NTmp)
 
      IF NTmp EQ 0 THEN BEGIN
         PRINT,"no inds for orbit " + STRCOMPRESS(curOrb,/REMOVE_ALL) + ". Move it on down."
-        curOrb = (orbs[++orbInd])[0]
+        curOrb = (uniqOrbs[++orbInd])[0]
         CONTINUE
      ENDIF
      
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;First we worry about junking the first ten seconds in each hemisphere
-     tmpTime      = NEWELL__eSpec.x[tmp_i]
+     tmpTime      = times[tmp_i]
 
      this         = !NULL
      this         = LOAD_JE_AND_JE_TIMES_FOR_ORB(curOrb,TIME_RANGES_OUT=tRanges,/USE_DUPELESS_FILES)
@@ -159,8 +172,8 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
 
         ENDIF
 
-        north_iii   = WHERE(NEWELL__eSpec.ilat[tmp_i[interval_ii]] GT 0.0,nNorth3)
-        south_iii   = WHERE(NEWELL__eSpec.ilat[tmp_i[interval_ii]] LT 0.0,nSouth3)
+        north_iii   = WHERE(ilat[tmp_i[interval_ii]] GT 0.0,nNorth3)
+        south_iii   = WHERE(ilat[tmp_i[interval_ii]] LT 0.0,nSouth3)
 
         IF nNorth3 GT 0 THEN BEGIN
            tmpBefStart_ii  = WHERE(ABS(tmpTime - (intStartTs[north_iii[0]])) LE 10,nBefStart)
@@ -396,7 +409,7 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
            orbString,nStreaks,n251,n0628,n0312, $
            nUnsafe,nDupes,nMissing
 
-     curOrb           = (orbs[++orbInd])[0]
+     curOrb           = (uniqOrbs[++orbInd])[0]
 
      IF curOrb EQ endOrb THEN BREAK
 
@@ -405,16 +418,16 @@ PRO JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE
   ;;Finish up
   IF curOrb GT lastSavOrb THEN BEGIN
      orbRangeString = STRING(FORMAT='(I0,"-",I0)',lastSavOrb,curOrb)
-     orbSavFileName = STRING(FORMAT='("esa_transit_times--",A0,".sav")',orbRangeString)
+     orbSavFileName = STRING(FORMAT='(A0,A0,".sav")',filePref,orbRangeString)
 
-     eSpec_info     = NEWELL__eSpec.info
+     ;; eSpec_info     = NEWELL__eSpec.info
      PRINT,STRING(FORMAT='("Saving ",I0," junk inds and ",I0," befStart inds for orbs ",A0," to file : ",A0)', $
                   N_ELEMENTS(junk_i),N_ELEMENTS(befStart_i),orbRangeString,orbSavFileName)
 
      SAVE,junk_i,befStart_i,junkTimes,befStartTimes, $
           missingIntervals, $
           eSpec_info, $
-          FILENAME=saveDir+orbSavFileName
+          FILENAME=saveDir+suffDir+orbSavFileName
 
      junk_i         = !NULL
      befStart_i     = !NULL
