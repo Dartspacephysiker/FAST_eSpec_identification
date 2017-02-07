@@ -98,20 +98,22 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         ;; DB_extras              = 'failcodes'
 
         ;;The file without failcodes
-        ;; defNewellDBFile        = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav' ;;This file does not need to be cleaned
-        ;; DB_date                = '20160607'
-        ;; DB_version             = 'v0.0'
-        ;; DB_extras              = 'with_mapping_factors'
+        defNewellDBFile        = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav' ;;This file does not need to be cleaned
+        DB_date                = '20160607'
+        DB_version             = 'v0.0'
+        DB_extras              = 'with_mapping_factors'
 
-        ;; defSortNewellDBFile    =  "sorted--" + defNewellDBFile
+        defSortNewellDBFile    =  "sorted--" + defNewellDBFile
 
-        ;; GEI_file             = 'eSpec_DB_20160607-GEI.sav'
-        ;; GEO_file             = 'eSpec_DB_20160607-GEO.sav'
-        ;; MAG_file             = 'eSpec_DB_20160607-MAG.sav'
-        ;; SDT_file             = 'eSpec_DB_20160607-SDT.sav'
+        GEI_file             = 'eSpec_DB_20160607-GEI.sav'
+        GEO_file             = 'eSpec_DB_20160607-GEO.sav'
+        MAG_file             = 'eSpec_DB_20160607-MAG.sav'
+        SDT_file             = 'eSpec_DB_20160607-SDT.sav'
 
         ;;The latest
-        defNewellDBFile        = 'eSpec_20170203_db--PARSED--Orbs_500-24634.sav' ;;This file does not need to be cleaned
+        defNewellDBFile        = 'eSpec_20170203_db--PARSED--Orbs_500-24634.sav' 
+        defNewellDBFile        = 'eSpecDB_20170203_v0_0--with_mapping_factors.sav' 
+
         DB_date                = '20170203'
         DB_version             = 'v0.0'
         DB_extras              = 'with_mapping_factors'

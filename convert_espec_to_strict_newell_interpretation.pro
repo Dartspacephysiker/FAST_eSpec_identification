@@ -51,8 +51,8 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
   broadGoodStrict       = WHERE(eSpec.broad    EQ 2  ,nBG_S)
   nBG_T                 = nBG+nBG_S
 
-  diffGood              = WHERE(( eSpec.broad EQ 0 OR eSpec.broad GT 2 ) AND $
-                                ( eSpec.mono  EQ 0 OR eSpec.mono  GT 2 ),nDG_T)
+  diffGood              = WHERE(( (eSpec.broad EQ 0) OR (eSpec.broad GT 2) ) AND $
+                                ( (eSpec.mono  EQ 0) OR (eSpec.mono  GT 2) ),nDG_T)
 
   n_G_T                 = N_ELEMENTS(CGSETUNION(diffGood,CGSETUNION(broadGood,monoGood)))
   n_G_T                 = nMG_T+nBG_T+nDG_T
@@ -65,7 +65,7 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
 
 
   ;Drop the broads if there's any competition between mono EQ 1 and broad EQ 1
-  ;2017/02/04 The statement above is false! You only call 'em broadband if there's competition between STRICTS!
+  ;2017/02/04 The statement above is false! You only call 'em mono if there's competition between STRICTS!
   i_B_ConvToM_          = CGSETINTERSECTION(monoGood      ,broadGood      ,COUNT=nB_ConvToM_)
   i_B_ConvToMS          = CGSETINTERSECTION(monoGoodStrict,broadGood      ,COUNT=nB_ConvToMS)
   i_BSConvToMS          = CGSETINTERSECTION(monoGoodStrict,broadGoodStrict,COUNT=nBSConvToMS)

@@ -4,21 +4,25 @@ PRO JOURNAL__20161008__GET_ESPECDB_FOOTPOINTS_AND_MAGFIELD_RATIOS__SDT_STYLE
   COMPILE_OPT idl2
 
   outDir        = '/SPENCEdata/Research/database/FAST/dartdb/saves/mapratio_dbs/'
-  outFilePref   = 'mapratio_for_20160607_eSpecDB--20161008--'
+  ;; outFilePref   = 'mapratio_for_20160607_eSpecDB--20161008--'
+  dbPref        = 'eSpecDB_20170203_v0_0--'
+  outFilePref   = 'mapratio_for_' + dbPref
 
   tmpDir        = outDir + 'TEMP_eSpec/'
   finalFile     = 'mapratio_for_20160607_eSpecDB--20161008.sav'
+  finalFile     = 'mapratio_for_' + dbPref + GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '.sav'
 
-  finalMappedDB = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav'
+  ;; finalMappedDB = 'eSpec_20160607_db--PARSED--with_mapping_factors--Orbs_500-16361.sav'
+  finalMappedDB = 'eSpecDB_20170203_v0_0--with_mapping_factors.sav'
 
   delta         = 1000000
 
   ;; start_k       = 28
   ;; stop_k        = 29
 
-  create_footpoint_files = 0
-  stitch_footpoint_files = 0
-  apply_ratios_to_db     = 1
+  create_footpoint_files = 1
+  stitch_footpoint_files = 1
+  apply_ratios_to_db     = 0
 
   @common__newell_espec.pro
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
@@ -26,6 +30,10 @@ PRO JOURNAL__20161008__GET_ESPECDB_FOOTPOINTS_AND_MAGFIELD_RATIOS__SDT_STYLE
         ;; OUT_TIMES=t, $
         ;; /JUST_TIMES, $
         ;; /DONT_LOAD_IN_MEMORY, $
+        /DONT_MAP_TO_100KM, $
+        /DO_NOT_MAP_FLUXES, $
+        /DO_NOT_MAP_DELTA_T, $
+        /DONT_PERFORM_CORRECTION, $
         /DONT_CONVERT_TO_STRICT_NEWELL, $
         /QUIET
   ENDIF
@@ -90,7 +98,7 @@ PRO CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,tmpDir, $
 
   @common__newell_espec.pro
 
-  IF ~MAKE_SURE_FILES_EXIST(div,kDecPlace,outFilePref,tmpDir) THEN RETURN
+  IF MAKE_SURE_FILES_EXIST(div,kDecPlace,outFilePref,tmpDir) THEN RETURN
 
   strtK = N_ELEMENTS(start_k) GT 0 ? start_k : 0
 

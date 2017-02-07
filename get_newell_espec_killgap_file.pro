@@ -8,7 +8,7 @@ FUNCTION GET_NEWELL_ESPEC_KILLGAP_FILE,eSpec, $
 
   defNewellDir   = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
   NewellDBDir    = KEYWORD_SET(NewellDBDir) ? NewellDBDir : defNewellDir
-  killGapDir     = 'instrument_oddity_times/'
+  killGapDir     = '../instrument_oddity_times/'
 
   IF KEYWORD_SET(maximus) THEN BEGIN
      ;; killGapFile = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/' + $

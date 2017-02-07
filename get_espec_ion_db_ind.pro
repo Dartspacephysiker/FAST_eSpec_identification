@@ -746,16 +746,18 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                                           NEWELLDBDIR=dbDir, $
                                                           /STOP_IF_NOEXIST)
 
-        RESTORE,safed_eSpecIndsFile
+        IF STRUPCASE(safed_eSpecIndsFile) NE STRUPCASE('DontNeedItBro') THEN BEGIN
+           RESTORE,safed_eSpecIndsFile
 
-        IF N_ELEMENTS(dbStruct.orbit) NE eSpec_clean_info.totChecked THEN BEGIN
-           PRINT,"Is there a database mix-up here? The answer is apparently yes."
-           STOP
+           IF N_ELEMENTS(dbStruct.orbit) NE eSpec_clean_info.totChecked THEN BEGIN
+              PRINT,"Is there a database mix-up here? The answer is apparently yes."
+              STOP
+           ENDIF
+           nGood       = N_ELEMENTS(good_i)
+           good_i      = CGSETINTERSECTION(good_i,TEMPORARY(cleaned_eSpec_i),COUNT=nKept)
+           PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the safety ind thing ...'
+
         ENDIF
-        nGood       = N_ELEMENTS(good_i)
-        good_i      = CGSETINTERSECTION(good_i,TEMPORARY(cleaned_eSpec_i),COUNT=nKept)
-        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the safety ind thing ...'
-
 
         ;;Now kill dat
         ;; killGap_file = GET_NEWELL_ESPEC_KILLGAP_FILE(dbStruct, $
