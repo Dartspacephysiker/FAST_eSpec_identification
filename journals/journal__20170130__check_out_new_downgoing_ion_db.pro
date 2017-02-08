@@ -20,7 +20,7 @@ PRO JOURNAL__20170130__CHECK_OUT_NEW_DOWNGOING_ION_DB
 
   ;; startOrb    = 500
   startOrb    = 500
-  stopOrb     = 10439
+  stopOrb     = 14361 ;;as of 2017/02/08 this is all you had
 
   options  = ['ORBIT','ALT','MLT','ILAT','RATIO',                                   $
              'ISPEC_DOWN_LC_RAM',                                                   $

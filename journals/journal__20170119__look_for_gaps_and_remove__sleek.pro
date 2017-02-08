@@ -76,7 +76,7 @@ PRO JOURNAL__20170119__LOOK_FOR_GAPS_AND_REMOVE__SLEEK
 
      IF curOrb GT (lastSavOrb + deltaSavOrb - 1) THEN BEGIN
         orbRangeString = STRING(FORMAT='(I0,"-",I0)',lastSavOrb,lastSavOrb+deltaSavOrb-1)
-        orbSavFileName = STRING(FORMAT='(A0,A0,".sav")',filePref,orbRangeString)
+        orbSavFileName = STRING(FORMAT='(A0,A0,".sav")',saveFilePref,orbRangeString)
 
         PRINT,STRING(FORMAT='("Saving ",I0," junk inds and ",I0," befStart inds for orbs ",A0," to file : ",A0)', $
                      N_ELEMENTS(junk_i),N_ELEMENTS(befStart_i),orbRangeString,orbSavFileName)
@@ -192,7 +192,7 @@ PRO JOURNAL__20170119__LOOK_FOR_GAPS_AND_REMOVE__SLEEK
         ENDIF
 
      ENDIF ELSE BEGIN
-        ;; PRINT,"No junkstart inds here!"
+        PRINT,"Nothing here for orbit " + STRCOMPRESS(curOrb,/REMOVE_ALL) + "!"
      ENDELSE
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -418,7 +418,7 @@ PRO JOURNAL__20170119__LOOK_FOR_GAPS_AND_REMOVE__SLEEK
   ;;Finish up
   IF curOrb GT lastSavOrb THEN BEGIN
      orbRangeString = STRING(FORMAT='(I0,"-",I0)',lastSavOrb,curOrb)
-     orbSavFileName = STRING(FORMAT='(A0,A0,".sav")',filePref,orbRangeString)
+     orbSavFileName = STRING(FORMAT='(A0,A0,".sav")',saveFilePref,orbRangeString)
 
      ;; eSpec_info     = NEWELL__eSpec.info
      PRINT,STRING(FORMAT='("Saving ",I0," junk inds and ",I0," befStart inds for orbs ",A0," to file : ",A0)', $

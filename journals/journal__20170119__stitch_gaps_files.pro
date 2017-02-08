@@ -48,7 +48,7 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
   
   lastSavOrb           = startOrb
 
-  nElem                = 1000000
+  nElem                = 2000000
   junk_i_final         = MAKE_ARRAY(nElem,VALUE=-1,/LONG  )
   befStart_i_final     = MAKE_ARRAY(nElem,VALUE=-1,/LONG  )
   junkTimes_final      = MAKE_ARRAY(nElem,VALUE=0.D,/DOUBLE)
