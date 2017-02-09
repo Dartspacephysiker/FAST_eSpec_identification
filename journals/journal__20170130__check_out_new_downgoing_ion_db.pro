@@ -99,7 +99,6 @@ PRO JOURNAL__20170130__CHECK_OUT_NEW_DOWNGOING_ION_DB
   totCnt = 0L
   FOR curOrb=startOrb,stopOrb DO BEGIN
 
-     sepTime    = curOrb LE 8644
      ;; nOffset    = 0
      itvl       = 0
      orbStr     = STRING(FORMAT='(I0)',curOrb)
@@ -110,6 +109,9 @@ PRO JOURNAL__20170130__CHECK_OUT_NEW_DOWNGOING_ION_DB
         RESTORE,dir+filNavn
 
         nHere   = N_ELEMENTS(mlt)
+
+        nTid    = N_ELEMENTS(x)
+        sepTime = (curOrb LE 8644) AND (nTid EQ 0)
 
         ;;Also restore time file if orbit is le 8644
         IF sepTime THEN BEGIN
