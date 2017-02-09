@@ -5,10 +5,10 @@ PRO JOURNAL__20170130__CHECK_OUT_NEW_DOWNGOING_ION_DB
 
   COMPILE_OPT IDL2
 
-  make_ephem  = 0
+  make_ephem  = 1
   make_highE  = 0
   make_lowE   = 0
-  make_combE  = 1
+  make_combE  = 0
   
   dir         = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/do_the_Newell_2009/downgoing_ions__v1_output/'
   fPref       = 'downgoing_ions__v1--orbit_'

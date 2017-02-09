@@ -40,14 +40,22 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
   @common__newell_ion_db.pro
   ;; ENDIF
   
-  defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
+  ;; defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
+  defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/ion_db/'
 
   CASE 1 OF
      KEYWORD_SET(downgoing): BEGIN
-        defNewellDBFile        = 'iSpec_down_20161228_db--PARSED--Orbs_500-16361.sav'
+        ;; defNewellDBFile        = 'iSpec_down_20161228_db--PARSED--Orbs_500-16361.sav'
 
-        DB_date                = '20161228'
-        DB_version             = 'v0.0'
+        ;; DB_date                = '20161228'
+        ;; DB_version             = 'v0.0'
+        ;; DB_extras              = ''
+
+        defNewellDBFile        = 'downgoing_ions__combE__v0_1.sav'
+        defNewellDBEphem       = 'downgoing_ions__ephem__v0_1.sav'
+
+        DB_date                = '20170209'
+        DB_version             = 'v0.1'
         DB_extras              = ''
      END
      ELSE: BEGIN
