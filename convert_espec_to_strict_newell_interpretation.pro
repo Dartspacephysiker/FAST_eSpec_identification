@@ -66,10 +66,14 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
 
   ;Drop the broads if there's any competition between mono EQ 1 and broad EQ 1
   ;2017/02/04 The statement above is false! You only call 'em mono if there's competition between STRICTS!
-  i_B_ConvToM_          = CGSETINTERSECTION(monoGood      ,broadGood      ,COUNT=nB_ConvToM_)
-  i_B_ConvToMS          = CGSETINTERSECTION(monoGoodStrict,broadGood      ,COUNT=nB_ConvToMS)
-  i_BSConvToMS          = CGSETINTERSECTION(monoGoodStrict,broadGoodStrict,COUNT=nBSConvToMS)
-  i_M_ConvToBS          = CGSETINTERSECTION(monoGood      ,broadGoodStrict,COUNT=nM_ConvToBS)
+  ;; i_B_ConvToM_          = CGSETINTERSECTION(monoGood      ,broadGood      ,COUNT=nB_ConvToM_)
+  ;; i_B_ConvToMS          = CGSETINTERSECTION(monoGoodStrict,broadGood      ,COUNT=nB_ConvToMS)
+  ;; i_BSConvToMS          = CGSETINTERSECTION(monoGoodStrict,broadGoodStrict,COUNT=nBSConvToMS)
+  ;; i_M_ConvToBS          = CGSETINTERSECTION(monoGood      ,broadGoodStrict,COUNT=nM_ConvToBS)
+  i_B_ConvToM_          = WHERE(eSpec.broad EQ 1 AND eSpec.mono EQ 1,nB_ConvToM_)
+  i_B_ConvToMS          = WHERE(eSpec.broad EQ 1 AND eSpec.mono EQ 2,nB_ConvToMS)
+  i_BSConvToMS          = WHERE(eSpec.broad EQ 2 AND eSpec.mono EQ 2,nBSConvToMS)
+  i_M_ConvToBS          = WHERE(eSpec.broad EQ 2 AND eSpec.mono EQ 1,nM_ConvToBS)
 
   nBTConvToM_           = nB_ConvToM_ + nB_ConvToMS + nBSConvToMS
 
