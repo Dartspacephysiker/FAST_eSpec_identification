@@ -19,7 +19,7 @@ PRO JOURNAL__20170130__CHECK_OUT_NEW_DOWNGOING_ION_DB
   outDir      = '/SPENCEdata/Research/database/FAST/dartdb/ion_db/'
 
   ;; startOrb    = 500
-  startOrb    = 4009
+  startOrb    = 13661
   stopOrb     = 14361 ;;as of 2017/02/08 this is all you had
 
   options  = ['ORBIT','ALT','MLT','ILAT','RATIO',                                   $
@@ -185,6 +185,9 @@ PRO JOURNAL__20170130__CHECK_OUT_NEW_DOWNGOING_ION_DB
         ENDCASE
 
         totCnt += nHere
+
+        IF N_ELEMENTS(UNIQ(time[0:(totCnt-1)])) NE totCnt THEN STOP
+
         filNavn = STRING(FORMAT='(A0,A0,"_",I0,A0)',fPref,orbStr,++itvl,fSuff)
 
      ENDWHILE
@@ -228,6 +231,7 @@ PRO JOURNAL__20170130__CHECK_OUT_NEW_DOWNGOING_ION_DB
      this = CGSETDIFFERENCE(LINDGEN(N_ELEMENTS(time)),UNIQ(time,SORT(time)))
 
      IF KEYWORD_SET(make_ephem) THEN BEGIN
+        t
         PRINT,ephem.orbit[this[(uniq(ephem.orbit[this],SORT(ephem.orbit[this])))]]
         ;;Here's the list from 2017/02/09
         ;;It hasn't budged (270 orbits), even after running SDT over all of these orbs yet again. What can it mean?
