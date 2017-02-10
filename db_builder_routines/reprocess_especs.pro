@@ -166,15 +166,34 @@ PRO REPROCESS_ESPECS
                                         y: tmpJe_lc.y[picker]}
                     END
                     N_ELEMENTS(tmpeSpec_lc.x) EQ N_ELEMENTS(tmpJee_lc.x): BEGIN
-                       ;; picker = VALUE_CLOSEST2(tmpeSpec_lc.x,tmpJee_lc.x)
+                       picker = VALUE_CLOSEST2(tmpeSpec_lc.x,tmpJee_lc.x)
                        decideMe = WHERE(ABS(tmpeSpec_lc.x-tmpJee_lc.x) GE 0.5,youDecide)
+
+                       IF youDecide GT 0 THEN BEGIN
+                          picker1 = VALUE_CLOSEST2(tmpeSpec_lc.x,tmpJee_lc.x)
+                          decideMe1 = WHERE(ABS(tmpeSpec_lc.x[picker1]-tmpJee_lc.x) GE 0.5,youDecide1)
+                          picker2 = VALUE_CLOSEST2(tmpJee_lc.x,tmpeSpec_lc.x)
+                          decideMe2 = WHERE(ABS(tmpJee_lc.x[picker2]-tmpeSpec_lc.x) GE 0.5,youDecide2)
+
+                          IF youDecide1 LE youDecide2 THEN BEGIN
+                             tmpeSpec_lc   = {x: tmpeSpec_lc.x[picker1], $
+                                              y: tmpeSpec_lc.y[picker1,*], $
+                                              v: tmpeSpec_lc.y[picker1,*]}
+
+                          ENDIF ELSE BEGIN
+                             tmpJee_lc     = {x: tmpJee_lc.x[picker2], $
+                                              y: tmpJee_lc.y[picker2]}
+                             tmpJe_lc      = {x: tmpJe_lc.x[picker2], $
+                                              y: tmpJe_lc.y[picker2]}
+
+                          ENDELSE
+                       ENDIF
                     END
                     ELSE: BEGIN
                        PRINT,"I'm nonplussed"
                        STOP
                     END
                  ENDCASE
-
 
                  IF (ARRAY_EQUAL(tmpeSpec_lc.x,tmpJe_lc.x) AND $
                      ARRAY_EQUAL(tmpeSpec_lc.x,tmpJee_lc.x))    $
