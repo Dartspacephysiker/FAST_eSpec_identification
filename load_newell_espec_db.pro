@@ -237,7 +237,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      ;;want characteristic energy? You sure?
      charE = ABS(eSpec.jee/eSpec.je)*6.242*1.0e11
      these = WHERE((eSpec.broad EQ 1) OR (eSpec.broad EQ 2) AND $
-                   ( ( (charE LT 300) AND  (eSpec.mlt GE 9.5) AND (eSpec.mlt LE 14.5) ) OR $
+                   ( ( (charE LT 80 ) AND  (eSpec.mlt GE 9.5) AND (eSpec.mlt LE 14.5) ) OR $
                      ( (charE LT 80 ) AND ((eSpec.mlt LT 9.5) OR  (eSpec.mlt GT 14.5) )    )),nNonsense)
      IF nNonsense GT 0 THEN BEGIN
         PRINT,"There are " + STRCOMPRESS(nNonsense) + ' inds that cannot be broad, and yet are, Spence. Figure it out.'
