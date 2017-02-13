@@ -15,6 +15,7 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
                                   OUT_II_LIST=out_ii_list, $
                                   RM_II_LIST=rm_ii_list, $
                                   COMB_ACCELERATED=comb_accelerated, $
+                                  QUIET=quiet, $
                                   ;; DESPUN_ALF_DB=despun_alf_db, $
                                   SUM_LUN=sum_lun
 
@@ -145,7 +146,7 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
      PRINTF,tmpLun,FORMAT='(A0,T10,": ",I0)',"SUM",sum
      PRINTF,tmpLun,""
   ENDIF
-  PRINT,FORMAT='(A0,T10,": ",I0)',"pure_b_i",nB
+  IF ~KEYWORD_SET(quiet) THEN PRINT,FORMAT='(A0,T10,": ",I0)',"pure_b_i",nB
 
   out_titles        = " (" + ['Broadband','Diffuse','Monoenergetic'] + ")" ;,"Broad/Diff",'Broad/Mono','Diff/Mono','BDM','Anomalous'] + ")"
   out_datanamesuffs = "_" + ['broad','diff','mono'] ;,'BD','BM','DM','BDM','Anom']
