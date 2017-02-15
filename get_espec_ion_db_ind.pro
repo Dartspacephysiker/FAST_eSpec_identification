@@ -622,52 +622,19 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                     KEYWORD_SET(for_alfven_db) ? $
                                     NWLL_ALF_I__cleaned_i : $
                                     NEWELL_I__cleaned_i) 
+
+        ESPEC__SLAP_OFF_THOSE_HUGE_ONES,DBStruct, $
+                                        ;; FOR_ESPEC_DBS=~is_ion, $
+                                        /FOR_ION_DBS, $
+                                        GOOD_I=good_i
+
      ENDIF ELSE BEGIN
-        ;; PRINT,"eSpec DB needs no cleaning. She's clean as a whistle, you know."
-        PRINT,'" … See, in my day we never cleaned eSpec … "'
 
-        ;; je_lims  = [0,3e10]
-        ;; jee_lims = [0,3e2]
+        ESPEC__SLAP_OFF_THOSE_HUGE_ONES,DBStruct, $
+                                        /FOR_ESPEC_DBS, $
+                                        ;; FOR_ION_DBS=for_ion_DBs, $
+                                        GOOD_I=good_i
 
-        ;;The command: GET_INDICES_ABOVE_PERCENT_THRESHOLD(NEWELL__eSpec.je[WHERE(broad)],0.25,OUT_FINAL_VAL=je_upper_lim)
-        je_lims  = [0,2.855e10] ;Drop 0.25% of the broadbands 
-        jee_lims = [0,1.043e2]  ;Drop 0.25% of the broadbands
-
-        ;;The command: GET_INDICES_ABOVE_PERCENT_THRESHOLD(NEWELL__eSpec.je[WHERE(broad)],1.0,OUT_FINAL_VAL=je_upper_lim)
-        je_lims  = [0,3.36e9] ;Drop 1.0% of all
-        jee_lims = [0,3.1172] ;Drop 1.0% of all
-
-        ;; je_lims  = [0,1e10] ;Drop ... less than 1.0% (by rounding up to nearest decade)
-        ;; jee_lims = [0,10.0] ;Drop ... less than 1.0% (by rounding up to nearest decade)
-
-        je_lims  = [0,1e11] ;Drop ... less than 1.0% (by rounding up to nearest decade)
-        jee_lims = [0,100.0] ;Drop ... less than 1.0% (by rounding up to nearest decade)
-
-        ;; percentToDrop = N_ELEMENTS(WHERE( ( (espec.broad EQ 1) OR (eSpec.broad EQ 2) ) AND $
-        ;;                                   ( eSpec.je GT 4e10 ) ) ) / $
-        ;;                 FLOAT(N_ELEMENTS(WHERE( ( (espec.broad EQ 1) OR $
-        ;;                                           (eSpec.broad EQ 2) )  ) )) $
-        ;;                 * 100.
-
-        ;;;START COMMENT TO FORCE MYSELF TO LABORIOUSLY CHECK EVERY ORBIT
-        ;;Now Je
-        good_je_i  = WHERE(dbStruct.je GE je_lims[0] AND $
-                           dbStruct.je LE je_lims[1],nGoodJe, $
-                           NCOMPLEMENT=nBadJe)
-
-        nGood      = N_ELEMENTS(good_i)
-        good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_je_i),COUNT=nKept)
-        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Je screening ...'
-
-        ;;Now Jee
-        good_jee_i = WHERE(dbStruct.jee GE jee_lims[0] AND $
-                           dbStruct.jee LE jee_lims[1],nGoodJee, $
-                           NCOMPLEMENT=nBadJee)
-
-        nGood      = N_ELEMENTS(good_i)
-        good_i     = CGSETINTERSECTION(good_i,TEMPORARY(good_jee_i),COUNT=nKept)
-        PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to Jee screening ...'
-        ;;;STOP COMMENT TO FORCE MYSELF TO LABORIOUSLY CHECK EVERY ORBIT
 
         ;; IF KEYWORD_SET(alfDB_plot_struct.eSpec__remove_outliers) AND ~is_ion THEN BEGIN
 
