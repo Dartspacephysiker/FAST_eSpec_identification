@@ -239,7 +239,7 @@ PRO GET_ESPEC_FLUX_DATA, $
   ENDCASE
 
   ;;Electrons
-  IF ~KEYWORD_SET(alfDB_plot_struct.eSpec__all_fluxes) THEN BEGIN
+  IF ~(KEYWORD_SET(alfDB_plot_struct.eSpec__all_fluxes) OR KEYWORD_SET(alfDB_plot_struct.ion__all_fluxes)) THEN BEGIN
 
      IF KEYWORD_SET(get_eSpec) THEN BEGIN
         LOAD_ALF_NEWELL_ESPEC_DB,!NULL,good_alf_eSpec_i,good_eSpec_assoc_w_alf_i, $

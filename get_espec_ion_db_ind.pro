@@ -15,14 +15,14 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                               GET_ION_I=get_ion_i, $
                               RESET_GOOD_INDS=reset_good_inds, $
                               DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
-                              DONT_LOAD_IN_MEMORY=nonMem, $
+                              DONT_LOAD_IN_MEMORY=noMem, $
                               PRINT_PARAM_SUMMARY=print_param_summary
   
   COMPILE_OPT idl2
   
   @common__mlt_ilat_magc_etc.pro
 
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  IF ~KEYWORD_SET(noMem) THEN BEGIN
      
      IF KEYWORD_SET(for_alfven_db) THEN BEGIN
         ;;This common block is defined ONLY here, in GET_H2D_NEWELLS__EACH_TYPE, and in LOAD_ALF_NEWELL_ESPEC_DB
@@ -120,7 +120,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                  NEWELLDBDIR=dbDir, $
                  NEWELLDBFILE=dbFile, $
                  FORCE_LOAD_DB=force_load_db, $
-                 DONT_LOAD_IN_MEMORY=nonMem, $
+                 DONT_LOAD_IN_MEMORY=noMem, $
                  ;; OUT_CLEANED_I=cleaned_i, $
                  LUN=lun
               
@@ -146,10 +146,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                  NEWELLDBDIR=dbDir, $
                                  NEWELLDBFILE=dbFile, $
                                  FORCE_LOAD_DB=force_load_db, $
-                                 DONT_LOAD_IN_MEMORY=nonMem, $
+                                 NO_MEMORY_LOAD=noMem, $
                                  LUN=lun
 
-              ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
+              ;; IF ~KEYWORD_SET(noMem) THEN BEGIN
               ;;    NEWELL_I__ion          = ion
               ;; ENDIF
            ENDELSE
@@ -170,10 +170,10 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                    NEWELLDBFILE=dbFile, $
                                    FORCE_LOAD_DB=force_load_db, $
                                    DESPUN_ALF_DB=despun_alf_db, $
-                                   DONT_LOAD_IN_MEMORY=nonMem, $
+                                   DONT_LOAD_IN_MEMORY=noMem, $
                                    ;; OUT_GOOD_I=good_i, $
                                    LUN=lun
-              IF ~KEYWORD_SET(nonMem) THEN BEGIN
+              IF ~KEYWORD_SET(noMem) THEN BEGIN
                  NWLL_ALF__eSpec         = dbStruct
                  NWLL_ALF__failCodes     = failCodes
                  NWLL_ALF__good_eSpec_i  = good_eSpec_i
@@ -195,13 +195,14 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                    NEWELLDBDIR=dbDir, $
                                    NEWELLDBFILE=dbFile, $
                                    FORCE_LOAD_DB=force_load_db, $
-                                   DONT_LOAD_IN_MEMORY=nonMem, $
+                                   ;; DONT_LOAD_IN_MEMORY=noMem, $
+                                   NO_MEMORY_LOAD=noMem, $
                                    DONT_CONVERT_TO_STRICT_NEWELL=~KEYWORD_SET(eSpec__Newell_2009_interp), $
                                    USE_2000KM_FILE=eSpec__use_2000km_file, $
                                    ;; OUT_GOOD_I=good_i, $
                                    LUN=lun
 
-              IF ~KEYWORD_SET(nonMem) THEN BEGIN
+              IF ~KEYWORD_SET(noMem) THEN BEGIN
                  NEWELL__eSpec         = TEMPORARY(dbStruct)
                  IF N_ELEMENTS(failCodes) GT 0 THEN BEGIN
                     NEWELL__failCodes  = TEMPORARY(failCodes)
@@ -522,7 +523,8 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                alfDB_plot_struct.charERange[0], $
                                alfDB_plot_struct.charERange[1], $
                                NEWELL_THE_CUSP=alfDB_plot_struct.fluxPlots__Newell_the_cusp, $
-                               /FOR_ESPEC_DB, $
+                               FOR_ESPEC_DB=~is_ion, $
+
                                LUN=lun)
 
            region_i          = CGSETINTERSECTION(region_i,chare_i)

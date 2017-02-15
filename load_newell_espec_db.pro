@@ -265,7 +265,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         DILAT_FILE=dILAT_file, $
         ;; FOR_ALFDB=alfDB, $
         ;; FOR_FASTLOC_DB=fastLocDB, $
-        /FOR_ESPEC_DB ;; , $
+        /FOR_ESPEC_DB, $
+        DELTA_STUFF=delta_stuff ;; , $
      ;; FOR_ION_DB=ionDB
 
      IF N_ELEMENTS(width_measure) GT 0 THEN BEGIN

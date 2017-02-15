@@ -122,29 +122,9 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
      NewellDBFile           = defNewellDBFile
   ENDIF
 
-  IF N_ELEMENTS(ion) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
-     CASE 1 OF
-        KEYWORD_SET(just_times): BEGIN
-           IF ~quiet THEN PRINT,"Just giving ion times ..."
-           out_times     = NEWELL_I__ion.x
-
-           RETURN
-        END
-        KEYWORD_SET(noMem): BEGIN
-           PRINT,"Moving ion structure/data in mem to outputted variables ..."
-           ion              = TEMPORARY(NEWELL_I__ion     )
-           ;; fastLoc_times    = TEMPORARY(FASTLOC__times)
-           NewellDBFile     = TEMPORARY(NEWELL_I__dbFile    )
-           NewellDBDir      = TEMPORARY(NEWELL_I__dbDir     )
-           ion__delta_t     = N_ELEMENTS(NEWELL_I__delta_t  ) GT 0 ? TEMPORARY(NEWELL_I__delta_t  ) : !NULL 
-        END
-        ELSE: BEGIN
-           PRINT,"There is already an ion DB in memory! If you want it to come out, set /NO_MEMORY_LOAD"
-        END
-     ENDCASE
-  ENDIF ELSE BEGIN
-     PRINTF,lun,'ion DB already loaded! Not restoring ' + NewellDBFile + '...'
-  ENDELSE
+  ;;If just getting times, at this point we've populated other variables
+  ;;that might be of interest to user, so JET
+  IF KEYWORD_SET(just_times) AND N_ELEMENTS(out_times) GT 0 THEN RETURN
 
   IF KEYWORD_SET(force_load_db) THEN BEGIN
      PRINTF,lun,"Forced loading of ion database ..."
@@ -168,11 +148,6 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
 
   ENDIF
 
-  IF KEYWORD_SET(load_charE) THEN BEGIN
-     STR_ELEMENT,ion,'chare',CHAR_ENERGY(ion.ji,ion.jei),/ADD_REPLACE
-     ion.info.has_charE = 1B
-  ENDIF
-
   NEWELL_ESPEC__ADD_INFO_STRUCT,ion, $
                                 /IONS, $
                                 DB_DIR=NewellDBDir, $
@@ -181,6 +156,11 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
                                 DB_EXTRAS=DB_extras, $
                                 REDUCE_DBSIZE=reduce_dbSize, $
                                 IS_ALFNEWELL=is_AlfNewell
+
+  IF KEYWORD_SET(load_charE) THEN BEGIN
+     STR_ELEMENT,ion,'chare',CHAR_ENERGY(ion.ji,ion.jei),/ADD_REPLACE
+     ion.info.has_charE = 1B
+  ENDIF
 
   IF KEYWORD_SET(downgoing) THEN BEGIN
      ion.info.is_downgoing = 1B
@@ -221,10 +201,28 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
      ;; FOR_ALFDB=alfDB, $
      ;; FOR_FASTLOC_DB=fastLocDB, $
      ;; /FOR_ESPEC_DB ;; , $
-     /FOR_ION_DB
+     /FOR_ION_DB, $
+     DELTA_STUFF=delta_stuff
 
   IF N_ELEMENTS(width_measure) GT 0 THEN BEGIN
      ion__delta_t = TEMPORARY(width_measure)
+  ENDIF
+
+  IF KEYWORD_SET(no_mapping) OR KEYWORD_SET(do_not_map_fluxes) THEN BEGIN
+     PRINT,"Not mapping to 100 km ..."
+  ENDIF ELSE BEGIN
+     PRINT,"Mapping eSpec observations to 100 km ..."
+     ion.ji            *= ion.ratio
+     ion.jei           *= ion.ratio
+
+     ion.info.is_mapped = 1B
+  ENDELSE
+
+  IF ~(KEYWORD_SET(do_not_map_delta_t) OR KEYWORD_SET(no_mapping)) $
+     AND (N_ELEMENTS(ion__delta_t) GT 0) $
+  THEN BEGIN
+     ion__delta_t         /= SQRT(ion.ratio)
+     ion.info.dt_is_mapped = 1B
   ENDIF
 
   ;; IF KEYWORD_SET(load_delta_t) THEN BEGIN
