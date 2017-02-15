@@ -43,6 +43,7 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
   ;; defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
   defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/ion_db/'
 
+  needsEphem                   = 0
   CASE 1 OF
      KEYWORD_SET(downgoing): BEGIN
         ;; defNewellDBFile        = 'iSpec_down_20161228_db--PARSED--Orbs_500-16361.sav'
@@ -54,7 +55,9 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
         defNewellDBFile        = 'downgoing_ions__combE__v0_1.sav'
         defNewellDBEphem       = 'downgoing_ions__ephem__v0_1.sav'
 
-        DB_date                = '20170209'
+        needsEphem             = 1
+
+        DB_date                = '20170214'
         DB_version             = 'v0.1'
         DB_extras              = ''
      END
@@ -136,6 +139,22 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
      ENDIF
      PRINTF,lun,'Loading ion DB: ' + NewellDBFile + '...'
      RESTORE,NewellDBDir+NewellDBFile
+
+     IF KEYWORD_SET(needsEphem) THEN BEGIN
+        ion_info = ion.info
+        jei      = ion.jei_lc
+        ji       = (TEMPORARY(ion)).jei_lc
+
+        RESTORE,NewellDBDir+defNewellDBEphem
+        
+        STR_ELEMENT,ephem,'info',/DELETE
+        ion      = CREATE_STRUCT(TEMPORARY(ephem), $
+                                 "jei",jei, $
+                                 "ji",ji, $
+                                 "chare",CHAR_ENERGY(ji,jei), $
+                                 'ion_info',TEMPORARY(ion_info))
+
+     ENDIF
 
      NEWELL_ESPEC__ADD_INFO_STRUCT,ion, $
                                    /IONS, $

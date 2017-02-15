@@ -1,6 +1,7 @@
 ;;02/09/17
 PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
    TIMES_UTC=times, $
+   DIFFTTHRESH=diffTThresh, $
    ORBIT_ARRAY=orbit, $
    ILAT_ARRAY=ilat, $
    INFO_FOR_STRUCT=info, $
@@ -16,6 +17,8 @@ PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
 
   uniqOrb_i      = UNIQ(orbit)
   
+  diffTThresh    = KEYWORD_SET(diffTThresh) ? diffTThresh : 5
+
   uniqOrbs       = orbit[uniqOrb_i]
   curOrb         = KEYWORD_SET(startOrb) ? startOrb : uniqOrbs[0]
   endOrb         = uniqOrbs[-1]
@@ -39,9 +42,9 @@ PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
   ENDIF
 
   PRINT,FORMAT='(A0,T10,A0,T20,A0,T30,A0,T40,A0,T50,' $
-        + 'A0,T60,A0,T70,A0)', $
+        + 'A0,T60,A0,T70,A0,T80,A0)', $
         "Orbits","N Streak","N 2.51","N 0.628","N 0.312", $
-        "N Unsafe","N Dupe Elems","MissedItvls"
+        "N Unsafe","N Dupe Elems","MissedItvls","N 1.27"
   WHILE curOrb LE endOrb DO BEGIN
 
      ;;Reset inds for this orbit
@@ -73,12 +76,23 @@ PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
      orbString = STRCOMPRESS(curOrb,/REMOVE_ALL)
      tmp_i     = WHERE(orbit EQ curOrb[0],NTmp)
 
-     IF NTmp EQ 0 THEN BEGIN
-        PRINT,"no inds for orbit " + STRCOMPRESS(curOrb,/REMOVE_ALL) + ". Move it on down."
-        curOrb = (uniqOrbs[++orbInd])[0]
-        CONTINUE
-     ENDIF
+     contPlease = 0
+     CASE 1 OF
+        (NTmp EQ 0): BEGIN
+           PRINT,"no inds for orbit " + STRCOMPRESS(curOrb,/REMOVE_ALL) + ". Move it on down."
+           curOrb = (uniqOrbs[++orbInd])[0]
+           contPlease = 1
+        END
+        (NTmp LE 5): BEGIN
+           PRINT,"LT 5 inds for orbit " + STRCOMPRESS(curOrb,/REMOVE_ALL) + ". Move it on down."
+           curOrb = (uniqOrbs[++orbInd])[0]
+           contPlease = 1
+        END
+        ELSE:
+     ENDCASE
      
+     IF contPlease THEN CONTINUE
+
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;First we worry about junking the first ten seconds in each hemisphere
      tmpTime      = times[tmp_i]
@@ -87,7 +101,7 @@ PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
      this         = LOAD_JE_AND_JE_TIMES_FOR_ORB(curOrb,TIME_RANGES_OUT=tRanges,/USE_DUPELESS_FILES)
      ;;Make sure we junk the first ten seconds, if we haven't already, when entering auroral zone in either hemisphere
      nLoops       = this NE -1
-     IF nLoops GT 0 THEN BEGIN
+     IF nLoops GT 0 AND (N_ELEMENTS(tmpTime) GT 5) THEN BEGIN
 
         intStartTs   = tRanges[*,0]
         CHECK_SORTED,intStartTs,sorted_intervals,/QUIET
@@ -112,7 +126,7 @@ PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
 
         ENDIF
         
-        goodIntMatch = WHERE(ABS(tmpTime[interval_ii]-intStartTs) LT 5, $
+        goodIntMatch = WHERE(ABS(tmpTime[interval_ii]-intStartTs) LT diffTThresh, $
                              nGoodIntMatch, $
                              COMPLEMENT=badIntMatch, $
                              NCOMPLEMENT=nBadIntMatch)
@@ -122,7 +136,7 @@ PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
            ;;Let's see if we just don't have times for this interval
            intStopTs = tRanges[*,1] 
            intStop_ii = VALUE_CLOSEST2(tmpTime,intStopTs) 
-           goodStopMatch = WHERE(ABS(tmpTime[intStop_ii]-intStopTs) LT 5, $
+           goodStopMatch = WHERE(ABS(tmpTime[intStop_ii]-intStopTs) LT diffTThresh, $
                                  nGoodStopMatch, $
                                  COMPLEMENT=badStopMatch, $
                                  NCOMPLEMENT=nBadStopMatch)
@@ -215,12 +229,15 @@ PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
         END
 
         samp251    = ABS(sampDT-2.51) LT 0.2
+        samp127    = ABS(sampDT-1.27) LT 0.2
         samp0628   = ABS(sampDT-0.624) LT 0.1
         samp0312   = ABS(sampDT-0.312) LT 0.1
         w251       = WHERE(samp251,n251)
+        w127       = WHERE(samp127,n127)
         w0628      = WHERE(samp0628,n0628)
         w0312      = WHERE(samp0312,n0312)
-        safe       = WHERE(TEMPORARY(samp251) OR TEMPORARY(samp0628) OR TEMPORARY(samp0312), $
+        ;; safe       = WHERE(TEMPORARY(samp251) OR TEMPORARY(samp0628) OR TEMPORARY(samp0312), $
+        safe       = WHERE(TEMPORARY(samp251) OR TEMPORARY(samp127) OR TEMPORARY(samp0628) OR TEMPORARY(samp0312), $
                            nSafeStreaks,COMPLEMENT=wUnsafe,NCOMPLEMENT=nUnsafe)
 
         IF nSafeStreaks NE nStreaks THEN BEGIN
@@ -232,6 +249,9 @@ PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
 
         ;;Junk all the places where we transition from 2.51-s sample period to something else
         IDENTIFY_GAPS__RM_INTERVAL,tmpTime,w251,w251_ii,n251,start_ii,stop_ii,sampDT,junk_ii
+
+        ;;Junk all the places where we transition from 1.27-s sample period to something else
+        IDENTIFY_GAPS__RM_INTERVAL,tmpTime,w127,w127_ii,n127,start_ii,stop_ii,sampDT,junk_ii
 
         ;;Junk all the places where we transition from 0.628-s sample period to something else
         IDENTIFY_GAPS__RM_INTERVAL,tmpTime,w0628,w0628_ii,n0628,start_ii,stop_ii,sampDT,junk_ii
@@ -381,9 +401,9 @@ PRO IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
      ENDIF
 
      PRINT,FORMAT='(A0,T10,I0,T20,I0,T30,I0,T40,I0,T50,I0,' $
-           + 'T60,I0,T70,I0)', $
+           + 'T60,I0,T70,I0,T80,I0)', $
            orbString,nStreaks,n251,n0628,n0312, $
-           nUnsafe,nDupes,nMissing
+           nUnsafe,nDupes,nMissing,n127
 
      curOrb           = (uniqOrbs[++orbInd])[0]
 

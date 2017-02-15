@@ -113,9 +113,9 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
         eSpec_interpreted.broad[i_M_ConvToBS] = 2
         IF KEYWORD_SET(verbose) THEN PRINT,"nM_Conv_to_BS  " + STRCOMPRESS(nM_ConvToBS,/REMOVE_ALL)
      ;; ENDIF ELSE BEGIN
-     ;;    eSpec_interpreted.mono[i_M_ConvToBS]  = 1
-     ;;    eSpec_interpreted.broad[i_M_ConvToBS] = 255-10-2
-     ;;    IF KEYWORD_SET(verbose) THEN PRINT,"nBS_Conv_to_M  " + STRCOMPRESS(nM_ConvToBS,/REMOVE_ALL)
+        ;; eSpec_interpreted.mono[i_M_ConvToBS]  = 1
+        ;; eSpec_interpreted.broad[i_M_ConvToBS] = 255-10-2
+        ;; IF KEYWORD_SET(verbose) THEN PRINT,"nBS_Conv_to_M  " + STRCOMPRESS(nM_ConvToBS,/REMOVE_ALL)
      ;; ENDELSE
   ENDIF
 

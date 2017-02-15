@@ -816,11 +816,11 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
      ENDELSE
   ENDELSE
 
-  good_i_file = '~/Desktop/eSpec_good_i__BOTH-' + $
-       GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '.sav'
-  PRINT,"Saving good_i to " + good_i_file
-  SAVE,good_i,FILENAME=good_i_file
-  STOP
+  ;; good_i_file = '~/Desktop/eSpec_good_i__BOTH-' + $
+  ;;      GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '.sav'
+  ;; PRINT,"Saving good_i to " + good_i_file
+  ;; SAVE,good_i,FILENAME=good_i_file
+  ;; STOP
 
   RETURN,good_i
 

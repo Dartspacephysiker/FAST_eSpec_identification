@@ -1,45 +1,37 @@
-;;01/19/17
-PRO JOURNAL__20170119__STITCH_GAPS_FILES
+;;02/14/17
+PRO JOURNAL__20170214__STITCH_ION_GAPS_FILES
 
   COMPILE_OPT IDL2
 
-  ;; startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
-  ;; endOrb      = 9500
-  ;; startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
-  ;; endOrb      = 16361 
   startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
-  endOrb      = 24634
+  endOrb      = 14361
   deltaSavOrb = 500
 
-  ;; saveDir     = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
+  saveDir     = '/SPENCEdata/Research/database/FAST/dartdb/ion_db/'
   suffDir     = 'instrument_oddity_times/'  
   ;; suffDir     = ''
 
   orbRangeF   = STRING(FORMAT='(I0,"-",I0)',startOrb,endOrb)
 
-  @common__newell_espec.pro
+  @common__newell_ion_db.pro
 
   ;; LOAD_NEWELL_ESPEC_DB,eSpec,!NULL,NEWELL__delta_t, $
   ;; /LOAD_DELTA_T, $
   ;; /NO_MEMORY_LOAD
-  IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
-     LOAD_NEWELL_ESPEC_DB,!NULL,!NULL,!NULL, $
-                          /DONT_MAP_TO_100KM, $
-                          /DO_NOT_MAP_DELTA_T, $
-                          /DONT_CONVERT_TO_STRICT_NEWELL
-                          ;; /LOAD_DELTA_T
+  IF N_ELEMENTS(NEWELL_I_ion) EQ 0 THEN BEGIN
+     LOAD_NEWELL_ION_DB,/DOWNGOING
 
   ENDIF
   ;; saveFilePref = "esa_transit_times--"
   prefSuff       = '__oddity_times--'
-  saveFilePref   = GET_NEWELL_DB_STRING(NEWELL__eSpec) + prefSuff
+  saveFilePref   = GET_NEWELL_DB_STRING(NEWELL_I__ion) + prefSuff
 
   saveFile    = saveFilePref+orbRangeF+'--'+GET_TODAY_STRING(/DO_YYYYMMDD_FMT)+'.sav'
 
-  je              = NEWELL__eSpec.je
-  jee             = NEWELL__eSpec.jee
-  times           = NEWELL__eSpec.x
-  orbit           = (TEMPORARY(NEWELL__eSpec)).orbit
+  ji              = NEWELL_I__ion.ji
+  jei             = NEWELL_I__ion.jei
+  times           = NEWELL_I__ion.x
+  orbit           = (TEMPORARY(NEWELL_I__ion)).orbit
 
   hjar = WHERE(orbit GE startOrb AND $
                orbit LE endOrb,nHjar )
@@ -147,21 +139,21 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
   keep_i = CGSETDIFFERENCE(hjar,allJunk_i)
 
 
-  ;;Je histos
+  ;;Ji histos
   WINDOW,0
   maxin    = 11 
   minin    = 9 
   binSize  = 0.1
   maxVal   = 0.01
   !P.MULTI = [0,1,2,0,0] 
-  CGHISTOPLOT,ALOG10(je[allJunk_i]), $
+  CGHISTOPLOT,ALOG10(ji[allJunk_i]), $
               MAXINPUT=maxin, $
               MININPUT=minin, $
               TITLE='Junk', $
               /FREQUENCY, $
               BINSIZE=binSize, $
               MAX_VALUE=maxVal
-  CGHISTOPLOT,ALOG10(je[keep_i]), $
+  CGHISTOPLOT,ALOG10(ji[keep_i]), $
               MAXINPUT=maxin, $
               MININPUT=minin, $
               TITLE='Not junk', $
@@ -169,47 +161,47 @@ PRO JOURNAL__20170119__STITCH_GAPS_FILES
               BINSIZE=binSize, $
               MAX_VALUE=maxVal
 
-  ;;Jee histos
+  ;;Jei histos
   WINDOW,1
   maxin    = 3
   minin    = 0 
   binSize  = 0.1
   maxVal   = 0.01
   !P.MULTI = [0,1,2,0,0] 
-  CGHISTOPLOT,ALOG10(jee[allJunk_i]), $
+  CGHISTOPLOT,ALOG10(jei[allJunk_i]), $
               MAXINPUT=maxin, $
               MININPUT=minin, $
-              TITLE='Junk Jee', $
+              TITLE='Junk Jei', $
               /FREQUENCY, $
               BINSIZE=binSize, $
               MAX_VALUE=maxVal
-  CGHISTOPLOT,ALOG10(jee[keep_i]), $
+  CGHISTOPLOT,ALOG10(jei[keep_i]), $
               MAXINPUT=maxin, $
               MININPUT=minin, $
-              TITLE='Not junk Jee', $
+              TITLE='Not junk Jei', $
               /FREQUENCY, $
               BINSIZE=binSize, $
               MAX_VALUE=maxVal
 
-  hugeJe             = 1e11
-  hugeJee            = 1e2
+  hugeJi             = 1e11
+  hugeJei            = 1e2
   
-  ;;Huge Je?
-  junkHugeJeFrac     = N_ELEMENTS(WHERE(je[allJunk_i] GE hugeJe))/ $
+  ;;Huge Ji?
+  junkHugeJiFrac     = N_ELEMENTS(WHERE(ji[allJunk_i] GE hugeJi))/ $
                        FLOAT(N_ELEMENTS(allJunk_i))*100
-  notJunkHugeJeFrac  = N_ELEMENTS(WHERE(je[keep_i] GE hugeJe))/ $
+  notJunkHugeJiFrac  = N_ELEMENTS(WHERE(ji[keep_i] GE hugeJi))/ $
                        FLOAT(N_ELEMENTS(keep_i))*100
-  ;;Huge Jee?
-  junkHugeJeeFrac    = N_ELEMENTS(WHERE(jee[allJunk_i] GE hugeJee))/ $
+  ;;Huge Jei?
+  junkHugeJeiFrac    = N_ELEMENTS(WHERE(jei[allJunk_i] GE hugeJei))/ $
                        FLOAT(N_ELEMENTS(allJunk_i))*100
-  notJunkHugeJeeFrac = N_ELEMENTS(WHERE(jee[keep_i] GE hugeJee))/ $
+  notJunkHugeJeiFrac = N_ELEMENTS(WHERE(jei[keep_i] GE hugeJei))/ $
                        FLOAT(N_ELEMENTS(keep_i))*100
 
-  PRINT,"Junk    Huge Je  % : ",junkHugeJeFrac
-  PRINT,"notJunk Huge Je  % : ",notJunkHugeJeFrac
+  PRINT,"Junk    Huge Ji  % : ",junkHugeJiFrac
+  PRINT,"notJunk Huge Ji  % : ",notJunkHugeJiFrac
   PRINT,''
-  PRINT,"Junk    Huge Jee % : ",junkHugeJeeFrac
-  PRINT,"notJunk Huge Jee % : ",notJunkHugeJeeFrac
+  PRINT,"Junk    Huge Jei % : ",junkHugeJeiFrac
+  PRINT,"notJunk Huge Jei % : ",notJunkHugeJeiFrac
 
   IF N_ELEMENTS(times) NE $
      (N_ELEMENTS(keep_i)+N_ELEMENTS(allJunk_i)) $

@@ -3,7 +3,9 @@ PRO JOURNAL__20170209__LOOK_FOR_GAPS_IN_IESA_DB_AND_REMOVE
 
   COMPILE_OPT IDL2
 
-  startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
+  diffTThresh = 10 ;allowable gap between data and EESA start times
+
+  startOrb    = 7500             ;Otherwise it just picks the first orbit in eSpec
   showPlots   = 0
   savePS      = 0
   PSDir       = '/SPENCEdata/Research/Satellites/FAST/espec_identification/plots/201702--trim_transitions/'
@@ -46,6 +48,7 @@ PRO JOURNAL__20170209__LOOK_FOR_GAPS_IN_IESA_DB_AND_REMOVE
 
   IDENTIFY_GAPS_IN_EESA_OR_IESA_TSERIES, $
      TIMES_UTC=times, $
+     DIFFTTHRESH=diffTThresh, $
      ORBIT_ARRAY=orbit, $
      ILAT_ARRAY=ilat, $
      INFO_FOR_STRUCT=info, $
