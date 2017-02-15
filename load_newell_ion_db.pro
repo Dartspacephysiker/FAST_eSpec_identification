@@ -78,7 +78,7 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
 
         DB_date                = '20170214'
         DB_version             = 'v0.1'
-        DB_extras              = ''
+        DB_extras              = 'downgoing/combE'
      END
      ELSE: BEGIN
         defNewellDBFile        = 'iSpec_20160607_db--PARSED--Orbs_500-16361.sav'
@@ -155,7 +155,7 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
   IF KEYWORD_SET(needsEphem) THEN BEGIN
      ion_info = ion.info
      jei      = ion.jei_lc
-     ji       = (TEMPORARY(ion)).jei_lc
+     ji       = (TEMPORARY(ion)).ji_lc
 
      RESTORE,NewellDBDir+defNewellDBEphem
      

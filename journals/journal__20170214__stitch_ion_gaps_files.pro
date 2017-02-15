@@ -20,16 +20,15 @@ PRO JOURNAL__20170214__STITCH_ION_GAPS_FILES
   ;; /NO_MEMORY_LOAD
   IF N_ELEMENTS(NEWELL_I_ion) EQ 0 THEN BEGIN
      LOAD_NEWELL_ION_DB,/DOWNGOING
-
   ENDIF
   ;; saveFilePref = "esa_transit_times--"
   prefSuff       = '__oddity_times--'
   saveFilePref   = GET_NEWELL_DB_STRING(NEWELL_I__ion) + prefSuff
 
-  saveFile    = saveFilePref+orbRangeF+'--'+GET_TODAY_STRING(/DO_YYYYMMDD_FMT)+'.sav'
+  saveFile        = saveFilePref+orbRangeF+'--'+GET_TODAY_STRING(/DO_YYYYMMDD_FMT)+'.sav'
 
-  ji              = NEWELL_I__ion.ji
-  jei             = NEWELL_I__ion.jei
+  ji              = ABS(NEWELL_I__ion.ji)
+  jei             = ABS(NEWELL_I__ion.jei)
   times           = NEWELL_I__ion.x
   orbit           = (TEMPORARY(NEWELL_I__ion)).orbit
 
@@ -141,8 +140,8 @@ PRO JOURNAL__20170214__STITCH_ION_GAPS_FILES
 
   ;;Ji histos
   WINDOW,0
-  maxin    = 11 
-  minin    = 9 
+  maxin    = 11
+  minin    = 4
   binSize  = 0.1
   maxVal   = 0.01
   !P.MULTI = [0,1,2,0,0] 
@@ -163,8 +162,8 @@ PRO JOURNAL__20170214__STITCH_ION_GAPS_FILES
 
   ;;Jei histos
   WINDOW,1
-  maxin    = 3
-  minin    = 0 
+  maxin    = 4
+  minin    = -4 
   binSize  = 0.1
   maxVal   = 0.01
   !P.MULTI = [0,1,2,0,0] 
