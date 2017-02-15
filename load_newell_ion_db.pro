@@ -27,6 +27,7 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
                        ;; OUT_CLEANED_I=cleaned_i, $
                        CLEAR_MEMORY=clear_memory, $
                        NO_MEMORY_LOAD=noMem, $
+                       QUIET=quiet, $
                        LUN=lun
 
   COMPILE_OPT idl2
@@ -89,10 +90,10 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
      END
   ENDCASE
 
-  IF N_ELEMENTS(NEWELL_I__eSpec) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
+  IF N_ELEMENTS(NEWELL_I__ion) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
      CASE 1 OF
         KEYWORD_SET(just_times): BEGIN
-           IF ~quiet THEN PRINT,"Just giving eSpec times ..."
+           IF ~quiet THEN PRINT,"Just giving ion times ..."
            out_times     = NEWELL_I__ion.x
 
            RETURN
@@ -121,7 +122,6 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
      NewellDBFile           = defNewellDBFile
   ENDIF
 
-
   IF N_ELEMENTS(ion) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
      CASE 1 OF
         KEYWORD_SET(just_times): BEGIN
@@ -132,7 +132,7 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
         END
         KEYWORD_SET(noMem): BEGIN
            PRINT,"Moving ion structure/data in mem to outputted variables ..."
-           eSpec            = TEMPORARY(NEWELL_I__ion     )
+           ion              = TEMPORARY(NEWELL_I__ion     )
            ;; fastLoc_times    = TEMPORARY(FASTLOC__times)
            NewellDBFile     = TEMPORARY(NEWELL_I__dbFile    )
            NewellDBDir      = TEMPORARY(NEWELL_I__dbDir     )
@@ -163,9 +163,14 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
      ion      = CREATE_STRUCT(TEMPORARY(ephem), $
                               "jei",jei, $
                               "ji",ji, $
-                              "chare",CHAR_ENERGY(ji,jei), $
+                              ;; "chare",CHAR_ENERGY(ji,jei), $
                               'ion_info',TEMPORARY(ion_info))
 
+  ENDIF
+
+  IF KEYWORD_SET(load_charE) THEN BEGIN
+     STR_ELEMENT,ion,'chare',CHAR_ENERGY(ion.ji,ion.jei),/ADD_REPLACE
+     ion.info.has_charE = 1B
   ENDIF
 
   NEWELL_ESPEC__ADD_INFO_STRUCT,ion, $
@@ -184,16 +189,27 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
   IF ~KEYWORD_SET(dont_perform_SH_correction) THEN BEGIN
      ;;Correct fluxes
      PRINT,"Correcting ionDB fluxes..."
-     ion.ji[WHERE(ion.ilat GT 0)]  = (-1.)*(ion.ji[WHERE(ion.ilat GT 0)])
-     ion.jei[WHERE(ion.ilat GT 0)] = (-1.)*(ion.jei[WHERE(ion.ilat GT 0)])
+     CASE 1 OF
+        KEYWORD_SET(downgoing): BEGIN
+           ;;Make Earthward positive
+           inds                = WHERE(ion.ilat LT 0)
+        END
+        ELSE: BEGIN
+           ;;Make outward positive
+           inds                = WHERE(ion.ilat GT 0)
+        END
+     ENDCASE
 
-     ion.info.correctedFluxes = 1B
+     ion.ji[inds]              = (-1.)*(ion.ji[inds])
+     ion.jei[inds]             = (-1.)*(ion.jei[inds])
+     inds                      = !NULL
+     ion.info.correctedFluxes  = 1B
   ENDIF
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;What type of delta do you want?
   FASTDBS__DELTA_SWITCHER, $
-     eSpec, $
+     ion, $
      OUT_WIDTH_MEASURE=width_measure, $
      DBDIR=NewellDBDir, $
      LOAD_DELTA_T=load_delta_t, $
