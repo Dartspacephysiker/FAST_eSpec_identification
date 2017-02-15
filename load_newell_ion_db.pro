@@ -5,12 +5,13 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
                        NEWELLDBDIR=NewellDBDir, $
                        NEWELLDBFILE=NewellDBFile, $
                        FORCE_LOAD_DB=force_load_db, $
-                       DONT_LOAD_IN_MEMORY=nonMem, $
+                       ;; DONT_LOAD_IN_MEMORY=nonMem, $
                        DONT_PERFORM_CORRECTION=dont_perform_SH_correction, $
                        DONT_MAP_TO_100KM=no_mapping, $
                        DO_NOT_MAP_FLUXES=do_not_map_fluxes, $
                        DO_NOT_MAP_DELTA_T=do_not_map_delta_t, $
                        LOAD_DELTA_T=load_delta_t, $
+                       LOAD_CHARE=load_charE, $
                        COORDINATE_SYSTEM=coordinate_system, $
                        USE_LNG=use_lng, $
                        USE_AACGM_COORDS=use_AACGM, $
@@ -25,25 +26,42 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
                        LOAD_DELTA_X_FOR_WIDTH_TIME=load_dx, $
                        ;; OUT_CLEANED_I=cleaned_i, $
                        CLEAR_MEMORY=clear_memory, $
+                       NO_MEMORY_LOAD=noMem, $
                        LUN=lun
 
   COMPILE_OPT idl2
+
+  @common__newell_ion_db.pro
+  
+  defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/ion_db/'
+  defCoordDir            = '/SPENCEdata/Research/database/FAST/dartdb/ion_db/alternate_coords/'
+
+  needsEphem             = 0
+
+  IF N_ELEMENTS(quiet) EQ 0 THEN quiet = 0
+
+  IF N_ELEMENTS(lun) EQ 0 THEN BEGIN
+     lun                 = -1
+  ENDIF
+
+  ;;DONT_LOAD_IN_MEMORY is kept so that other routines don't make a mistake,
+  ;;but I've included the keyword NO_MEMORY_LOAD from LOAD_MAXIMUS and LOAD_FASTLOC for the sake of my poor memory
+  ;; IF N_ELEMENTS(noMem) NE 0 THEN BEGIN
+  ;;    IF N_ELEMENTS(nonMem) EQ 0 THEN BEGIN
+  ;;       nonMem = noMem
+  ;;    ENDIF ELSE BEGIN
+  ;;       IF nonMem NE noMem THEN BEGIN
+  ;;          PRINT,"Ludicrosity. Tell me to do one thing and then the other."
+  ;;          STOP
+  ;;       ENDIF
+  ;;    ENDELSE
+  ;; ENDIF
 
   IF KEYWORD_SET(clear_memory) THEN BEGIN
      CLEAR_ION_DB_VARS,QUIET=quiet
      RETURN
   ENDIF
 
-
-  ;;This common block is defined ONLY here and in GET_ESPEC_ION_DB_IND, I believe
-  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-  @common__newell_ion_db.pro
-  ;; ENDIF
-  
-  ;; defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
-  defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/ion_db/'
-
-  needsEphem                   = 0
   CASE 1 OF
      KEYWORD_SET(downgoing): BEGIN
         ;; defNewellDBFile        = 'iSpec_down_20161228_db--PARSED--Orbs_500-16361.sav'
@@ -70,9 +88,6 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
         DB_extras              = ''
      END
   ENDCASE
-  IF N_ELEMENTS(lun) EQ 0 THEN BEGIN
-     lun                 = -1
-  ENDIF
 
   IF N_ELEMENTS(NEWELL_I__eSpec) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
      CASE 1 OF
@@ -82,7 +97,40 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
 
            RETURN
         END
-        KEYWORD_SET(nonMem): BEGIN
+        KEYWORD_SET(noMem): BEGIN
+           PRINT,"Moving ion structure/data in mem to outputted variables ..."
+           ion              = TEMPORARY(NEWELL_I__ion     )
+           ;; fastLoc_times    = TEMPORARY(FASTLOC__times)
+           NewellDBFile     = TEMPORARY(NEWELL_I__dbFile    )
+           NewellDBDir      = TEMPORARY(NEWELL_I__dbDir     )
+           ion__delta_t     = N_ELEMENTS(NEWELL_I__delta_t  ) GT 0 ? TEMPORARY(NEWELL_I__delta_t  ) : !NULL 
+        END
+        ELSE: BEGIN
+           PRINT,"There is already an ion DB in memory! If you want it to come out, set /NO_MEMORY_LOAD"
+        END
+     ENDCASE
+     RETURN
+  ENDIF
+
+  ;;Pick up directory and file if not specified
+  IF N_ELEMENTS(NewellDBDir) EQ 0 THEN BEGIN
+     NewellDBDir            = defNewellDBDir
+  ENDIF
+
+  IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
+     NewellDBFile           = defNewellDBFile
+  ENDIF
+
+
+  IF N_ELEMENTS(ion) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
+     CASE 1 OF
+        KEYWORD_SET(just_times): BEGIN
+           IF ~quiet THEN PRINT,"Just giving ion times ..."
+           out_times     = NEWELL_I__ion.x
+
+           RETURN
+        END
+        KEYWORD_SET(noMem): BEGIN
            PRINT,"Moving ion structure/data in mem to outputted variables ..."
            eSpec            = TEMPORARY(NEWELL_I__ion     )
            ;; fastLoc_times    = TEMPORARY(FASTLOC__times)
@@ -91,181 +139,129 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
            ion__delta_t     = N_ELEMENTS(NEWELL_I__delta_t  ) GT 0 ? TEMPORARY(NEWELL_I__delta_t  ) : !NULL 
         END
         ELSE: BEGIN
-           ;; IF ~quiet THEN PRINT,'Restoring eSpec DB already in memory...'
-           ;; eSpec         = NEWELL_I__ion
-           ;; NewellDBDir   = NEWELL__dbDir
-           ;; NewellDBFile  = NEWELL__dbFile
-           PRINT,"There is already an eSpec DB in memory! If you want it to come out, set /NO_MEMORY_LOAD"
+           PRINT,"There is already an ion DB in memory! If you want it to come out, set /NO_MEMORY_LOAD"
         END
      ENDCASE
-     RETURN
-  ENDIF
-
-  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     ;; IF N_ELEMENTS(NEWELL_I__ion) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
-     ;;    CASE 1 OF
-     ;;       KEYWORD_SET(just_times): BEGIN
-     ;;          PRINT,"Just giving eSpec times ..."
-     ;;          out_times     = ion.x
-     ;;       END
-     ;;       ELSE: BEGIN
-     ;;          PRINT,'Restoring ion DB already in memory...'
-     ;;          ion           = NEWELL_I__ion
-     ;;          NewellDBDir   = NEWELL_I__dbDir
-     ;;          NewellDBFile  = NEWELL_I__dbFile
-     ;;       END
-     ;;    ENDCASE
-     ;;    RETURN
-     ;; ENDIF
-  ;; ENDIF
-
-  IF N_ELEMENTS(NewellDBDir) EQ 0 THEN BEGIN
-     NewellDBDir            = defNewellDBDir
-  ENDIF
-  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     NEWELL_I__dbDir        = NewellDBDir
-  ;; ENDIF
-
-  IF N_ELEMENTS(NewellDBFile) EQ 0 THEN BEGIN
-     NewellDBFile           = defNewellDBFile
-  ENDIF
-  ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     NEWELL_I__dbFile       = NewellDBFile
-  ;; ENDIF
-
-  IF N_ELEMENTS(ion) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
-     IF KEYWORD_SET(force_load_db) THEN BEGIN
-        PRINTF,lun,"Forced loading of ion database ..."
-     ENDIF
-     PRINTF,lun,'Loading ion DB: ' + NewellDBFile + '...'
-     RESTORE,NewellDBDir+NewellDBFile
-
-     IF KEYWORD_SET(needsEphem) THEN BEGIN
-        ion_info = ion.info
-        jei      = ion.jei_lc
-        ji       = (TEMPORARY(ion)).jei_lc
-
-        RESTORE,NewellDBDir+defNewellDBEphem
-        
-        STR_ELEMENT,ephem,'info',/DELETE
-        ion      = CREATE_STRUCT(TEMPORARY(ephem), $
-                                 "jei",jei, $
-                                 "ji",ji, $
-                                 "chare",CHAR_ENERGY(ji,jei), $
-                                 'ion_info',TEMPORARY(ion_info))
-
-     ENDIF
-
-     NEWELL_ESPEC__ADD_INFO_STRUCT,ion, $
-                                   /IONS, $
-                                   DB_DIR=NewellDBDir, $
-                                   DB_DATE=DB_date, $
-                                   DB_VERSION=DB_version, $
-                                   DB_EXTRAS=DB_extras, $
-                                   REDUCE_DBSIZE=reduce_dbSize, $
-                                   IS_ALFNEWELL=is_AlfNewell
-
-     IF KEYWORD_SET(downgoing) THEN BEGIN
-        ion.info.is_downgoing = 1B
-     ENDIF
-
-     IF ~KEYWORD_SET(dont_perform_SH_correction) THEN BEGIN
-        ;;Correct fluxes
-        PRINT,"Correcting ionDB fluxes..."
-        ion.ji[WHERE(ion.ilat GT 0)]  = (-1.)*(ion.ji[WHERE(ion.ilat GT 0)])
-        ion.jei[WHERE(ion.ilat GT 0)] = (-1.)*(ion.jei[WHERE(ion.ilat GT 0)])
-
-        ion.info.correctedFluxes = 1B
-     ENDIF
-
-     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     ;;What type of delta do you want?
-     delta_stuff = KEYWORD_SET(load_delta_t) + KEYWORD_SET(load_dILAT) + KEYWORD_SET(load_dx) + KEYWORD_SET(load_dAngle)
-     CASE delta_stuff OF
-        0:
-        1: BEGIN
-           IF ~KEYWORD_SET(load_delta_t) THEN BEGIN
-              dILAT_file         = GET_FAST_DB_STRING(ion,/FOR_ION_DB) + '-delta_ilats.sav'
-              RESTORE,NewellDBDir+dILAT_file
-           ENDIF
-        END
-        ELSE: BEGIN
-           PRINT,"Can't have it all."
-           STOP
-        END
-     ENDCASE
-
-     IF KEYWORD_SET(load_delta_t) THEN BEGIN
-        PRINT,"Loading ion delta_ts ..."
-        ion__delta_t = GET_ESPEC_ION_DELTA_T(ion, $
-                                               DBNAME='ion')
-     ENDIF
-
-
-     ;; IF FILE_TEST(NewellDBDir+defNewellDBCleanInds) THEN BEGIN
-     ;;    RESTORE,NewellDBDir+defNewellDBCleanInds
-     ;; ENDIF ELSE BEGIN        
-     ;;    cleaned_i = BASIC_ESPEC_ION_DB_CLEANER(ion,/CLEAN_NANS_AND_INFINITIES)
-     ;;    PRINT,'Saving NaN- and INF-less ion DB inds to ' + defNewellDBCleanInds + '...'
-     ;;    SAVE,cleaned_i,FILENAME=NewellDBDir+defNewellDBCleanInds
-     ;; ENDELSE
-
-     ;; IF ~KEYWORD_SET(nonMem) THEN BEGIN
-     ;;    NEWELL_I__cleaned_i = cleaned_i
-     ;; ENDIF
-
   ENDIF ELSE BEGIN
      PRINTF,lun,'ion DB already loaded! Not restoring ' + NewellDBFile + '...'
   ENDELSE
 
+  IF KEYWORD_SET(force_load_db) THEN BEGIN
+     PRINTF,lun,"Forced loading of ion database ..."
+  ENDIF
+  PRINTF,lun,'Loading ion DB: ' + NewellDBFile + '...'
+  RESTORE,NewellDBDir+NewellDBFile
 
-  IF KEYWORD_SET(coordinate_system) THEN BEGIN
-     CASE STRUPCASE(coordinate_system) OF
-        'AACGM': BEGIN
-           use_AACGM = 1
-           use_GEI   = 0
-           use_GEO   = 0
-           use_MAG   = 0
-        END
-        'GEI'  : BEGIN
-           use_AACGM = 0
-           use_GEI   = 1
-           use_GEO   = 0
-           use_MAG   = 0
-           use_SDT   = 0
-        END
-        'GEO'  : BEGIN
-           use_AACGM = 0
-           use_GEI   = 0
-           use_GEO   = 1
-           use_MAG   = 0
-           use_SDT   = 0
-        END
-        'MAG'  : BEGIN
-           use_AACGM = 0
-           use_GEI   = 0
-           use_GEO   = 0
-           use_MAG   = 1
-           use_SDT   = 0
-        END
-        'SDT'  : BEGIN
-           use_AACGM = 0
-           use_GEI   = 0
-           use_GEO   = 0
-           use_MAG   = 0
-           use_SDT   = 1
-        END
-     ENDCASE
+  IF KEYWORD_SET(needsEphem) THEN BEGIN
+     ion_info = ion.info
+     jei      = ion.jei_lc
+     ji       = (TEMPORARY(ion)).jei_lc
 
-     PRINT,"Can't do anything with ion coords right now!"
+     RESTORE,NewellDBDir+defNewellDBEphem
+     
+     STR_ELEMENT,ephem,'info',/DELETE
+     ion      = CREATE_STRUCT(TEMPORARY(ephem), $
+                              "jei",jei, $
+                              "ji",ji, $
+                              "chare",CHAR_ENERGY(ji,jei), $
+                              'ion_info',TEMPORARY(ion_info))
+
   ENDIF
 
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  NEWELL_ESPEC__ADD_INFO_STRUCT,ion, $
+                                /IONS, $
+                                DB_DIR=NewellDBDir, $
+                                DB_DATE=DB_date, $
+                                DB_VERSION=DB_version, $
+                                DB_EXTRAS=DB_extras, $
+                                REDUCE_DBSIZE=reduce_dbSize, $
+                                IS_ALFNEWELL=is_AlfNewell
+
+  IF KEYWORD_SET(downgoing) THEN BEGIN
+     ion.info.is_downgoing = 1B
+  ENDIF
+
+  IF ~KEYWORD_SET(dont_perform_SH_correction) THEN BEGIN
+     ;;Correct fluxes
+     PRINT,"Correcting ionDB fluxes..."
+     ion.ji[WHERE(ion.ilat GT 0)]  = (-1.)*(ion.ji[WHERE(ion.ilat GT 0)])
+     ion.jei[WHERE(ion.ilat GT 0)] = (-1.)*(ion.jei[WHERE(ion.ilat GT 0)])
+
+     ion.info.correctedFluxes = 1B
+  ENDIF
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;What type of delta do you want?
+  FASTDBS__DELTA_SWITCHER, $
+     eSpec, $
+     OUT_WIDTH_MEASURE=width_measure, $
+     DBDIR=NewellDBDir, $
+     LOAD_DELTA_T=load_delta_t, $
+     LOAD_DELTA_ILAT_NOT_DELTA_T=load_dILAT, $
+     LOAD_DELTA_ANGLE_FOR_WIDTH_TIME=load_dAngle, $
+     LOAD_DELTA_X_FOR_WIDTH_TIME=load_dx, $
+     DO_NOT_MAP_DELTA_T=do_not_map_delta_t, $
+     DILAT_FILE=dILAT_file, $
+     ;; FOR_ALFDB=alfDB, $
+     ;; FOR_FASTLOC_DB=fastLocDB, $
+     ;; /FOR_ESPEC_DB ;; , $
+     /FOR_ION_DB
+
+  IF N_ELEMENTS(width_measure) GT 0 THEN BEGIN
+     ion__delta_t = TEMPORARY(width_measure)
+  ENDIF
+
+  ;; IF KEYWORD_SET(load_delta_t) THEN BEGIN
+  ;;    PRINT,"Loading ion delta_ts ..."
+  ;;    ion__delta_t = GET_ESPEC_ION_DELTA_T(ion, $
+  ;;                                         DBNAME='ion')
+  ;; ENDIF
+
+  ;; delta_stuff = KEYWORD_SET(load_delta_t) + KEYWORD_SET(load_dILAT) + KEYWORD_SET(load_dx) + KEYWORD_SET(load_dAngle)
+  ;; CASE delta_stuff OF
+  ;;    0:
+  ;;    1: BEGIN
+  ;;       IF ~KEYWORD_SET(load_delta_t) THEN BEGIN
+  ;;          dILAT_file         = GET_FAST_DB_STRING(ion,/FOR_ION_DB) + '-delta_ilats.sav'
+  ;;          RESTORE,NewellDBDir+dILAT_file
+  ;;       ENDIF
+  ;;    END
+  ;;    ELSE: BEGIN
+  ;;       PRINT,"Can't have it all."
+  ;;       STOP
+  ;;    END
+  ;; ENDCASE
+
+  ;;Handle coordinates
+  IF ~KEYWORD_SET(just_times) THEN BEGIN
+     FASTDBS__COORDINATE_SWITCHER, $
+        ion, $
+        COORDINATE_SYSTEM=coordinate_system, $
+        USE_LNG=use_lng, $
+        USE_AACGM_COORDS=use_AACGM, $
+        USE_GEI_COORDS=use_GEI, $
+        USE_GEO_COORDS=use_GEO, $
+        USE_MAG_COORDS=use_MAG, $
+        USE_SDT_COORDS=use_SDT, $
+        DEFCOORDDIR=defCoordDir, $
+        AACGM_FILE=AACGM_file, $
+        GEI_FILE=GEI_file, $
+        GEO_FILE=GEO_file, $
+        MAG_FILE=MAG_file, $
+        SDT_FILE=SDT_file, $
+        NO_MEMORY_LOAD=noMem
+
+  ENDIF
+
+  IF ~KEYWORD_SET(noMem) THEN BEGIN
      NEWELL_I__ion          = TEMPORARY(ion)
 
      IF KEYWORD_SET(delta_stuff) THEN BEGIN
         NEWELL_I__delta_t   = TEMPORARY(ion__delta_t)
      ENDIF
+
+     NEWELL_I__dbFile       = TEMPORARY(NewellDBFile)
+     NEWELL_I__dbDir        = TEMPORARY(NewellDBDir )
 
   ENDIF
 

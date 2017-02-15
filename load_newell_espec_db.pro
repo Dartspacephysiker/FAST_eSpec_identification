@@ -8,7 +8,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          NEWELLDBDIR=NewellDBDir, $
                          NEWELLDBFILE=NewellDBFile, $
                          FORCE_LOAD_DB=force_load_db, $
-                         DONT_LOAD_IN_MEMORY=nonMem, $
+                         ;; DONT_LOAD_IN_MEMORY=nonMem, $
                          DONT_PERFORM_CORRECTION=dont_perform_SH_correction, $
                          DONT_CONVERT_TO_STRICT_NEWELL=dont_convert_to_strict_newell, $
                          DONT_MAP_TO_100KM=no_mapping, $
@@ -38,28 +38,35 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
   COMPILE_OPT idl2
 
+  @common__newell_espec.pro
+  
+  defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
+  defCoordDir            = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
+
+
+  IF N_ELEMENTS(quiet) EQ 0 THEN quiet = 0
+
+  IF N_ELEMENTS(lun) EQ 0 THEN BEGIN
+     lun                 = -1
+  ENDIF
+
   ;;DONT_LOAD_IN_MEMORY is kept so that other routines don't make a mistake,
   ;;but I've included the keyword NO_MEMORY_LOAD from LOAD_MAXIMUS and LOAD_FASTLOC for the sake of my poor memory
-  IF N_ELEMENTS(noMem) NE 0 THEN BEGIN
-     IF N_ELEMENTS(nonMem) EQ 0 THEN BEGIN
-        nonMem = noMem
-     ENDIF ELSE BEGIN
-        IF nonMem NE noMem THEN BEGIN
-           PRINT,"Ludicrosity. Tell me to do one thing and then the other."
-           STOP
-        ENDIF
-     ENDELSE
-  ENDIF
+  ;; IF N_ELEMENTS(noMem) NE 0 THEN BEGIN
+  ;;    IF N_ELEMENTS(nonMem) EQ 0 THEN BEGIN
+  ;;       nonMem = noMem
+  ;;    ENDIF ELSE BEGIN
+  ;;       ;; IF nonMem NE noMem THEN BEGIN
+  ;;       ;;    PRINT,"Ludicrosity. Tell me to do one thing and then the other."
+  ;;       ;;    STOP
+  ;;       ;; ENDIF
+  ;;    ENDELSE
+  ;; ENDIF
 
   IF KEYWORD_SET(clear_memory) THEN BEGIN
      CLEAR_ESPEC_DB_VARS,QUIET=quiet
      RETURN
   ENDIF
-
-  @common__newell_espec.pro
-  
-  defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
-  ;; defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
 
   CASE 1 OF
      KEYWORD_SET(upgoing): BEGIN
@@ -142,18 +149,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
         ;; defNewellDBCleanInds   = 'iSpec_20160607_db--PARSED--Orbs_500-16361--indices_w_no_NaNs_INFs.sav'
 
-
-
      END
   ENDCASE
-  defCoordDir            = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
-
-
-  IF N_ELEMENTS(quiet) EQ 0 THEN quiet = 0
-
-  IF N_ELEMENTS(lun) EQ 0 THEN BEGIN
-     lun                 = -1
-  ENDIF
 
   IF N_ELEMENTS(NEWELL__eSpec) NE 0 AND ~KEYWORD_SET(force_load_db) THEN BEGIN
      CASE 1 OF
@@ -163,7 +160,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
            RETURN
         END
-        KEYWORD_SET(nonMem): BEGIN
+        KEYWORD_SET(noMem): BEGIN
            PRINT,"Moving eSpec structure/data in mem to outputted variables ..."
            eSpec            = TEMPORARY(NEWELL__eSpec     )
            ;; fastLoc_times    = TEMPORARY(FASTLOC__times)
@@ -173,20 +170,14 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
            eSpec__delta_t   = N_ELEMENTS(NEWELL__delta_t  ) GT 0 ? TEMPORARY(NEWELL__delta_t  ) : !NULL 
         END
         ELSE: BEGIN
-           ;; IF ~quiet THEN PRINT,'Restoring eSpec DB already in memory...'
-           ;; eSpec         = NEWELL__eSpec
-           ;; IF N_ELEMENTS(NEWELL__failCodes) GT 0 THEN BEGIN
-           ;;    failCodes  = NEWELL__failCodes
-           ;; ENDIF
-           ;; NewellDBDir   = NEWELL__dbDir
-           ;; NewellDBFile  = NEWELL__dbFile
            PRINT,"There is already an eSpec DB in memory! If you want it to come out, set /NO_MEMORY_LOAD"
         END
      ENDCASE
      RETURN
   ENDIF
-  ;; ENDIF
 
+
+  ;;Pick up directory and file if not specified
   IF N_ELEMENTS(NewellDBDir) EQ 0 THEN BEGIN
      NewellDBDir      = defNewellDBDir
   ENDIF
@@ -262,56 +253,75 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;What type of delta do you want?
-     delta_stuff = KEYWORD_SET(load_delta_t) + KEYWORD_SET(load_dILAT) + KEYWORD_SET(load_dx) + KEYWORD_SET(load_dAngle)
-     CASE delta_stuff OF
-        0:
-        1: BEGIN
-           IF ~KEYWORD_SET(load_delta_t) THEN BEGIN
-              dILAT_file         = GET_FAST_DB_STRING(eSpec,/FOR_ESPEC_DB) + '-delta_ilats.sav'
-              RESTORE,NewellDBDir+dILAT_file
-           ENDIF
-        END
-        ELSE: BEGIN
-           PRINT,"Can't have it all."
-           STOP
-        END
-     ENDCASE
+     FASTDBS__DELTA_SWITCHER, $
+        eSpec, $
+        OUT_WIDTH_MEASURE=width_measure, $
+        DBDIR=NewellDBDir, $
+        LOAD_DELTA_T=load_delta_t, $
+        LOAD_DELTA_ILAT_NOT_DELTA_T=load_dILAT, $
+        LOAD_DELTA_ANGLE_FOR_WIDTH_TIME=load_dAngle, $
+        LOAD_DELTA_X_FOR_WIDTH_TIME=load_dx, $
+        DO_NOT_MAP_DELTA_T=do_not_map_delta_t, $
+        DILAT_FILE=dILAT_file, $
+        ;; FOR_ALFDB=alfDB, $
+        ;; FOR_FASTLOC_DB=fastLocDB, $
+        /FOR_ESPEC_DB ;; , $
+     ;; FOR_ION_DB=ionDB
 
-     IF KEYWORD_SET(load_delta_t) THEN BEGIN
-        PRINT,"Loading eSpec delta_ts ..."
-        eSpec__delta_t = GET_ESPEC_ION_DELTA_T(eSpec, $
-                                               DBNAME='eSpec')
+     IF N_ELEMENTS(width_measure) GT 0 THEN BEGIN
+        eSpec__delta_t = TEMPORARY(width_measure)
      ENDIF
 
-     IF KEYWORD_SET(load_dILAT) THEN BEGIN
-        PRINT,"Loading dILAT in place of eSpec delta_t, and not mapping ..."
+     ;; delta_stuff = KEYWORD_SET(load_delta_t) + KEYWORD_SET(load_dILAT) + KEYWORD_SET(load_dx) + KEYWORD_SET(load_dAngle)
+     ;; CASE delta_stuff OF
+     ;;    0:
+     ;;    1: BEGIN
+     ;;       IF ~KEYWORD_SET(load_delta_t) THEN BEGIN
+     ;;          dILAT_file         = GET_FAST_DB_STRING(eSpec,/FOR_ESPEC_DB) + '-delta_ilats.sav'
+     ;;          RESTORE,NewellDBDir+dILAT_file
+     ;;       ENDIF
+     ;;    END
+     ;;    ELSE: BEGIN
+     ;;       PRINT,"Can't have it all."
+     ;;       STOP
+     ;;    END
+     ;; ENDCASE
+
+     ;; IF KEYWORD_SET(load_delta_t) THEN BEGIN
+     ;;    PRINT,"Loading eSpec delta_ts ..."
+     ;;    eSpec__delta_t = GET_ESPEC_ION_DELTA_T(eSpec, $
+     ;;                                           DBNAME='eSpec')
+     ;; ENDIF
+
+     ;; IF KEYWORD_SET(load_dILAT) THEN BEGIN
+     ;;    PRINT,"Loading dILAT in place of eSpec delta_t, and not mapping ..."
         
-        ;; no_mapping              = 1
-        do_not_map_delta_t      = 1
+     ;;    ;; no_mapping              = 1
+     ;;    do_not_map_delta_t      = 1
 
-        eSpec__delta_t          = TEMPORARY(ABS(FLOAT(width_ILAT)))
-        eSpec.info.dILAT_not_dt = 1B
-     ENDIF
+     ;;    eSpec__delta_t          = TEMPORARY(ABS(FLOAT(width_ILAT)))
+     ;;    eSpec.info.dILAT_not_dt = 1B
+     ;; ENDIF
 
-     IF KEYWORD_SET(load_dAngle) THEN BEGIN
-        PRINT,"Loading dAngle in place of eSpec delta_t, and not mapping ..."
+     ;; IF KEYWORD_SET(load_dAngle) THEN BEGIN
+     ;;    PRINT,"Loading dAngle in place of eSpec delta_t, and not mapping ..."
         
-        ;; no_mapping               = 1
-        do_not_map_delta_t       = 1
+     ;;    ;; no_mapping               = 1
+     ;;    do_not_map_delta_t       = 1
 
-        eSpec__delta_t           = TEMPORARY(ABS(FLOAT(width_angle)))
-        eSpec.info.dAngle_not_dt = 1B
-     ENDIF
+     ;;    eSpec__delta_t           = TEMPORARY(ABS(FLOAT(width_angle)))
+     ;;    eSpec.info.dAngle_not_dt = 1B
+     ;; ENDIF
 
-     IF KEYWORD_SET(load_dx) THEN BEGIN
-        PRINT,"Loading dx in place of eSpec delta_t, and not mapping ..."
+     ;; IF KEYWORD_SET(load_dx) THEN BEGIN
+     ;;    PRINT,"Loading dx in place of eSpec delta_t, and not mapping ..."
         
-        ;; no_mapping              = 1
-        do_not_map_delta_t      = 1
+     ;;    ;; no_mapping              = 1
+     ;;    do_not_map_delta_t      = 1
 
-        eSpec__delta_t          = TEMPORARY(ABS(FLOAT(width_x)))
-        eSpec.info.dx_not_dt    = 1B
-     ENDIF
+     ;;    eSpec__delta_t          = TEMPORARY(ABS(FLOAT(width_x)))
+     ;;    eSpec.info.dx_not_dt    = 1B
+     ;; ENDIF
 
      IF KEYWORD_SET(no_mapping) OR KEYWORD_SET(do_not_map_fluxes) THEN BEGIN
         PRINT,"Not mapping to 100 km ..."
@@ -329,7 +339,6 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         eSpec__delta_t         /= SQRT(eSpec.mapFactor)
         eSpec.info.dt_is_mapped = 1B
      ENDIF
-
 
      ;; STR_ELEMENT,eSpec,'mapFactor',/DELETE
 
@@ -383,127 +392,29 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      IF ~quiet THEN PRINTF,lun,'eSpec DB already loaded! Not restoring ' + NewellDBFile + '...'
   ENDELSE
 
-  IF KEYWORD_SET(coordinate_system) THEN BEGIN
-     CASE STRUPCASE(coordinate_system) OF
-        'AACGM': BEGIN
-           use_aacgm = 1
-           use_gei   = 0
-           use_geo   = 0
-           use_mag   = 0
-           use_SDT   = 0
-        END
-        'GEI'  : BEGIN
-           use_aacgm = 0
-           use_gei   = 1
-           use_geo   = 0
-           use_mag   = 0
-           use_SDT   = 0
-        END
-        'GEO'  : BEGIN
-           use_aacgm = 0
-           use_gei   = 0
-           use_geo   = 1
-           use_mag   = 0
-           use_SDT   = 0
-        END
-        'MAG'  : BEGIN
-           use_aacgm = 0
-           use_geo   = 0
-           use_mag   = 1
-           use_SDT   = 0
-        END
-        'SDT'  : BEGIN
-           use_aacgm = 0
-           use_geo   = 0
-           use_mag   = 0
-           use_SDT   = 1
-        END
-     ENDCASE
-  ENDIF
+  ;;Handle coordinates
+  IF ~KEYWORD_SET(just_times) THEN BEGIN
 
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  PRINT,"UNDER CONSTRUCTION"
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  IF KEYWORD_SET(use_aacgm) THEN BEGIN
-     PRINT,"I know. I already did."
-
-     ;; PRINT,'Using AACGM lat, MLT, and alt ...'
-
-     coordStr  = TEMPORARY(AACGM)
-     coordName = 'AACGM'
-     ;; RESTORE,defCoordDir+AACGM_file
-
-     ;; ALFDB_SWITCH_COORDS,MAXIMUS__maximus,max_AACGM,'AACGM'
-
-  ENDIF
-
-  IF KEYWORD_SET(use_GEI) THEN BEGIN
-     PRINT,'Using GEI lat and alt ...'
-
-     RESTORE,defCoordDir+GEI_file
-
-     coordStr  = TEMPORARY(GEI)
-     coordName = 'GEI'
-
-  ENDIF
-
-  IF KEYWORD_SET(use_GEO) THEN BEGIN
-     PRINT,'Using GEO lat and alt ...'
-
-     RESTORE,defCoordDir+GEO_file
-
-     coordStr  = TEMPORARY(GEO)
-     coordName = 'GEO'
-
-  ENDIF
-
-  IF KEYWORD_SET(use_MAG) THEN BEGIN
-     PRINT,'Using MAG lat and alt ...'
-
-     RESTORE,defCoordDir+MAG_file
-
-     coordStr  = TEMPORARY(MAG)
-     coordName = 'MAG'
-
-  ENDIF
-
-  IF ~KEYWORD_SET(noMem) THEN BEGIN
-     IF ~(KEYWORD_SET(use_AACGM) OR KEYWORD_SET(use_MAG) OR KEYWORD_SET(use_GEO)) THEN BEGIN
-        IF STRUPCASE(eSpec.info.coords) NE 'SDT' THEN BEGIN
-           use_SDT = 1
-        ENDIF 
-     ENDIF
-  ENDIF
-
-  IF KEYWORD_SET(use_SDT) THEN BEGIN
-
-     RESTORE,defCoordDir+SDT_file
-
-     coordName = 'SDT'
-     coordStr  = TEMPORARY(SDT)
-
-  ENDIF
-
-  IF N_ELEMENTS(coordName) GT 0 THEN BEGIN
-     ALFDB_SWITCH_COORDS, $
+     FASTDBS__COORDINATE_SWITCHER, $
         eSpec, $
-        coordStr, $
-        coordName, $
-        SUCCESS=success
-  ENDIF
+        COORDINATE_SYSTEM=coordinate_system, $
+        USE_LNG=use_lng, $
+        USE_AACGM_COORDS=use_AACGM, $
+        USE_GEI_COORDS=use_GEI, $
+        USE_GEO_COORDS=use_GEO, $
+        USE_MAG_COORDS=use_MAG, $
+        USE_SDT_COORDS=use_SDT, $
+        DEFCOORDDIR=defCoordDir, $
+        AACGM_FILE=AACGM_file, $
+        GEI_FILE=GEI_file, $
+        GEO_FILE=GEO_file, $
+        MAG_FILE=MAG_file, $
+        SDT_FILE=SDT_file, $
+        NO_MEMORY_LOAD=noMem
 
-  IF KEYWORD_SET(use_lng) THEN BEGIN
-     index = -1
-     STR_ELEMENT,eSpec,'lng',INDEX=index
-     IF index NE -1 THEN BEGIN
-        flip = WHERE(eSpec.lng LT 0.)
-        IF flip[0] NE -1 THEN BEGIN
-           eSpec.lng[flip] += 360.
-        ENDIF
-     ENDIF
   ENDIF
-
-  IF ~KEYWORD_SET(nonMem) THEN BEGIN
+  
+  IF ~KEYWORD_SET(noMem) THEN BEGIN
      NEWELL__eSpec          = TEMPORARY(eSpec)
 
      IF KEYWORD_SET(delta_stuff) THEN BEGIN
