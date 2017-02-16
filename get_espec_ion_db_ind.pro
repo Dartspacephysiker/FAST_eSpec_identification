@@ -524,7 +524,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                alfDB_plot_struct.charERange[1], $
                                NEWELL_THE_CUSP=alfDB_plot_struct.fluxPlots__Newell_the_cusp, $
                                FOR_ESPEC_DB=~is_ion, $
-
+                               FOR_ION_DB=is_ion, $
                                LUN=lun)
 
            region_i          = CGSETINTERSECTION(region_i,chare_i)
