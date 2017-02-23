@@ -1,0 +1,11 @@
+#Not plots dir
+plots/
+
+#Not saves and things
+saves_output_etc/
+
+#No text output
+txtOutput/
+
+#No text loggies
+txt_log_etc/

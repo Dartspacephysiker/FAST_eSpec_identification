@@ -1,0 +1,55 @@
+Originally, mFCode = bFCode = 0.
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;MONOENERGETIC EVENTS
+  ;;I. Identify peak in differential energy flux
+  mFCode |= 1 if we fail here.
+  We also keep mono_nAbove and mono_nBelow.
+
+  ;;**
+  ;;2.  Is peak_flux GE 1.0e8 eV/cm^2-sr-eV?
+  ;;    i.  If so, continue to 3
+  ;;    ii. Else, not monoenergetic. Monoenergetic EQ -2
+  ;;    NOTE: They reference Newell et al. [1996b] here, saying it is the smallest threshold that seems to exclude homogeneous aurora
+  mFCode |= 2 if we fail here.
+
+  ;;**
+  ;;3. Identify average energy. Is Eavg GT 80 eV?
+  ;;   i.   YES: Continue to 4
+  ;;   ii.  NO : Not monoenergetic. Monoenergetic EQ -3
+  mfCode |= 4 if we fail here.
+
+  ;;**
+  ;;4. Get peakEnergy. Is peakEnergy GE 100 eV? 
+  ;;   i.   YES: Monoenergetic! Go to 5.
+  ;;   ii.  NO : Not monoenergetic. Monoenergetic EQ -4
+  mfCode |= 8 if we fail here.
+
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;BROADBAND EVENTS
+  ;;****************
+  ;;1. Get N_good bins WHERE(dJ_E/dE > 2.0e8 eV/cm^2-sr-eV)
+  ;;   i.   N_good GE 3 ? Continue to 2.
+  ;;   ii.  Else, not broadband. Broadband EQ -1
+  ;; broad_i                              = WHERE(dSpec_E GT 2.0e8,nBroad)
+  bFCode |= 1 if we fail here.
+
+  ;;**
+  ;;2.  Calculate Eavg
+  ;;   i.   Eavg GT 80 eV ? Continue to 3.
+  ;;   ii.  Else, not broadband. Broadband EQ -2
+  bFCode |= 2 if we fail here.
+
+  ;;**
+  ;;3. Get N_broad_GE_min_eV(=number of N_good energies at or above min_eV). N_broad_GE_min_eV GE 1?
+  ;;   i.   YES: broadband! Go to 4.
+  ;;   ii.  NO : Not broadband. Broadband EQ -3
+  bFCode |= 4 if we fail here.
+
+  If we have failcodes for these events, then mono = broad = 250 if they are not either 1 or 2.
+
+
+  So in order to determine which events would have become broad, we should consider events for which
+  ( (mFCode AND 1) GT 0) OR ( (mFCode AND 2) GT 0 ). This gives us all events failing either step 1 or 2 of the mono algorithm.
+  THEN we consider events for which ( (bFCode AND 1) EQ 0 ) AND ( (bFCode AND 4) EQ 0).
