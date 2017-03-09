@@ -3,7 +3,7 @@
 ;;phase error. So let's just use stuff before orbit 14973
 PRO JOURNAL__20170102__WHICH_ORBITS_AT_REALLY_LOW_LATITUDES
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__newell_espec.pro 
 

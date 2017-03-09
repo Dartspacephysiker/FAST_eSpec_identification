@@ -20,7 +20,7 @@ PRO PLOT_STEREO_AND_HISTOPLOTS__SMALL_ESPECSTRUCT, $
    PLOTDIR=plotDir, $
    BATCH=batch
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Plot options
   savePlot      = N_ELEMENTS(savePlot) GT 0 ? savePlot          : 0

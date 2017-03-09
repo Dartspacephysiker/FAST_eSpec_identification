@@ -1,7 +1,7 @@
 ;2016/10/08
 PRO JOURNAL__20161008__GET_ESPECDB_FOOTPOINTS_AND_MAGFIELD_RATIOS__SDT_STYLE
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   outDir        = '/SPENCEdata/Research/database/FAST/dartdb/saves/mapratio_dbs/'
   ;; outFilePref   = 'mapratio_for_20160607_eSpecDB--20161008--'
@@ -66,7 +66,7 @@ END
 
 FUNCTION DIVVY_INDICES,N,delta,OUT_kDecPlace,OUT_lens
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;divvy up indices
   div       = !NULL
@@ -94,7 +94,7 @@ PRO CREATE_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,tmpDir, $
                            START_K=start_k, $
                            END_K=end_k
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__newell_espec.pro
 
@@ -167,7 +167,7 @@ PRO STITCH_TOGETHER_ESPEC_FOOTPOINT_FILES,div,lens,kDecPlace,outFilePref,tmpDir,
                                           START_K=start_k, $
                                           END_K=end_k
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF ~MAKE_SURE_FILES_EXIST(div,kDecPlace,outFilePref,tmpDir) THEN RETURN
 
@@ -273,7 +273,7 @@ END
 
 FUNCTION MAKE_SURE_FILES_EXIST,div,kDecPlace,outFilePref,outDir
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   PRINT,'Making sure all ' + STRCOMPRESS(N_ELEMENTS(div[0,*]),/REMOVE_ALL) + $
         ' files exist ...'

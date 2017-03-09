@@ -3,7 +3,7 @@ PRO IS_STRUCT_ION_OR_ESPEC,dbStruct, $
                            QUIET=quiet, $
                            LUN=lun
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(lun) EQ 0 THEN lun = -1   ;stdout
 

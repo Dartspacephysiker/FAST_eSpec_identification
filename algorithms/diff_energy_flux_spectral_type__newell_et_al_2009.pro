@@ -17,7 +17,7 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__NEWELL_ET_AL_2009,eSpec,Je,Jee, $
    BATCH_MODE=batch_mode, $
    INCLUDE_IONS=include_ions
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;return control to caller if no one is watching
   IF KEYWORD_SET(batch_mode) THEN BEGIN

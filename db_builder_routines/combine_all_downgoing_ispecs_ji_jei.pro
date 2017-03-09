@@ -1,7 +1,7 @@
 ;;2016/12/29
 PRO COMBINE_ALL_DOWNGOING_ISPECS_JI_JEI
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Running options
   loud                      = 1

@@ -15,7 +15,7 @@ PRO LOAD_NEWELL_ORB_ESPEC_FILE,orbit,requested_interval, $
                                ION_SC_POT=ion_sc_pot, $
                                ION_SC_TIME=ion_sc_time
                                
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
 
   IF ~KEYWORD_SET(orbit) THEN BEGIN

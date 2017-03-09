@@ -28,7 +28,7 @@ PRO JOURNAL__20161122__SO_HOW_DO_WE_CLEAN_YOU_ESPEC_DB, $
    SUFF__PLOTDIR=suff__plotDir, $
    CUSTOM_TITLE=custom_title
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__newell_espec.pro
 

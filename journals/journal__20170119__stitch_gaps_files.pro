@@ -1,7 +1,7 @@
 ;;01/19/17
 PRO JOURNAL__20170119__STITCH_GAPS_FILES
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;; startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
   ;; endOrb      = 9500

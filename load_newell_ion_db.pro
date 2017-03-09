@@ -30,7 +30,7 @@ PRO LOAD_NEWELL_ION_DB,ion,ion__times,ion__delta_t, $
                        QUIET=quiet, $
                        LUN=lun
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__newell_ion_db.pro
   

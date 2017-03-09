@@ -7,7 +7,7 @@ PRO ESPEC_STATS_STRINGS,stats_name,stats_title, $
                         NEG_ONLY=neg_only, $
                         LOG_STATS=log_stats
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   CASE 1 OF
      KEYWORD_SET(je): BEGIN

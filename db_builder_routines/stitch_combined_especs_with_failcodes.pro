@@ -1,7 +1,7 @@
 ;;06/09/16
 PRO STITCH_COMBINED_ESPECS_WITH_FAILCODES
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Running options
   loud                      = 0

@@ -19,7 +19,7 @@ PRO SPLIT_ESPECDB_I_BY_ESPEC_TYPE,good_i, $ ;is_despun, $
                                   ;; DESPUN_ALF_DB=despun_alf_db, $
                                   SUM_LUN=sum_lun
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__newell_espec.pro
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN

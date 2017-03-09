@@ -18,7 +18,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                               DONT_LOAD_IN_MEMORY=noMem, $
                               PRINT_PARAM_SUMMARY=print_param_summary
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
   
   @common__mlt_ilat_magc_etc.pro
 

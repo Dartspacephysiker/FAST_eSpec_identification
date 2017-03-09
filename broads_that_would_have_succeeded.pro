@@ -3,7 +3,7 @@ FUNCTION BROADS_THAT_WOULD_HAVE_SUCCEEDED,eSpec,failCodes,charEThresh, $
                                           CUSPCOUNT=cuspCount, $
                                           NOTCUSPCOUNT=notCuspCount
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(charEThresh) EQ 0 THEN charEThresh = 140
 

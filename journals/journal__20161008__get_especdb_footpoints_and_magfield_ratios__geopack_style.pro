@@ -1,7 +1,7 @@
 ;;2016/10/08
 PRO JOURNAL__20161008__GET_ESPECDB_FOOTPOINTS_AND_MAGFIELD_RATIOS__GEOPACK_STYLE
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   PRINT,"STOP! Work in progress! Haven't figured out the details of the field-line mapping and as of right now (2016/10/08) I'm just resorting to SDT's little BFOOT thing."
   PRINT,'(See JOURNAL__20161008__GET_ESPECDB_FOOTPOINTS_AND_MAGFIELD_RATIOS__SDT_STYLE)'

@@ -14,7 +14,7 @@ FUNCTION BARPLOT_ESPEC_TYPES_VS_MLT,eSpec, $
                                     PLOTDIR=plotDir, $
                                     CLOSE_WINDOW_AFTER_SAVE=close_window_after_save
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
 
   IF N_ELEMENTS(binSize) EQ 0 THEN BEGIN

@@ -1,7 +1,7 @@
 ;;06/04/16
 PRO REPROCESS_ESPECS
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Running options
   loud                      = 1

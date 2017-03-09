@@ -1,7 +1,7 @@
 ;;11/25/16
 FUNCTION GET_NEWELL_DB_STRING,elOrI
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;; RETURN,'eSpecDB_' + $
   ;;        eSpec.info.DB_DATE + '_' + $

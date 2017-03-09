@@ -11,7 +11,7 @@
 ;;    October 22        11:23:00.000-11:43:00.000
 PRO JOURNAL__20160825__PLOT_DMSP_FAST_CONJUNCTION_PERIODS_IN_1999
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;DB to check out
   dbDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'

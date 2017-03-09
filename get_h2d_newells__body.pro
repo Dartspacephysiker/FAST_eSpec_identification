@@ -24,7 +24,7 @@ PRO GET_H2D_NEWELLS__BODY,eSpec, $
                           PRINT_MANDM=print_mAndM, $
                           LUN=lun
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;Indices

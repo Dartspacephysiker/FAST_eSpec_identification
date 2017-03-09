@@ -1,7 +1,7 @@
 ;;02/09/17
 PRO IDENTIFY_GAPS__RM_INTERVAL,tmpTime,wCheck,wCheck_ii,nCheck,start_ii,stop_ii,sampDT,junk_ii
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   wCheck_ii = !NULL
 

@@ -13,7 +13,7 @@ PRO JOURNAL__20160825__STEREO_AND_HISTOPLOTS__AACGM_V2_VS_COORDS_PROVIDED_BY_SDT
    RESTRICT_HISTO_ILAT_RANGE=restrict_histo_ILAT_range, $
    BATCH=batch
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Plot options
   savePlot      = N_ELEMENTS(savePlot) GT 0 ? savePlot          : 0

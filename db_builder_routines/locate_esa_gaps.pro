@@ -34,7 +34,7 @@ PRO LOCATE_ESA_GAPS,data_str,  $
                     units = units, $
                     gap_time = gap_time
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;	Time how long the routine takes
   ex_start = SYSTIME(1)

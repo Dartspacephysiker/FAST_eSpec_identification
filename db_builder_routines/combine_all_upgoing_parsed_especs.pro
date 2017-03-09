@@ -1,7 +1,7 @@
 ;;06/04/16
 PRO COMBINE_ALL_UPGOING_PARSED_ESPECS
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Running options
   loud                      = 0

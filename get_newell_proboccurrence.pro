@@ -3,7 +3,7 @@ PRO GET_NEWELL_PROBOCCURRENCE,h2dStrs, $
                               ;; COMBINE_ACCELERATED=comb_accelerated, $                              
                               OUT_H2D_LIST=out_H2D_list
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Denominator doesn't change, even if we have accelerated
   denom                             = h2dStrs[0].data +h2dStrs[1].data+h2dStrs[2].data

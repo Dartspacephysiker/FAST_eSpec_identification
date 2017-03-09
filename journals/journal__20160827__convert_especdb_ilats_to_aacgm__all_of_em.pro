@@ -2,7 +2,7 @@
 ;;Please compile AACGM lib before running: IDL> @compile_aacgm.pro
 PRO JOURNAL__20160827__CONVERT_ESPECDB_ILATS_TO_AACGM__ALL_OF_EM
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   do_conversions    = 1
 

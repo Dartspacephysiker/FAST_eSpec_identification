@@ -31,7 +31,7 @@ PRO GET_ESPEC_FLUX_DATA, $
    DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
    DONT_LOAD_IN_MEMORY=nonMem
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__newell_espec.pro
   @common__newell_ion_db.pro

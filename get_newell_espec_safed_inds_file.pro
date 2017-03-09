@@ -8,7 +8,7 @@ FUNCTION GET_NEWELL_ESPEC_SAFED_INDS_FILE,eSpec, $
                                           JUSTNAMEPLEASE=justNamePlease, $
                                           QUIET=quiet
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   cleanedUpFile = NewellDBDir + $
                   GET_NEWELL_DB_STRING(eSpec) + $

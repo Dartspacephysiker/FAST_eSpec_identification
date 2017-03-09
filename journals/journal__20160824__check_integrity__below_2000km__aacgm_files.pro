@@ -6,7 +6,7 @@
 ;will never run to any value greater than, say, 10 million. Of course there are duplicates!
 PRO JOURNAL__20160824__CHECK_INTEGRITY__BELOW_2000KM__AACGM_FILES
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;
   indDir   = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/AACGM_v2/'

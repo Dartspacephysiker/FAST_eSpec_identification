@@ -1,6 +1,6 @@
 PRO FAST_ESPEC__GEI_AND_GEO
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   eSpecDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
 

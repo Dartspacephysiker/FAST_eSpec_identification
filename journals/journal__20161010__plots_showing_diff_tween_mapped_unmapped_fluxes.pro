@@ -1,7 +1,7 @@
 ;;10/10/16
 PRO JOURNAL__20161010__PLOTS_SHOWING_DIFF_TWEEN_MAPPED_UNMAPPED_FLUXES
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Just for reference--we don't actually use these here
   ;; ephemFileIndArr  = [[      0,10000000,20000000], $

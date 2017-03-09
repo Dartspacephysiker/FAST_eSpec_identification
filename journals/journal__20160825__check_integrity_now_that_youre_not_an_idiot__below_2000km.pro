@@ -2,7 +2,7 @@
 ;;Use JOURNAL__20160825__STITCH_TOGETHER_BELOW_2000KM_FILES__INCLUDING_OTHER_COORDS to get all coord systems together
 PRO JOURNAL__20160825__CHECK_INTEGRITY_NOW_THAT_YOURE_NOT_AN_IDIOT__BELOW_2000KM
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;
   indDir       = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'

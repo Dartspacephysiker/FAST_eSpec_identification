@@ -9,7 +9,7 @@ PRO GET_ESPEC_INDS_BY_TYPE,eSpec,m_i,b_i,d_i, $
                            NO_INDS_AVAILABLE=skip_me, $
                            QUIET=quiet
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   opener = 'GET_ESPEC_INDS_BY_TYPE: '
   CASE 1 OF

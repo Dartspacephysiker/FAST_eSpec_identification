@@ -1,6 +1,6 @@
 PRO JOURNAL__20160803__STRING_TOGETHER_SORTED_UNIQ_ESPEC_FILES
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   eSpecDir          = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
 

@@ -16,7 +16,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
    BATCH_MODE=batch_mode, $
    ERRORLOGFILE=errorLogFile
    
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(chunk_save_interval) EQ 0 THEN chunk_save_interval = 0
   ;; IF KEYWORD_SET(batch_mode) THEN BEGIN

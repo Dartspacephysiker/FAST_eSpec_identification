@@ -5,7 +5,7 @@ PRO PLOT_NEWELL_ORB_ESPEC__SC_POT,orbit,interval, $
                                   OUT_PLOTARR=out_plotArr, $
                                   WINDOW=window
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   LOAD_NEWELL_ORB_ESPEC_FILE,orbit,requested_interval, $
                              INTERVAL=interval, $

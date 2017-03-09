@@ -3,7 +3,7 @@ FUNCTION BASIC_ESPEC_ION_DB_CLEANER,dbStruct,LUN=lun, $
                                     CLEAN_NANS_AND_INFINITIES=clean_nans_and_infinities, $
                                     CLEAN_ON_THE_FLY=clean_on_the_fly
   
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
   
   IF N_ELEMENTS(lun) EQ 0 THEN lun = -1
   n_events = N_ELEMENTS(dbStruct.orbit)

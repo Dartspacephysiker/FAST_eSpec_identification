@@ -1,7 +1,7 @@
 ;;02/02/17
 PRO JOURNAL__20170202__FIND_WAY_LOW_GEOLAT_ORBITS
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   dir    = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
   geofil = 'eSpec_DB_20160607-GEO.sav'

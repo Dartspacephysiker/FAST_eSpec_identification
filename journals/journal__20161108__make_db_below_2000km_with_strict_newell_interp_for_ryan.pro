@@ -1,7 +1,7 @@
 ;;11/08/16
 PRO JOURNAL__20161108__MAKE_DB_BELOW_2000KM_WITH_STRICT_NEWELL_INTERP_FOR_RYAN
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   dir = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
 

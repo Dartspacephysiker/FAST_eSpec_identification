@@ -2,7 +2,7 @@
 ;;Generating info commented out at bottom
 PRO JOURNAL__20160826__CAREFULLY_CHECK_COORD_CONVERSION_AND_JE_VALS__ANY_OLD_ORBIT
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   startPeriod         = 0
 

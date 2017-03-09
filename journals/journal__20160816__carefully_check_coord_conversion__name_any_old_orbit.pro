@@ -2,7 +2,7 @@
 ;;Generating info commented out at bottom
 PRO JOURNAL__20160816__CAREFULLY_CHECK_COORD_CONVERSION__NAME_ANY_OLD_ORBIT
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   orbNumArr           = [1000,5000]
   ;; orbNumArr           = [1000,10000]

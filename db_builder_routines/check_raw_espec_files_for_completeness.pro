@@ -1,7 +1,7 @@
 ;;06/03/16
 PRO CHECK_RAW_ESPEC_FILES_FOR_COMPLETENESS
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   firstOrb                             = 500
   lastOrb                              = 16361

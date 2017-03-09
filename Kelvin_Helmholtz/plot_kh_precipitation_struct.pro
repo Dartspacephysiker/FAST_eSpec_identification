@@ -40,7 +40,7 @@ PRO PLOT_KH_PRECIPITATION_STRUCT,struct, $
                                  REMOVE_EPS=remove_eps, $
                                  DO_NOT_SAVE=noSave
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Things that work
   __VALID_XVARS = STRUPCASE(['time','x','mlt','ilat','lShell', $

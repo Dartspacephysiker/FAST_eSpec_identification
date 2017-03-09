@@ -9,7 +9,7 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                                   REDUCE_DBSIZE=reduce_dbSize, $
                                   IS_ALFNEWELL=is_AlfNewell
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   CASE 1 OF
      KEYWORD_SET(ions): BEGIN

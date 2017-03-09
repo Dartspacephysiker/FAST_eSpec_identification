@@ -6,7 +6,7 @@ PRO PRINT_ESPEC_STATS,eSpec, $
                       INTERPRETED_STATISTICS=interpreted_statistics, $
                       LUN=lun
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(lun) NE 0 THEN l = lun ELSE l = -1
 

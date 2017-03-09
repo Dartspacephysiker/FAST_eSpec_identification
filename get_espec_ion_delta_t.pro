@@ -3,7 +3,7 @@ FUNCTION GET_ESPEC_ION_DELTA_T,elOrIon, $
                                DBNAME=dbName
                                
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(dbName) EQ 0 THEN dbname = 'ElOrIon'
 

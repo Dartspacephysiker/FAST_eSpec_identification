@@ -1,7 +1,7 @@
 ;;06/13/16
 PRO JOURNAL__20160613__COMPARE_THE_TWO_ESPEC_DBS
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   inDir    = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
   ;;The file with failcodes

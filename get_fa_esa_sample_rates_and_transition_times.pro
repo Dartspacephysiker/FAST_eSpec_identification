@@ -6,7 +6,7 @@ PRO GET_FA_ESA_SAMPLE_RATES_AND_TRANSITION_TIMES,tmpTime, $
    BEFSTART_I=befStart_i, $
    JUNKTIMES=junkTimes
   
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
   
   ;;Defaults
   delta   = 0.08

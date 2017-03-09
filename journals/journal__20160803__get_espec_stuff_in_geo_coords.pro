@@ -1,7 +1,7 @@
 ;;2016/08/03 Note the addition of realFile, since that's the one that is sorted. The other had a few dupes of unknown origin.
 PRO JOURNAL__20160803__GET_ESPEC_STUFF_IN_GEO_COORDS
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   eSpecDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/fully_parsed/'
 

@@ -2,7 +2,7 @@
 ;;Output from the end of JOURNAL__20170130__CHECK_OUT_NEW_DOWNGOING_ION_DB suggests that we've got dupes
 PRO JOURNAL__20170209__DUPETIMES_IN_NEW_DOWNGOING_ION_DB
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   
   dir          = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/do_the_Newell_2009/downgoing_ions__v1_output/'

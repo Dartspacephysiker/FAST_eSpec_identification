@@ -3,7 +3,7 @@ PRO ADD_EVENT_TO_SPECTRAL_STRUCT,events,tempEvent,tSort_i, $
 
   ;; event = { time_e:[events.time_e,tempEvent.time_e], $ ; When are you?
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   IF N_ELEMENTS(tSort_i) GT 0 THEN BEGIN
      inds = tSort_i

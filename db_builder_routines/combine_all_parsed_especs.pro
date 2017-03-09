@@ -2,7 +2,7 @@
 PRO COMBINE_ALL_PARSED_ESPECS, $
    UPGOING=upgoing
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Running options
   loud                      = 0

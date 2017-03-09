@@ -1,7 +1,7 @@
 ;;02/01/17
 PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PARALLEL
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
   
   ;; outFile_pref            = 'eSpec_DB_20160607'
   outFile_pref            = 'eSpecDB_20170203_v0_0--with_mapping_factors'

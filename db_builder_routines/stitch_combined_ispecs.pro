@@ -2,7 +2,7 @@
 PRO STITCH_COMBINED_ISPECS,DOWNGOING=downgoing, $
                            DBDATE=DBDate
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;Running options
   loud                      = 0

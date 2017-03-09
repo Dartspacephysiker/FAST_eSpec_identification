@@ -1,7 +1,7 @@
 ;;2017/01/20
 PRO JOURNAL__20170120__PLOT_JE_JEE_CHARE_WITH_GAPS_REMOVED
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   startOrb    = 9843            ;Otherwise it just picks the first orbit in eSpec
   showPlots   = 1

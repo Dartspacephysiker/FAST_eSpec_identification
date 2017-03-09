@@ -6,7 +6,7 @@ FUNCTION GET_NEWELL_ESPEC_KILLGAP_FILE,DBStruct, $
                                        FOR_ION_DB=for_ion_DB, $
                                        STOP_IF_NOEXIST=stop_if_noExist
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   defNewellDir   = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/'
   defNewellIDir  = '/SPENCEdata/Research/database/FAST/dartdb/ion_db/'

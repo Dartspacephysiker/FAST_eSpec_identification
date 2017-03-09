@@ -5,7 +5,7 @@ PRO PLOT_ESPEC_JE_JEE_CHARE_ORBSUMMARY,curOrb, $
                                        JUNK_I=junk_i, $
                                        BEFSTART_I=befStart_i
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__newell_espec.pro
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN

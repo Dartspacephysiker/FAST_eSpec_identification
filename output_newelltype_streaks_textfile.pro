@@ -9,7 +9,7 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
    
 
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   outDir   = '/SPENCEdata/Research/Satellites/FAST/espec_identification/txtOutput/'
   

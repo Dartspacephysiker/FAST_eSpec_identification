@@ -5,7 +5,7 @@
 ;;           List at bottom.
 PRO JOURNAL__20170130__CHECK_OUT_NEW_DOWNGOING_ION_DB
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   dry_run             = 0
 

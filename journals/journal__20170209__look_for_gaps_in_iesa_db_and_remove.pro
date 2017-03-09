@@ -1,7 +1,7 @@
 ;;02/09/17
 PRO JOURNAL__20170209__LOOK_FOR_GAPS_IN_IESA_DB_AND_REMOVE
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   diffTThresh = 10 ;allowable gap between data and EESA start times
 

@@ -9,7 +9,7 @@ PRO PLOT_ESPEC_SAMPLE_RATES_AND_TRANSITION_TIMES,curOrb, $
    W0312_II=w0312_ii ;, $
    ;; WIN_INDEX=win_index
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   junkTransVal = 0
   junkStartVal = 1

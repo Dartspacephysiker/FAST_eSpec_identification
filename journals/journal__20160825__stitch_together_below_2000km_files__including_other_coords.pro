@@ -1,7 +1,7 @@
 ;;08/23/16
 PRO JOURNAL__20160825__STITCH_TOGETHER_BELOW_2000KM_FILES__INCLUDING_OTHER_COORDS
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
 
   inDir        = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'

@@ -1,7 +1,7 @@
 ;;2017/01/19
 PRO JOURNAL__20170119__LOOK_FOR_GAPS_AND_REMOVE__SLEEK
 
-  COMPILE_OPT IDL2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   startOrb    = 500             ;Otherwise it just picks the first orbit in eSpec
   showPlots   = 0

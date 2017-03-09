@@ -27,7 +27,7 @@ PRO GET_H2D_NEWELLS__EACH_TYPE__NONALFVEN,eSpec,eSpec_i, $
                                           LUN=lun
 
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   ;;This common block is defined ONLY here, in GET_ESPEC_ION_DB_IND, and in LOAD_NEWELL_ESPEC_DB
   @common__newell_espec.pro

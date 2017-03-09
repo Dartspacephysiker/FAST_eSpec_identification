@@ -9,7 +9,7 @@ FUNCTION GET_ESPEC_COORD_CONVERSION,eSpec, $
                                     CONVERT_IF_NOTEXIST=convert_nonExisting, $
                                     FORCE_CONVERSIONS=force_conversions
 
-  COMPILE_OPT idl2
+  COMPILE_OPT IDL2,STRICTARRSUBS
 
   @common__newell_espec.pro
 

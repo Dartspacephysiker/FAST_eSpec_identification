@@ -14,7 +14,7 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
    VERBOSE=verbose
    
    
-   COMPILE_OPT idl2
+   COMPILE_OPT IDL2,STRICTARRSUBS
 
    ;;Check to see whether conversion has already happened
    STR_ELEMENT,eSpec,"info",INDEX=infoIndex
