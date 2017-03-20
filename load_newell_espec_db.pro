@@ -118,19 +118,19 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         SDT_file             = 'eSpec_DB_20160607-SDT.sav'
 
         ;;The latest
-        defNewellDBFile        = 'eSpec_20170203_db--PARSED--Orbs_500-24634.sav' 
-        defNewellDBFile        = 'eSpecDB_20170203_v0_0--with_mapping_factors.sav' 
+        ;; defNewellDBFile        = 'eSpec_20170203_db--PARSED--Orbs_500-24634.sav' 
+        ;; defNewellDBFile        = 'eSpecDB_20170203_v0_0--with_mapping_factors.sav' 
 
-        DB_date                = '20170203'
-        DB_version             = 'v0.0'
-        DB_extras              = 'with_mapping_factors'
+        ;; DB_date                = '20170203'
+        ;; DB_version             = 'v0.0'
+        ;; DB_extras              = 'with_mapping_factors'
 
-        defSortNewellDBFile    =  defNewellDBFile
+        ;; defSortNewellDBFile    =  defNewellDBFile
 
-        GEI_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-GEI.sav'
-        GEO_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-GEO.sav'
-        MAG_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-MAG.sav'
-        SDT_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-SDT.sav'
+        ;; GEI_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-GEI.sav'
+        ;; GEO_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-GEO.sav'
+        ;; MAG_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-MAG.sav'
+        ;; SDT_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-SDT.sav'
 
         ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
 

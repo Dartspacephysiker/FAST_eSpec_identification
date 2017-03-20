@@ -109,12 +109,12 @@ PRO CONVERT_ESPEC_TO_STRICT_NEWELL_INTERPRETATION,eSpec,eSpec_interpreted, $
   ;;2017/02/04 Here's where you're wrong. There's no call for favoring mono over broadStrict (Newell et al. [2009], ¶21)
   IF nM_ConvToBS GT 0 THEN BEGIN
      ;; IF KEYWORD_SET(favor_broadStrict_over_mono) THEN BEGIN
-        ;; eSpec_interpreted.mono[i_M_ConvToBS]  = 255-10-1
-        ;; eSpec_interpreted.broad[i_M_ConvToBS] = 2
+        eSpec_interpreted.mono[i_M_ConvToBS]  = 255-10-1
+        eSpec_interpreted.broad[i_M_ConvToBS] = 2
         ;; IF KEYWORD_SET(verbose) THEN PRINT,"nM_Conv_to_BS  " + STRCOMPRESS(nM_ConvToBS,/REMOVE_ALL)
      ;; ENDIF ELSE BEGIN
-        eSpec_interpreted.mono[i_M_ConvToBS]  = 1
-        eSpec_interpreted.broad[i_M_ConvToBS] = 255-10-2
+        ;; eSpec_interpreted.mono[i_M_ConvToBS]  = 1
+        ;; eSpec_interpreted.broad[i_M_ConvToBS] = 255-10-2
         IF KEYWORD_SET(verbose) THEN PRINT,"nBS_Conv_to_M  " + STRCOMPRESS(nM_ConvToBS,/REMOVE_ALL)
      ;; ENDELSE
   ENDIF
