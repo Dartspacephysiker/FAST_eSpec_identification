@@ -66,7 +66,7 @@ FUNCTION GET_NEWELL_ESPEC_KILLGAP_FILE,DBStruct, $
 
   IF KEYWORD_SET(stop_if_noExist) THEN BEGIN
      IF ~FILE_TEST(killGapFile) THEN BEGIN
-        PRINT,"File doeesn't exist: " + killGapFile
+        PRINT,"File doesn't exist: " + killGapFile
         PRINT,"What to do?"
         PRINT,"You know, if you visited JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE.PRO, you could probably get it handled."
         STOP
