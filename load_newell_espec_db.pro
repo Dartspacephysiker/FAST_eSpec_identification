@@ -116,6 +116,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         GEO_file             = 'eSpec_DB_20160607-GEO.sav'
         MAG_file             = 'eSpec_DB_20160607-MAG.sav'
         SDT_file             = 'eSpec_DB_20160607-SDT.sav'
+        AACGM_file           = 'eSpec_DB_20160607-AACGM.sav'
 
         ;;The latest
         ;; defNewellDBFile        = 'eSpec_20170203_db--PARSED--Orbs_500-24634.sav' 
@@ -127,10 +128,10 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
         ;; defSortNewellDBFile    =  defNewellDBFile
 
-        ;; GEI_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-GEI.sav'
-        ;; GEO_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-GEO.sav'
-        ;; MAG_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-MAG.sav'
-        ;; SDT_file             = 'eSpecDB_20170203_v0_0--with_mapping_factors-SDT.sav'
+        ;; GEI_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-GEI.sav'
+        ;; GEO_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-GEO.sav'
+        ;; MAG_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-MAG.sav'
+        ;; SDT_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-SDT.sav'
 
         ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
 

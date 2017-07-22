@@ -29,12 +29,14 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
   ;; get_GEI_coordsArr         = [0,1,0,0,0]
   ;; do_GEO_MAG_conversionsArr = [0,0,1,0,0]
   ;; do_AACGM_conversionsArr   = [0,0,0,1,0]
+  ;; get_dipoleTilt_dataArr    = [0,0,0,0,0]
   ;; stitch_filesArr           = [0,0,0,0,1]
-  create_timeStampsArr      = [0,0,0,0]
-  get_GEI_coordsArr         = [1,0,0,0]
-  do_GEO_MAG_conversionsArr = [0,1,0,0]
-  do_AACGM_conversionsArr   = [0,0,1,0]
-  stitch_filesArr           = [0,0,0,1]
+  create_timeStampsArr      = [0,0,0,0]  * 0
+  get_GEI_coordsArr         = [0,0,0,0]  * 0
+  do_GEO_MAG_conversionsArr = [0,1,0,0]  * 0
+  do_AACGM_conversionsArr   = [0,0,1,0]  * 0
+  get_dipoleTilt_dataArr    = [1,0,0,0];  * 0
+  stitch_filesArr           = [0,0,0,1]  * 0
 
 
   ;; test_single             = 0
@@ -61,6 +63,7 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
      get_GEI_coords          = get_GEI_coordsArr[k]
      do_GEO_MAG_conversions  = do_GEO_MAG_conversionsArr[k]
      do_AACGM_conversions    = do_AACGM_conversionsArr[k]
+     get_dipoleTilt_data     = get_dipoleTilt_dataArr[k]
      stitch_files            = stitch_filesArr[k]
 
      PRINT,""
@@ -69,6 +72,7 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
      PRINT,'get_GEI_coords        ',get_GEI_coords
      PRINT,'do_GEO_MAG_conversions',do_GEO_MAG_conversions
      PRINT,'do_AACGM_conversions  ',do_AACGM_conversions
+     PRINT,'get_dipoleTilt_data   ',get_dipoleTilt_data
      PRINT,'stitch_files          ',stitch_files
 
      FASTDB_COORDINATE_CONVERSION__PARALLEL, $
@@ -80,6 +84,7 @@ PRO JOURNAL__20170201__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
         GET_GEI_COORDS=get_GEI_coords, $
         DO_GEO_MAG_CONVERSIONS=do_GEO_MAG_conversions, $
         DO_AACGM_CONVERSIONS=do_AACGM_conversions, $
+        GET_DIPOLETILT_DATA=get_dipoleTilt_data, $
         STITCH_FILES=stitch_files, $
         ORIG_ROUTINENAME=orig_routineName, $
         COORDDIR=coordDir, $

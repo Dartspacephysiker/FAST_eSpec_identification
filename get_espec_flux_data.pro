@@ -26,6 +26,7 @@ PRO GET_ESPEC_FLUX_DATA, $
    RESET_OMNI_INDS=reset_omni_inds, $
    RESTRICT_WITH_THESE_ESPEC_I=restrict_with_these_eSpec_i, $
    RESTRICT_WITH_THESE_ION_I=restrict_with_these_ion_i, $
+   RESTRICT_OMNI_WITH_THESE_I=restrict_OMNI_with_these_i, $
    ;; GET_ESPEC_I_NOT_ION_I=get_eSpec_i, $
    RESET_GOOD_INDS=reset_good_inds, $
    DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
@@ -162,6 +163,7 @@ PRO GET_ESPEC_FLUX_DATA, $
                                DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                                /FOR_ESPEC_OR_ION_DB, $
                                RESTRICT_WITH_THESE_I=restrict_with_these_eSpec_i, $
+                               RESTRICT_OMNI_WITH_THESE_I=restrict_OMNI_with_these_i, $
                                RESET_GOOD_INDS=reset_good_inds, $
                                DONT_LOAD_IN_MEMORY=nonMem) ;; , $
 
@@ -181,6 +183,7 @@ PRO GET_ESPEC_FLUX_DATA, $
                         DO_NOT_SET_DEFAULTS=do_not_set_defaults, $
                         /FOR_ESPEC_OR_ION_DB, $
                         RESTRICT_WITH_THESE_I=restrict_with_these_ion_i, $
+                        RESTRICT_OMNI_WITH_THESE_I=restrict_OMNI_with_these_i, $
                         RESET_GOOD_INDS=reset_good_inds, $
                         DONT_LOAD_IN_MEMORY=nonMem) ;; , $
 
@@ -198,7 +201,7 @@ PRO GET_ESPEC_FLUX_DATA, $
               DBTIMES=dbTimes, $
               /FOR_ESPEC_DB, $
               /DO_NOT_MAKE_ORB_INFO, $
-              RESTRICT_W_THESEINDS=restrict, $
+              RESTRICT_W_THESEINDS=restrict_with_these_eSpec_i, $
               OUT_INDS_LIST=eSpec_i, $
               UNIQ_ORBS_LIST=uniq_orbs_list, $
               UNIQ_ORB_INDS_LIST=uniq_orb_inds_list, $
