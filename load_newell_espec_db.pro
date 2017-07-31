@@ -23,7 +23,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          USE_GEO_COORDS=use_GEO, $
                          USE_MAG_COORDS=use_MAG, $
                          USE_SDT_COORDS=use_SDT, $
-                         ;; JUST_TIMES=just_times, $
+                         JUST_TIMES=just_times, $
                          ;; OUT_TIMES=out_times, $
                          ;; OUT_GOOD_I=good_i, $
                          LOAD_DELTA_ILAT_FOR_WIDTH_TIME=load_dILAT, $
@@ -163,8 +163,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         END
         KEYWORD_SET(noMem): BEGIN
            PRINT,"Moving eSpec structure/data in mem to outputted variables ..."
-           eSpec            = TEMPORARY(NEWELL__eSpec     )
-           ;; fastLoc_times    = TEMPORARY(FASTLOC__times)
+           eSpec            = KEYWORD_SET(just_times) ? !NULL : TEMPORARY(NEWELL__eSpec     )
+           eSpec__times     = KEYWORD_SET(just_times) ? (TEMPORARY(NEWELL__eSpec)).x : !NULL
            NewellDBFile     = TEMPORARY(NEWELL__dbFile    )
            NewellDBDir      = TEMPORARY(NEWELL__dbDir     )
            failCodes        = N_ELEMENTS(NEWELL__failCodes) GT 0 ? TEMPORARY(NEWELL__failCodes) : !NULL
@@ -198,7 +198,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
   ;;If just getting times, at this point we've populated other variables
   ;;that might be of interest to user, so JET
-  IF KEYWORD_SET(just_times) AND N_ELEMENTS(out_times) GT 0 THEN RETURN
+  IF KEYWORD_SET(just_times) AND N_ELEMENTS(eSpec__times) GT 0 THEN RETURN
 
   IF N_ELEMENTS(specType) EQ 0 THEN specType = ''
   IF N_ELEMENTS(eSpec) EQ 0 OR KEYWORD_SET(force_load_db) THEN BEGIN
@@ -226,6 +226,14 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                     info       : eSpec.info}
      ENDIF
 
+     IF KEYWORD_SET(just_times) THEN BEGIN
+        PRINT,"Here you go, sport!"
+        eSpec__times = (TEMPORARY(eSpec)).x
+
+        RETURN
+
+     ENDIF
+     
      ;;want characteristic energy? You sure?
      charE = ABS(eSpec.jee/eSpec.je)*6.242*1.0e11
      these = WHERE((eSpec.broad EQ 1) OR (eSpec.broad EQ 2) AND $
