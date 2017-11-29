@@ -86,7 +86,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      KEYWORD_SET(gigante): BEGIN
 
         IF KEYWORD_SET(use_unsorted_file) THEN BEGIN
-           PRINT,"Can't use unsorted with upgoing eSpec DB!"
+           PRINT,"Can't use unsorted with gigante eSpec DB!"
            use_unsorted_file = 0
         ENDIF
 
@@ -256,6 +256,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
      eSpec.info.has_charE     = BYTE(KEYWORD_SET(load_charE))
 
+     eSpec.info.is_gigante    = KEYWORD_SET(gigante)
      IF KEYWORD_SET(upgoing) THEN BEGIN
         eSpec.info.is_upgoing = 1B
      ENDIF
