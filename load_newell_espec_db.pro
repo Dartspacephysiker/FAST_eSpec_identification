@@ -91,10 +91,24 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         ENDIF
 
         ;;The file without failcodes
-        defSortNewellDBFile    = 'eSpec_20170102_db--PARSED--Orbs_500-23999.sav'
-        DB_date                = '20170102'
+        ;; defSortNewellDBFile    = 'eSpec_20170102_db--PARSED--Orbs_500-23999.sav'
+        ;; DB_extras              = 'gigante'
+
+        defNewellDBFile        = 'eSpec_20170203_db--PARSED--Orbs_500-24634.sav' 
+        defNewellDBFile        = 'eSpecDB_20170203_v0_0--with_mapping_factors.sav' 
+
+        DB_date                = '20170203'
         DB_version             = 'v0.0'
-        DB_extras              = 'gigante'
+        DB_extras              = 'gigante/with_alternate_coords/with_mapping_factors'
+
+        defSortNewellDBFile    =  defNewellDBFile
+
+        GEI_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-GEI.sav'
+        GEO_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-GEO.sav'
+        MAG_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-MAG.sav'
+        SDT_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-SDT.sav'
+
+        AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
 
      END
      ELSE: BEGIN
