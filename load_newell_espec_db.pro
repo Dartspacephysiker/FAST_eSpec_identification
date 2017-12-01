@@ -103,10 +103,10 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
         defSortNewellDBFile    =  defNewellDBFile
 
-        GEI_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-GEI.sav'
-        GEO_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-GEO.sav'
-        MAG_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-MAG.sav'
-        SDT_file             = 'eSpec_DB_20170203_v0_0--with_mapping_factors-SDT.sav'
+        GEI_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-GEI.sav'
+        GEO_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-GEO.sav'
+        MAG_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-MAG.sav'
+        SDT_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-SDT.sav'
 
         AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
 
