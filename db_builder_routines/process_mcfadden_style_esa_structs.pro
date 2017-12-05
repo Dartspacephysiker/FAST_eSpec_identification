@@ -6,9 +6,10 @@ PRO PROCESS_MCFADDEN_STYLE_ESA_STRUCTS
   ;;Running options
   loud                      = 0
 
-  firstOrb                  = 1532
+  firstOrb                  = 1533
   lastOrb                   = 50000
 
+  eeb_or_ees                = 'ees' ;MOMENT_SUITE_2D would like to know
 
   newFileDateStr            = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
 
@@ -20,7 +21,7 @@ PRO PROCESS_MCFADDEN_STYLE_ESA_STRUCTS
      ;; END
      ELSE: BEGIN
         Newell_DB_dir       = '/SPENCEdata/software/sdt/batch_jobs/saves_output_etc/do_the_Newell_2009/batch_output__just_electrons_v2/'
-        Newell_filePref     = 'Dartdb--e-_spectra__all_angles_energies_v4__justElec_v2--ees--Orbit_'
+        Newell_filePref     = 'Dartdb--e-_spectra__all_angles_energies_v4__justElec_v2-newTry-ees--Orbit_'
         pref                = "eSpec_"
      END
   ENDCASE
@@ -84,7 +85,96 @@ PRO PROCESS_MCFADDEN_STYLE_ESA_STRUCTS
               STOP
            ENDIF
 
-           STOP
+           mag1      = (diff_eFlux[*].B_model[0]*diff_eFlux[*].B_model[0]+ $
+                        diff_eFlux[*].B_model[1]*diff_eFlux[*].B_model[1]+ $
+                        diff_eFlux[*].B_model[2]*diff_eFlux[*].B_model[2])^0.5
+           mag2      = (diff_eFlux[*].B_foot[0]*diff_eFlux[*].B_foot[0]+ $
+                        diff_eFlux[*].B_foot[1]*diff_eFlux[*].B_foot[1]+ $
+                        diff_eFlux[*].B_foot[2]*diff_eFlux[*].B_foot[2])^0.5
+           mapRatio  = TEMPORARY(mag2)/TEMPORARY(mag1)
+           lcw       = ATAN(SQRT(1.D/(mapRatio-1.D)))*180./!PI
+
+           aRange__moments = TRANSPOSE([[-lcw],[lcw]])
+
+           ;; STOP
+
+           ;;Zero out the nonsense
+           FOR k=0,N_ELEMENTS(diff_eFlux)-1 DO BEGIN
+
+              IF ~diff_eFlux[k].valid THEN CONTINUE
+
+              eInd = diff_eFlux[k].nenergy-1
+              
+              zeroed = 0
+              couldBe = 0
+              WHILE diff_eFlux[k].energy[eInd,0] LE 45. DO BEGIN
+                 IF N_ELEMENTS(WHERE(diff_eFlux[k].data[eInd,0:diff_eFlux[k].nbins-1] GT 5e7))/FLOAT(diff_eFlux[k].nbins) GE 0.75 THEN BEGIN
+                    ;; PRINT,MEAN(diff_eFlux[k].data[eInd,0:diff_eFlux[k].nbins-1])
+                    diff_eFlux[k].data[eInd,*] = 0
+                    eInd--
+                    zeroed++
+                 ENDIF ELSE BREAK
+              ENDWHILE
+
+              IF diff_eFlux[k].energy[eInd,0] GE 45. THEN BEGIN
+                 ;; mean = MEAN(diff_eFlux[k].data[eInd:diff_eFlux[k].nenergy-1,0:diff_eFlux[k].nbins-1])
+                 mean = 10.^(MEAN(ALOG10(diff_eFlux[k].data[0:eInd,0:diff_eFlux[k].nbins-1]),/NAN))
+                 couldBe = 1
+                 couldBe += mean GE 1.5E7
+                 ;; PRINT,(couldBe EQ 2 ? "Is" : "Could be")," garbage: ",MEAN(diff_eFlux[k].data[0:eInd,0:diff_eFlux[k].nbins-1])
+                 PRINT,(couldBe EQ 2 ? "Is" : "Could be")," garbage: ",mean
+              ENDIF
+              ;; IF k EQ 1071 THEN STOP
+              PRINT,curOrb,", ",T2S(diff_eFlux[k].time),", ",k,", ",diff_eFlux[k].energy[eInd,0],", ",zeroed,", ",(couldBe ? '*' : '')
+              IF couldBe EQ 2 THEN BEGIN
+                 diff_eFlux[k].valid = 0B
+                 diff_eFlux[k].data  = !VALUES.f_NaN
+              ENDIF
+           ENDFOR
+
+           MOMENT_SUITE_2D,diff_eFlux, $
+                           ENERGY=energy, $
+                           ARANGE__DENS=aRange__dens, $
+                           ARANGE__MOMENTS=aRange__moments, $
+                           ARANGE__CHARE=aRange__charE, $
+                           SC_POT=sc_pot, $
+                           EEB_OR_EES=eeb_or_ees, $
+                           ERROR_ESTIMATES=error_estimates, $
+                           MAP_TO_100KM=map_to_100km, $ 
+                           ORBIT=orbit, $
+                           /NEW_MOMENT_ROUTINE, $
+                           /QUIET, $
+                           /MCFADDEN_STYLE_DIFF_EFLUX, $
+                           /PROVIDING_EPHEM_INFO, $
+                           IN_ALT=diff_eFlux[*].alt, $
+                           IN_ILAT=diff_eFlux[*].ilat, $
+                           IN_MLT=diff_eFlux[*].mlt, $
+                           INOUT_MAPRATIO=mapRatio, $
+                           OUT_STRUCT=struct, $
+                           OUTTIME=time, $
+                           OUT_N=n, $
+                           OUT_J_=j, $
+                           OUT_JE=je, $
+                           OUT_T=T, $
+                           OUT_CHARE=charE, $
+                           OUT_CURRENT=cur, $
+                           OUT_JJE_COVAR=jje_coVar, $
+                           OUT_PERPJ_=jPerp, $
+                           OUT_PERPJE=jePerp, $
+                           OUT_PERPCHARE=charEPerp, $
+                           OUT_PERPCURRENT=curPerp, $
+                           OUT_PERPJJE_COVAR=jjePerp_coVar, $
+                           OUT_ERRORS=errors, $
+                           OUT_ERR_N=nErr, $
+                           OUT_ERR_J_=jErr, $
+                           OUT_ERR_JE=jeErr, $
+                           OUT_ERR_T=TErr, $
+                           OUT_ERR_CURRENT=curErr, $
+                           OUT_ERR_CHARE=charEErr, $
+                           OUT_ERR_PERPJ_=jPerpErr, $
+                           OUT_ERR_PERPJE=jePerpErr, $
+                           OUT_ERR_PERPCURRENT=curPerpErr, $
+                           OUT_ERR_PERPCHARE=charEPerpErr
 
            IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,tmpeSpec_lc,tmpjee_lc,tmpje_lc, $
                                                    mlt,ilat,alt,orbit, $
@@ -94,15 +184,6 @@ PRO PROCESS_MCFADDEN_STYLE_ESA_STRUCTS
                                                    BATCH_MODE=batch_mode, $
                                                    ORBSTR=orbStr, $
                                                    ERRORLOGFILE=badFile
-
-           mag1      = (diff_eFlux[*].B_model[0]*diff_eFlux[*].B_model[0]+ $
-                        diff_eFlux[*].B_model[1]*diff_eFlux[*].B_model[1]+ $
-                        diff_eFlux[*].B_model[2]*diff_eFlux[*].B_model[2])^0.5
-           mag2      = (diff_eFlux[*].B_foot[0]*diff_eFlux[*].B_foot[0]+ $
-                        diff_eFlux[*].B_foot[1]*diff_eFlux[*].B_foot[1]+ $
-                        diff_eFlux[*].B_foot[2]*diff_eFlux[*].B_foot[2])^0.5
-           mapRatio  = TEMPORARY(mag2)/TEMPORARY(mag1)
-           lcw       = ATAN(SQRT(1.D/(mapRatio-1.D)))*180./!PI
 
            IF KEYWORD_SET(tSort_i) THEN BEGIN
               eSpecs_parsed = {x:eSpecs_parsed.x[tSort_i], $
