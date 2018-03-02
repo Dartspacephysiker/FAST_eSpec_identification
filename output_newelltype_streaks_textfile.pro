@@ -13,9 +13,9 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
 
   outDir   = '/SPENCEdata/Research/Satellites/FAST/espec_identification/txtOutput/'
   
-  mltRange = [21,24]
-  orbRange = [1000,7000]
-  altRange = [2000,4300]
+  mltRange = [19,5]
+  orbRange = [1000,16000]
+  altRange = [1800,4300]
 
   IF N_ELEMENTS(decimal_place) EQ 0 THEN BEGIN
      decimal_place = ALOG10(5.0)
