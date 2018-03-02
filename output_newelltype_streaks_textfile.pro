@@ -1,4 +1,4 @@
-;;11/11/16
+;;2016/11/11
 PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
    ONLY_STRICT=only_strict, $
    ONLY_NONSTRICT=only_nonstrict, $
@@ -6,23 +6,26 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
    MONO=mono, $
    DIFFUSE=diffuse, $
    MIN_T_STREAKLEN=min_T_streakLen, $
-   
-
+   MLTRANGE=mltRange, $
+   ORBRANGE=orbRange, $
+   ALTRANGE=altRange
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
+  @common__newell_espec.pro
+
   outDir   = '/SPENCEdata/Research/Satellites/FAST/espec_identification/txtOutput/'
   
-  mltRange = [19,5]
-  orbRange = [1000,16000]
-  altRange = [1800,4300]
+  mltR = KEYWORD_SET(mltRange) ? mltRange : [-5,5]
+  orbR = KEYWORD_SET(orbRange) ? orbRange : [1000,16000]
+  altR = KEYWORD_SET(altRange) ? altRange : [300,4300]
 
   IF N_ELEMENTS(decimal_place) EQ 0 THEN BEGIN
      decimal_place = ALOG10(5.0)
   ENDIF
 
   IF N_ELEMENTS(min_T_streakLen) EQ 0 THEN BEGIN
-     min_T_streakLen = 20 ;in seconds
+     min_T_streakLen = 10       ;in seconds
   ENDIF
 
   CASE 1 OF
@@ -50,28 +53,35 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
      ENDIF
   ENDELSE
 
+  mltStr   = STRING(FORMAT='("__",I0,"-",I0,"MLT")',mltR[0],mltR[1])
+  orbStr   = STRING(FORMAT='("__",I0,"-",I0,"ORB")',orbR[0],orbR[1])
+  altStr   = STRING(FORMAT='("__",I0,"-",I0,"ALT")',altR[0],altR[1])
+  min_TStr = STRING(FORMAT='("__minTStreak_sec_",I0)',min_T_streakLen)
+
   outFile  = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + typeStr + '_aurora_streaks' + $
+             mltStr + orbStr + altStr + min_TStr + $
              strictStr + '.txt'
 
-  LOAD_NEWELL_ESPEC_DB,eSpec,/DONT_CONVERT_TO_STRICT_NEWELL, $
-                       /DONT_LOAD_IN_MEMORY
+  LOAD_NEWELL_ESPEC_DB,/DONT_CONVERT_TO_STRICT_NEWELL, $
+                       ;; /NO_MEMORY_LOAD, $
+                       /GIGANTE
 
-  thisType  = WHERE(TAG_NAMES(eSpec) EQ STRUPCASE(typeStr))
+  thisType  = WHERE(TAG_NAMES(NEWELL__eSpec) EQ STRUPCASE(typeStr))
   IF thisType[0] EQ -1 THEN STOP
 
-  mltI     = GET_MLT_INDS(eSpec,mltRange[0],mltRange[1])
-  orbI     = GET_ORBRANGE_INDS(eSpec,orbRange[0],orbRange[1])
-  altI     = GET_ALTITUDE_INDS(eSpec,altRange[0],altRange[1])
+  mltI     = GET_MLT_INDS(NEWELL__eSpec,mltR[0],mltR[1])
+  orbI     = GET_ORBRANGE_INDS(NEWELL__eSpec,orbR[0],orbR[1],/KEEP_TRASHINDS_ON_TAP)
+  altI     = GET_ALTITUDE_INDS(NEWELL__eSpec,altR[0],altR[1])
 
   CASE 1 OF
      KEYWORD_SET(doStrict): BEGIN
-        typeI    = WHERE(eSpec.(thisType) EQ 2,nType)
+        typeI    = WHERE(NEWELL__eSpec.(thisType) EQ 2,nType)
      END
      (KEYWORD_SET(diffuse) OR KEYWORD_SET(only_nonstrict)): BEGIN
-        typeI    = WHERE(eSpec.(thisType) EQ 1,nType)
+        typeI    = WHERE(NEWELL__eSpec.(thisType) EQ 1,nType)
      END
      ELSE: BEGIN
-        typeI    = WHERE((eSpec.(thisType) EQ 1) OR (eSpec.(thisType)) EQ 2,nType)
+        typeI    = WHERE((NEWELL__eSpec.(thisType) EQ 1) OR (NEWELL__eSpec.(thisType)) EQ 2,nType)
      END
   ENDCASE
 
@@ -81,15 +91,15 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
 
   PRINT,count,' inds to work with'
 
-  masterOrb  = eSpec.orbit[mltI]
-  masterTime = (TEMPORARY(eSpec.x))[mltI]
+  masterOrb  = NEWELL__eSpec.orbit[mltI]
+  masterTime = (TEMPORARY(NEWELL__eSpec.x))[mltI]
 
   PRINT,'Opening ' + outFile + ' ...'
   OPENW,outLun,outDir+outFile,/GET_LUN
 
 
   GET_DOUBLE_STREAKS__NTH_DECIMAL_PLACE,masterTime,decimal_place, $
-                                        CURRENT_FOR_PRINTING=eSpec.je[mltI]*1.6e-9, $ ;microA/m2
+                                        CURRENT_FOR_PRINTING=NEWELL__eSpec.je[mltI]*1.6e-9, $ ;microA/m2
                                         START_I=strt_i, $
                                         STOP_I=stop_i, $
                                         STREAKLENS=streakLens, $
@@ -103,7 +113,5 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
   PRINT,'Closing ' + outFile + ' ...'
   CLOSE,outLun
   FREE_LUN,outLun
-
-  STOP
 
 END
