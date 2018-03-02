@@ -1,4 +1,6 @@
 ;;2016/11/11
+;2018/02/03 A thing
+;; FOR k=0,6 DO BEGIN & PRINT,1000L+k*3000,", ",3999L+k*3000 & OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE,/MONO,ORBRANGE=[1000L+k*3000,3999L+k*3000] & ENDFOR
 PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
    ONLY_STRICT=only_strict, $
    ONLY_NONSTRICT=only_nonstrict, $
@@ -25,9 +27,11 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
   ENDIF
 
   IF N_ELEMENTS(min_T_streakLen) EQ 0 THEN BEGIN
-     min_T_streakLen = 10       ;in seconds
+     min_T_streakLen = 60       ;in seconds
   ENDIF
 
+  allowable_gap_time = 5
+  
   CASE 1 OF
      KEYWORD_SET(mono)   : typeStr = 'mono'
      KEYWORD_SET(broad)  : typeStr = 'broad'
@@ -91,21 +95,31 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
 
   PRINT,count,' inds to work with'
 
-  masterOrb  = NEWELL__eSpec.orbit[mltI]
-  masterTime = (TEMPORARY(NEWELL__eSpec.x))[mltI]
+  pOrb  = NEWELL__eSpec.orbit[mltI]
+  pAlt  = NEWELL__eSpec.alt[mltI]
+  pMLT  = NEWELL__eSpec.MLT[mltI]
+  pILAT = NEWELL__eSpec.ILAT[mltI]
+  pTime = (TEMPORARY(NEWELL__eSpec.x))[mltI]
 
   PRINT,'Opening ' + outFile + ' ...'
   OPENW,outLun,outDir+outFile,/GET_LUN
 
 
-  GET_DOUBLE_STREAKS__NTH_DECIMAL_PLACE,masterTime,decimal_place, $
+  GET_DOUBLE_STREAKS__NTH_DECIMAL_PLACE,pTime,decimal_place, $
                                         CURRENT_FOR_PRINTING=NEWELL__eSpec.je[mltI]*1.6e-9, $ ;microA/m2
+                                        ORBIT_FOR_PRINTING=pOrb, $
+                                        ALT_FOR_PRINTING=pAlt, $
+                                        MLT_FOR_PRINTING=pMLT, $
+                                        ILAT_FOR_PRINTING=pILAT, $
                                         START_I=strt_i, $
                                         STOP_I=stop_i, $
                                         STREAKLENS=streakLens, $
                                         T_STREAKLENS=tStreak, $
                                         MIN_T_STREAKLEN=min_T_streakLen, $
+                                        GAP_TIME=allowable_gap_time, $
                                         /PRINT_START_STOP_TIMES, $
+                                        /SORT_BY_T_STREAKLEN, $
+                                        /SORT_REVERSE, $
                                         /PRINT__INCLUDE_CURRENT, $
                                         OUTLUN=outLun
 
