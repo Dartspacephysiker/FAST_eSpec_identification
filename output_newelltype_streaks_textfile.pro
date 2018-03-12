@@ -10,7 +10,8 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
    MIN_T_STREAKLEN=min_T_streakLen, $
    MLTRANGE=mltRange, $
    ORBRANGE=orbRange, $
-   ALTRANGE=altRange
+   ALTRANGE=altRange, $
+   ALLOWED_GAP_TIME=allowed_gap_time
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
@@ -30,7 +31,7 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
      min_T_streakLen = 60       ;in seconds
   ENDIF
 
-  allowable_gap_time = 5
+  allowable_gap_time = KEYWORD_SET(allowed_gap_time) ? allowed_gap_time : 5
   
   CASE 1 OF
      KEYWORD_SET(mono)   : typeStr = 'mono'
