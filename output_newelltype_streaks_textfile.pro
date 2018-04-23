@@ -58,7 +58,24 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
      ENDIF
   ENDELSE
 
-  mltStr   = STRING(FORMAT='("__",I0,"-",I0,"MLT")',mltR[0],mltR[1])
+  CASE (N_ELEMENTS(SIZE(mltR,/DIM))) OF
+     1: BEGIN
+        minM     = mltR[0]
+        maxM     = mltR[1]
+        mltStr   = STRING(FORMAT='("__",I0,"-",I0,"MLT")',mltR[0],mltR[1])
+     END
+     2: BEGIN
+        minM     = mltR[0,*]
+        maxM     = mltR[1,*]
+
+        nRange   = N_ELEMENTS(mltR[0,*])
+        mltStr   = STRING(FORMAT='("__",I0,"-",I0)',mltR[0,0],mltR[1,0])
+        FOR k=1,nRange-1 DO BEGIN
+           mltStr += STRING(FORMAT='("n",I0,"-",I0)',mltR[0,k],mltR[1,k])
+        ENDFOR
+        mltStr += 'MLT'
+     END
+  ENDCASE
   orbStr   = STRING(FORMAT='("__",I0,"-",I0,"ORB")',orbR[0],orbR[1])
   altStr   = STRING(FORMAT='("__",I0,"-",I0,"ALT")',altR[0],altR[1])
   min_TStr = STRING(FORMAT='("__minTStreak_sec_",I0)',min_T_streakLen)
@@ -67,14 +84,16 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
              mltStr + orbStr + altStr + min_TStr + $
              strictStr + '.txt'
 
-  LOAD_NEWELL_ESPEC_DB,/DONT_CONVERT_TO_STRICT_NEWELL, $
-                       ;; /NO_MEMORY_LOAD, $
-                       /GIGANTE
-
+  IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
+     LOAD_NEWELL_ESPEC_DB,/DONT_CONVERT_TO_STRICT_NEWELL, $
+                          ;; /NO_MEMORY_LOAD, $
+                          /GIGANTE
+  ENDIF
+  
   thisType  = WHERE(TAG_NAMES(NEWELL__eSpec) EQ STRUPCASE(typeStr))
   IF thisType[0] EQ -1 THEN STOP
 
-  mltI     = GET_MLT_INDS(NEWELL__eSpec,mltR[0],mltR[1])
+  mltI     = GET_MLT_INDS(NEWELL__eSpec,minM,maxM)
   orbI     = GET_ORBRANGE_INDS(NEWELL__eSpec,orbR[0],orbR[1],/KEEP_TRASHINDS_ON_TAP)
   altI     = GET_ALTITUDE_INDS(NEWELL__eSpec,altR[0],altR[1])
 
