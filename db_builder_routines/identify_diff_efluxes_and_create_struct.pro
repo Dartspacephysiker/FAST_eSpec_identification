@@ -49,8 +49,17 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
   max_en_ind   = MAKE_ARRAY(nEvents,/INTEGER,VALUE=-2)
   CASE 1 OF
      KEYWORD_SET(sc_pot): BEGIN
+
+        ;; Ions are attracted to neg potential, so use neg of potential as threshold
+        ;; elecs are attracted to pos potential, so use       potential as threshold
+        IF KEYWORD_SET(is_ion) THEN BEGIN
+           potFac = (-1.)
+        ENDIF ELSE BEGIN
+           potFac = 1.
+        ENDELSE
+
         FOR i=0,nEvents-1 DO BEGIN
-           tempInd       = MAX(WHERE(energies GT sc_pot[i])) ;;Note (as above) that lowest energies are at HIGH indices!
+           tempInd       = MAX(WHERE(energies GT (sc_pot[i]*potFac))) ;;Note (as above) that lowest energies are at HIGH indices!
 
            ;; tempMax      = MAX(WHERE(
               max_en_ind[i] = tempInd
@@ -81,6 +90,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
   ENDELSE
   FOR i=0,N_ELEMENTS(eSpec.x)-1 DO BEGIN
 
+     ;; IF ABS(eSpec.x[i]-854157739.35D) LT 1 THEN STOP
 
      IF KEYWORD_SET(give_timesplit_info) AND ( (i MOD split_interval) EQ 0 ) THEN BEGIN
         clock     = TIC("eSpecs_"+STRCOMPRESS(i,/REMOVE_ALL) +  '-' + STRCOMPRESS(i+split_interval-1,/REMOVE_ALL))

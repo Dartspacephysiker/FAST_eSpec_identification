@@ -90,16 +90,19 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
   ;;    ENDIF
   ;; ENDIF
 
-  threshold_percentage         = KEYWORD_SET(is_ion) ? 0.3   : 0.3
-  strictThreshold_percentage   = KEYWORD_SET(is_ion) ? 0.1   : 0.1
+  threshold_percentage         = KEYWORD_SET(is_ion) ? 0.6   : 0.3
+  strictThreshold_percentage   = KEYWORD_SET(is_ion) ? 0.15  : 0.1
   chare_threshold              = KEYWORD_SET(is_ion) ? 10    : 80
   cusp_mineV                   = KEYWORD_SET(is_ion) ? 10    : 300
   notCusp_mineV                = KEYWORD_SET(is_ion) ? 10    : 140
   minForBroad                  = KEYWORD_SET(is_ion) ? 6     : 6
   minForBroadStrict            = KEYWORD_SET(is_ion) ? 8     : 8
   monoenergetic_n_to_check     = KEYWORD_SET(is_ion) ? 4     : 4
-  peakFluxThresh               = KEYWORD_SET(is_ion) ? 7.5e6 : 1.0e8
-  broadFluxThresh              = KEYWORD_SET(is_ion) ? 1.5e7 : 2.0e8
+  peakFluxThresh               = KEYWORD_SET(is_ion) ? 1.0e7 : 1.0e8
+  broadFluxThresh              = KEYWORD_SET(is_ion) ? 2.0e7 : 2.0e8
+
+  nMaxAbove                    = monoenergetic_n_to_check
+  nMaxBelow                    = KEYWORD_SET(is_ion) ?     6 : monoenergetic_n_to_check
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MONOENERGETIC EVENTS
@@ -116,8 +119,8 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
   ;;    NOTE: Assuming a Maxwellian, the drop would be ~80% on either side. 30% is well below Maxwellian.
   above_i     = WHERE(energy_e GT energy_e[peakFlux_ind],nAbove)
   below_i     = WHERE(energy_e LT energy_e[peakFlux_ind],nBelow)
-  nAbove = nAbove < monoenergetic_n_to_check
-  nBelow = nBelow < monoenergetic_n_to_check
+  nAbove = nAbove < nMaxAbove
+  nBelow = nBelow < nMaxBelow
   CASE nAbove OF
      0: BEGIN
         cont = 1
@@ -199,6 +202,36 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
                                      ( (spec_e[peakFlux_ind-2]/peakFlux) LE strictThreshold_percentage ) OR $
                                      ( (spec_e[peakFlux_ind-3]/peakFlux) LE strictThreshold_percentage ) OR $
                                      ( (spec_e[peakFlux_ind-4]/peakFlux) LE strictThreshold_percentage )
+           ENDELSE
+        END
+        5: BEGIN
+           cont = ( (spec_e[peakFlux_ind-1]/peakFlux) LE threshold_percentage ) OR $
+                  ( (spec_e[peakFlux_ind-2]/peakFlux) LE threshold_percentage ) OR $
+                  ( (spec_e[peakFlux_ind-3]/peakFlux) LE threshold_percentage ) OR $
+                  ( (spec_e[peakFlux_ind-4]/peakFlux) LE threshold_percentage ) OR $
+                  ( (spec_e[peakFlux_ind-5]/peakFlux) LE threshold_percentage )
+           IF ~cont THEN mono = -1 ELSE BEGIN ;check how awesome
+              strictMono_candidate = ( (spec_e[peakFlux_ind-1]/peakFlux) LE strictThreshold_percentage ) OR $
+                                     ( (spec_e[peakFlux_ind-2]/peakFlux) LE strictThreshold_percentage ) OR $
+                                     ( (spec_e[peakFlux_ind-3]/peakFlux) LE strictThreshold_percentage ) OR $
+                                     ( (spec_e[peakFlux_ind-4]/peakFlux) LE strictThreshold_percentage ) OR $
+                                     ( (spec_e[peakFlux_ind-5]/peakFlux) LE strictThreshold_percentage )
+           ENDELSE
+        END
+        6: BEGIN
+           cont = ( (spec_e[peakFlux_ind-1]/peakFlux) LE threshold_percentage ) OR $
+                  ( (spec_e[peakFlux_ind-2]/peakFlux) LE threshold_percentage ) OR $
+                  ( (spec_e[peakFlux_ind-3]/peakFlux) LE threshold_percentage ) OR $
+                  ( (spec_e[peakFlux_ind-4]/peakFlux) LE threshold_percentage ) OR $
+                  ( (spec_e[peakFlux_ind-5]/peakFlux) LE threshold_percentage ) OR $
+                  ( (spec_e[peakFlux_ind-6]/peakFlux) LE threshold_percentage )
+           IF ~cont THEN mono = -1 ELSE BEGIN ;check how awesome
+              strictMono_candidate = ( (spec_e[peakFlux_ind-1]/peakFlux) LE strictThreshold_percentage ) OR $
+                                     ( (spec_e[peakFlux_ind-2]/peakFlux) LE strictThreshold_percentage ) OR $
+                                     ( (spec_e[peakFlux_ind-3]/peakFlux) LE strictThreshold_percentage ) OR $
+                                     ( (spec_e[peakFlux_ind-4]/peakFlux) LE strictThreshold_percentage ) OR $
+                                     ( (spec_e[peakFlux_ind-5]/peakFlux) LE strictThreshold_percentage ) OR $
+                                     ( (spec_e[peakFlux_ind-6]/peakFlux) LE strictThreshold_percentage )
            ENDELSE
         END
      ENDCASE
