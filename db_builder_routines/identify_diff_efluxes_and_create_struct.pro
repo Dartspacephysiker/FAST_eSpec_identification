@@ -4,6 +4,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
    HAS_ALT_AND_ORBIT=has_alt_and_orbit, $
    SC_POT=sc_pot, $
    IND_SC_POT=ind_sc_pot, $
+   IS_ION=is_ion, $
    ORBSTR=orbStr, $
    PRODUCE_FAILCODE_OUTPUT=produce_failCodes, $
    OUT_FAILCODES=failCodes, $
@@ -103,6 +104,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
         tempEvent = DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ(tempeSpec,je_vars[i],jee_vars[i], $
                                                              mlt[i],ilat[i],alt[i],orbit[i], $
                                                              QUIET=quiet, $
+                                                             IS_ION=is_ion, $
                                                              BATCH_MODE=batch_mode, $
                                                              ERRORMSG=errorMsg) ;, $
      ENDELSE

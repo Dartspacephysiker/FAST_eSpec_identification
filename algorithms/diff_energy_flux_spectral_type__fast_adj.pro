@@ -18,6 +18,7 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
    ;; iSpec,Ji,Jei, $
    BATCH_MODE=batch_mode, $
    QUIET=quiet, $
+   IS_ION=is_ion, $
    ERRORMSG=errorMsg                ;, $
    ;; ORBSTR=orbStr, $
    ;; INCLUDE_IONS=include_ions
@@ -89,14 +90,16 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
   ;;    ENDIF
   ;; ENDIF
 
-  threshold_percentage         = 0.3
-  strictThreshold_percentage   = 0.1
-  chare_threshold              = 80
-  cusp_mineV                   = 300
-  notCusp_mineV                = 140
-  minForBroad                  = 6
-  minForBroadStrict            = 8
-  monoenergetic_n_to_check     = 4
+  threshold_percentage         = KEYWORD_SET(is_ion) ? 0.3   : 0.3
+  strictThreshold_percentage   = KEYWORD_SET(is_ion) ? 0.1   : 0.1
+  chare_threshold              = KEYWORD_SET(is_ion) ? 10    : 80
+  cusp_mineV                   = KEYWORD_SET(is_ion) ? 10    : 300
+  notCusp_mineV                = KEYWORD_SET(is_ion) ? 10    : 140
+  minForBroad                  = KEYWORD_SET(is_ion) ? 6     : 6
+  minForBroadStrict            = KEYWORD_SET(is_ion) ? 8     : 8
+  monoenergetic_n_to_check     = KEYWORD_SET(is_ion) ? 4     : 4
+  peakFluxThresh               = KEYWORD_SET(is_ion) ? 7.5e6 : 1.0e8
+  broadFluxThresh              = KEYWORD_SET(is_ion) ? 1.5e7 : 2.0e8
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;MONOENERGETIC EVENTS
@@ -207,7 +210,7 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
   ;;    ii. Else, not monoenergetic. Monoenergetic = -2
   ;;    NOTE: They reference Newell et al. [1996b] here, saying it is the smallest threshold that seems to exclude homogeneous aurora
   IF cont THEN BEGIN
-     cont                     = peakFlux GE 1.0e8
+     cont                     = peakFlux GE peakFluxThresh
      IF ~cont THEN mono       = -2
   ENDIF
 
@@ -251,7 +254,7 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
   ;;   i.   N_good GE 3 ? Continue to 2.
   ;;   ii.  Else, not broadband. Broadband = -1
   ;; broad_i = WHERE(dSpec_E GT 2.0e8,nBroad)
-  broad_i = WHERE(spec_e GT 2.0e8,nBroad)
+  broad_i = WHERE(spec_e GT broadFluxThresh,nBroad)
   cont                        = nBroad GE minForBroad
   IF ~cont THEN broad         = -1
 
