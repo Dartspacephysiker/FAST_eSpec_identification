@@ -90,7 +90,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
   ENDELSE
   FOR i=0,N_ELEMENTS(eSpec.x)-1 DO BEGIN
 
-     ;; IF ABS(eSpec.x[i]-854157739.35D) LT 1 THEN STOP
+     ;; IF ABS(eSpec.x[i]-854565610.49D) LT 1 THEN STOP
 
      IF KEYWORD_SET(give_timesplit_info) AND ( (i MOD split_interval) EQ 0 ) THEN BEGIN
         clock     = TIC("eSpecs_"+STRCOMPRESS(i,/REMOVE_ALL) +  '-' + STRCOMPRESS(i+split_interval-1,/REMOVE_ALL))

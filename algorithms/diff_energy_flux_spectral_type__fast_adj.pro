@@ -100,6 +100,7 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
   monoenergetic_n_to_check     = KEYWORD_SET(is_ion) ? 4     : 4
   peakFluxThresh               = KEYWORD_SET(is_ion) ? 1.0e7 : 1.0e8
   broadFluxThresh              = KEYWORD_SET(is_ion) ? 2.0e7 : 2.0e8
+  minMono_peak_energy          = KEYWORD_SET(is_ion) ? 10    : 100
 
   nMaxAbove                    = monoenergetic_n_to_check
   nMaxBelow                    = KEYWORD_SET(is_ion) ?     6 : monoenergetic_n_to_check
@@ -261,7 +262,7 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
   ;;   i.   YES: Monoenergetic! Go to 5.
   ;;   ii.  NO : Not monoenergetic. Monoenergetic = -4
   IF cont THEN BEGIN
-     cont                     = energy_e[peakFlux_ind] GE 100
+     cont                     = energy_e[peakFlux_ind] GE minMono_peak_energy
      IF ~cont THEN mono       = -4
   ENDIF
 
