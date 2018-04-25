@@ -5,6 +5,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
    SC_POT=sc_pot, $
    IND_SC_POT=ind_sc_pot, $
    IS_ION=is_ion, $
+   ION_HALFRANGE_SPEC=ion_HR_spec, $
    ORBSTR=orbStr, $
    PRODUCE_FAILCODE_OUTPUT=produce_failCodes, $
    OUT_FAILCODES=failCodes, $
@@ -90,7 +91,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
   ENDELSE
   FOR i=0,N_ELEMENTS(eSpec.x)-1 DO BEGIN
 
-     ;; IF ABS(eSpec.x[i]-854565610.49D) LT 1 THEN STOP
+     ;; IF ABS(eSpec.x[i]-854157804.36D) LT 1 THEN STOP
 
      IF KEYWORD_SET(give_timesplit_info) AND ( (i MOD split_interval) EQ 0 ) THEN BEGIN
         clock     = TIC("eSpecs_"+STRCOMPRESS(i,/REMOVE_ALL) +  '-' + STRCOMPRESS(i+split_interval-1,/REMOVE_ALL))
@@ -98,8 +99,22 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
      ENDIF
 
      ;; The FAST-adjusted way
-     tempeSpec = {x:eSpec.x[i],y:REVERSE(REFORM(eSpec.y[i,0:max_en_ind[i]])),v:REVERSE(REFORM(eSpec.v[i,0:max_en_ind[i]]))}
+     tempeSpec = {x:eSpec.x[i], $
+                  y:REVERSE(REFORM(eSpec.y[i,0:max_en_ind[i]])), $
+                  v:REVERSE(REFORM(eSpec.v[i,0:max_en_ind[i]]))}
+     IF KEYWORD_SET(is_ion) THEN BEGIN
+        tempHRSpec = {x:ion_HR_spec.x[i], $
+                      y:REVERSE(REFORM(ion_HR_spec.y[i,0:max_en_ind[i]])), $
+                      v:REVERSE(REFORM(ion_HR_spec.v[i,0:max_en_ind[i]]))}
+     ENDIF
+
      IF KEYWORD_SET(produce_failCodes) THEN BEGIN
+
+        IF KEYWORD_SET(is_ion) THEN BEGIN
+           PRINT,"Can't! Not set up!"
+           STOP
+        ENDIF
+
         tempEvent = DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ_V2(tempeSpec,je_vars[i],jee_vars[i], $
                                                              mlt[i],ilat[i],alt[i],orbit[i], $
                                                              PRODUCE_FAILCODE_OUTPUT=produce_failCodes, $
@@ -115,6 +130,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
                                                              mlt[i],ilat[i],alt[i],orbit[i], $
                                                              QUIET=quiet, $
                                                              IS_ION=is_ion, $
+                                                             ION_HALFRANGE_SPEC=tempHRSpec, $
                                                              BATCH_MODE=batch_mode, $
                                                              ERRORMSG=errorMsg) ;, $
      ENDELSE
