@@ -8,6 +8,7 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
    MONO=mono, $
    DIFFUSE=diffuse, $
    MIN_T_STREAKLEN=min_T_streakLen, $
+   MAX_T_STREAKLEN=max_T_streakLen, $
    MLTRANGE=mltRange, $
    ORBRANGE=orbRange, $
    ALTRANGE=altRange, $
@@ -90,9 +91,13 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
   orbStr   = STRING(FORMAT='("__",I0,"-",I0,"ORB")',orbR[0],orbR[1])
   altStr   = STRING(FORMAT='("__",I0,"-",I0,"ALT")',altR[0],altR[1])
   min_TStr = STRING(FORMAT='("__minTStreak_sec_",I0)',min_T_streakLen)
+  max_TStr = ''
+  IF N_ELEMENTS(max_T_streakLen) GT 0 THEN BEGIN
+     max_TStr = STRING(FORMAT='("__maxTStreak_",I0)',max_T_streakLen)
+  ENDIF
 
   outFile  = GET_TODAY_STRING(/DO_YYYYMMDD_FMT) + '--' + typeStr + '_aurora_streaks' + $
-             mltStr + orbStr + altStr + min_TStr + $
+             mltStr + orbStr + altStr + min_TStr + max_TStr + $
              strictStr + '.txt'
 
   IF N_ELEMENTS(NEWELL__eSpec) EQ 0 THEN BEGIN
@@ -147,6 +152,7 @@ PRO OUTPUT_NEWELLTYPE_STREAKS_TEXTFILE, $
                                         STREAKLENS=streakLens, $
                                         T_STREAKLENS=tStreak, $
                                         MIN_T_STREAKLEN=min_T_streakLen, $
+                                        MAX_T_STREAKLEN=max_T_streakLen, $
                                         GAP_TIME=allowable_gap_time, $
                                         /PRINT_START_STOP_TIMES, $
                                         /SORT_BY_T_STREAKLEN, $
