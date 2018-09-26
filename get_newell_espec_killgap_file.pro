@@ -16,7 +16,7 @@ FUNCTION GET_NEWELL_ESPEC_KILLGAP_FILE,DBStruct, $
      ;;               'eSpecDB_20160607_v0_0--with_mapping_factors--killedGap_inds.sav'
      ;; killGapFile = NewellDBDir + killGapDir + $
      ;;               'eSpecDB_20160607_v0_0--with_mapping_factors--killedGap_inds.sav'
-     killGapFile = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/instrument_oddity_times/eSpecDB_20170203_v0_0--with_mapping_factors--killedGap_inds--500-24634--20170208.sav'
+     killGapFile = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/instrument_oddity_times/eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors--killedGap_inds--500-24634--20170208.sav'
      ;; killGapDate = '20170206'
      ;; isOK        = 
   ENDIF ELSE BEGIN
