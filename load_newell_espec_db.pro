@@ -129,6 +129,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         GEI_file             = 'eSpec_DB_20160607-GEI.sav'
         GEO_file             = 'eSpec_DB_20160607-GEO.sav'
         MAG_file             = 'eSpec_DB_20160607-MAG.sav'
+        MAG_file             = 'eSpecDB_20160607_v0_0--with_mapping_factors-MAG.sav'
         SDT_file             = 'eSpec_DB_20160607-SDT.sav'
         AACGM_file           = 'eSpec_DB_20160607-AACGM.sav'
 
