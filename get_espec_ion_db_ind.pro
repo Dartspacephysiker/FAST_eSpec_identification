@@ -464,7 +464,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
 
      ;;;;;;;;;;;;;;;;;;;;;;;;;;
      ;;Limits on season?
-     test = !NULL
+     test = ''
      STR_ELEMENT,alfDB_plot_struct,'restrict_by_season',test
      IF STRLEN(test) NE 0 THEN $
         IF (WHERE(STRMATCH(['spring','summer','fall','winter'], $

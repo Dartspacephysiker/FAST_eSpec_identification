@@ -3,11 +3,34 @@ PRO JOURNAL__20181008__THE_KALLE_PLOT
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  PRINT,"This is junk. I decided to wait until I finish the ELECTRON_MOMENTS batch job in sdt/batch_jobs/Do_the_Newell_2009/. Then we'll have the whole mission."
+  ;; This file is ONLY used to get the inds. I set a
+  ;; breakpoint inside GET_ESPEC_FLUX_DATA at espec_i_list
+  ;; so that I could save the good_i coming out of
+  ;; GET_RESTRICTED_AND_INTERPED_DB_INDICES. I then did the
+  ;; following:
+  ;; eSpec = { $
+  ;;         x		 : dbStruct.x[good_i]		, $         
+  ;;         orbit		 : dbStruct.orbit[good_i]	, $     
+  ;;         mlt		 : dbStruct.mlt[good_i]		, $       
+  ;;         ilat		 : dbStruct.ilat[good_i]	, $      
+  ;;         alt		 : dbStruct.alt[good_i]		, $       
+  ;;         mono		 : dbStruct.mono[good_i]	, $      
+  ;;         broad		 : dbStruct.broad[good_i]	, $     
+  ;;         diffuse		 : dbStruct.diffuse[good_i]	, $   
+  ;;         je		 : dbStruct.je[good_i]		, $        
+  ;;         jee		 : dbStruct.jee[good_i]		, $       
+  ;;         nbad_espec	 : dbStruct.nbad_espec[good_i]	, $
+  ;;         mapfactor	 : dbStruct.mapfactor[good_i]	, $ 
+  ;;         chare		 : dbStruct.chare[good_i]	, $     
+  ;;         info		 : dbStruct.info}      
+  ;; SAVE,espec,good_i, $
+  ;;      FILENAME='/SPENCEdata/Research/Satellites/FAST/espec_identification/20181009-Kalle_inds_21-24MLT__BOTH__gigante_DB.sav'
+  
+  ;; PRINT,"This is junk. I decided to wait until I finish the ELECTRON_MOMENTS batch job in sdt/batch_jobs/Do_the_Newell_2009/. Then we'll have the whole mission."
   STOP
 
   for_eSpec_DBs = 1
-  ;; eSpec__gigante_DB = 1
+  eSpec__gigante_DB = 1
 
   minM = 21
   maxM = 24
@@ -16,6 +39,7 @@ PRO JOURNAL__20181008__THE_KALLE_PLOT
   maxMLAT = 75
 
   dont_consider_clockAngles = 1
+  do_not_consider_IMF       = 1
   ;; Both hemispheres              
 
   ;; Contour plot of loss-cone energy flux, function of MLAT, MLON
@@ -57,7 +81,7 @@ PRO JOURNAL__20181008__THE_KALLE_PLOT
   ;;DB stuff
   do_despun                      = 0
   use_AACGM                      = 0
-  use_MAG                        = 1
+  use_MAG                        = 0
 
   autoscale_fluxPlots            = 0
   fluxPlots__remove_outliers     = 0
@@ -171,10 +195,10 @@ PRO JOURNAL__20181008__THE_KALLE_PLOT
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;ILAT stuff
   ;; hemi                        = 'NORTH'
-  hemi                        = 'SOUTH'
-  ;; hemi                        = 'BOTH'
-  minI                        = 45
-  maxI                        = 90
+  ;; hemi                        = 'SOUTH'
+  hemi                        = 'BOTH'
+  ;; minI                        = 45
+  ;; maxI                        = 90
   ;; maskMin                        = 100
   ;; tHist_mask_bins_below_thresh   = 1
   ;; numOrbLim                      = 5
@@ -352,6 +376,7 @@ PRO JOURNAL__20181008__THE_KALLE_PLOT
         ESPEC_FLUX_PLOTS=eSpec_flux_plots, $
         ESPEC__ALL_FLUXES=eSpec__all_fluxes, $
         ESPEC__NEWELL_2009_INTERP=eSpec__Newell_2009_interp, $
+        ESPEC__GIGANTE_DB=eSpec__gigante_DB, $
         ;; CBEFDIVFAC=cbEFDivFac, $
         CBENUMFLDIVFAC=cbENumFlDivFac, $
         ;; CBPFDIVFAC=CBPFDivFac, $
