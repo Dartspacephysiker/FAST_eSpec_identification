@@ -26,14 +26,32 @@ PRO JOURNAL__20181008__THE_KALLE_PLOT
   ;; SAVE,espec,good_i, $
   ;;      FILENAME='/SPENCEdata/Research/Satellites/FAST/espec_identification/20181009-Kalle_inds_21-24MLT__BOTH__gigante_DB.sav'
   
+  ;; 20181010 UPDATE to the ALL-MLT database
+  ;; file ='/SPENCEdata/Research/Satellites/FAST/espec_identification/20181010-Kalle_inds_ALLMLT__BOTH__gigante_DB.sav'
+
+  ;; Also for delta Ts:
+  ;; IF espec.info.dt_is_mapped THEN BEGIN & espec.info.dt_is_mapped = 0 & espec_delta_t = NEWELL__delta_t[good_i] * SQRT(NEWELL__eSpec.mapFactor[good_i]) & ENDIF ELSE espec_delta_t = NEWELL__delta_t[good_i]
+
+  ;; Also for mag:
+  ;; MAGdir = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
+  ;; MAGfile = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-MAG.sav'
+
+  ;; RESTORE,MAGdir+MAGfile
+
+  ;; mag = {alt: mag.alt[good_i], $
+  ;;        lon: mag.lon[good_i], $
+  ;;        lat: mag.lat[good_i]}
+
+  ;; SAVE,espec,good_i,espec_delta_t,mag,FILENAME=allFile
+
   ;; PRINT,"This is junk. I decided to wait until I finish the ELECTRON_MOMENTS batch job in sdt/batch_jobs/Do_the_Newell_2009/. Then we'll have the whole mission."
-  STOP
+  ;; STOP
 
   for_eSpec_DBs = 1
   eSpec__gigante_DB = 1
 
-  minM = 21
-  maxM = 24
+  ;; minM = 21
+  ;; maxM = 24
 
   minMLAT = 60
   maxMLAT = 75
@@ -197,8 +215,8 @@ PRO JOURNAL__20181008__THE_KALLE_PLOT
   ;; hemi                        = 'NORTH'
   ;; hemi                        = 'SOUTH'
   hemi                        = 'BOTH'
-  ;; minI                        = 45
-  ;; maxI                        = 90
+  minI                        = 45
+  maxI                        = 90
   ;; maskMin                        = 100
   ;; tHist_mask_bins_below_thresh   = 1
   ;; numOrbLim                      = 5
