@@ -24,10 +24,10 @@ PRO JOURNAL__20181008__THE_KALLE_PLOT
   ;;         chare		 : dbStruct.chare[good_i]	, $     
   ;;         info		 : dbStruct.info}      
   ;; SAVE,espec,good_i, $
-  ;;      FILENAME='/SPENCEdata/Research/Satellites/FAST/espec_identification/20181009-Kalle_inds_21-24MLT__BOTH__gigante_DB.sav'
+  ;;      FILENAME='/SPENCEdata/Research/Satellites/FAST/espec_identification/saves_output_etc/20181009-Kalle_inds_21-24MLT__BOTH__gigante_DB.sav'
   
   ;; 20181010 UPDATE to the ALL-MLT database
-  ;; file ='/SPENCEdata/Research/Satellites/FAST/espec_identification/20181010-Kalle_inds_ALLMLT__BOTH__gigante_DB.sav'
+  ;; file ='/SPENCEdata/Research/Satellites/FAST/espec_identification/saves_output_etc/20181010-Kalle_inds_ALLMLT__BOTH__gigante_DB.sav'
 
   ;; Also for delta Ts:
   ;; IF espec.info.dt_is_mapped THEN BEGIN & espec.info.dt_is_mapped = 0 & espec_delta_t = NEWELL__delta_t[good_i] * SQRT(NEWELL__eSpec.mapFactor[good_i]) & ENDIF ELSE espec_delta_t = NEWELL__delta_t[good_i]

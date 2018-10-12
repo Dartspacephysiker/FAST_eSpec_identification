@@ -3,7 +3,7 @@ PRO JOURNAL__20181009__THE_KALLE_DB__NOW_GET_MAG_COORDINATES
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
-  file = '/SPENCEdata/Research/Satellites/FAST/espec_identification/20181009-Kalle_inds_21-24MLT__BOTH__gigante_DB.sav'
+  file = '/SPENCEdata/Research/Satellites/FAST/espec_identification/saves_output_etc/20181009-Kalle_inds_21-24MLT__BOTH__gigante_DB.sav'
 
   MAGdir = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/alternate_coords/'
   MAGfile = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-MAG.sav'
