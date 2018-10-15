@@ -3,6 +3,7 @@
 PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          UPGOING=upgoing, $
                          GIGANTE=gigante, $
+                         FINALDB=finalDB, $
                          FAILCODES=failCode, $
                          USE_UNSORTED_FILE=use_unsorted_file, $
                          NEWELLDBDIR=NewellDBDir, $
@@ -109,6 +110,34 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         SDT_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-SDT.sav'
 
         AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
+
+     END
+     KEYWORD_SET(finalDB): BEGIN
+
+        IF KEYWORD_SET(use_unsorted_file) THEN BEGIN
+           PRINT,"Can't use unsorted with gigante eSpec DB!"
+           use_unsorted_file = 0
+        ENDIF
+
+        defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/v2018/'
+        defCoordDir            = defNewellDBDir
+
+        defNewellDBFile        = 'eMomDB_20181015-1000-11776-ephem.sav' 
+        defNewellDBMomsFile    = 'eMomDB_20181015-1000-11776-LCangle_moms.sav'
+        defNewellDBExtraFile   = 'eMomDB_20181015-1000-11776-extra.sav'
+
+        DB_date                = '20181015'
+        DB_version             = 'v0.0'
+        DB_extras              = 'finalDB/with_alternate_coords/with_mapping_factors'
+
+        defSortNewellDBFile    =  defNewellDBFile
+
+        ;; GEI_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-GEI.sav'
+        ;; GEO_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-GEO.sav'
+        ;; MAG_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-MAG.sav'
+        ;; SDT_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-SDT.sav'
+
+        ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
 
      END
      ELSE: BEGIN
@@ -249,18 +278,25 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
      ENDIF
      
-     ;;want characteristic energy? You sure?
-     charE = ABS(eSpec.jee/eSpec.je)*6.242*1.0e11
-     these = WHERE((eSpec.broad EQ 1) OR (eSpec.broad EQ 2) AND $
-                   ( ( (charE LT 80 ) AND  (eSpec.mlt GE 9.5) AND (eSpec.mlt LE 14.5) ) OR $
-                     ( (charE LT 80 ) AND ((eSpec.mlt LT 9.5) OR  (eSpec.mlt GT 14.5) )    )),nNonsense)
-     IF nNonsense GT 0 THEN BEGIN
-        PRINT,"There are " + STRCOMPRESS(nNonsense) + ' inds that cannot be broad, and yet are, Spence. Figure it out.'
-        eSpec.broad[TEMPORARY(these)] = 255-10-2
-     ENDIF
-     IF KEYWORD_SET(load_charE) THEN BEGIN
-        STR_ELEMENT,eSpec,'charE',TEMPORARY(charE),/ADD_REPLACE
-     ENDIF
+     IF ~KEYWORD_SET(finalDB) THEN BEGIN
+        ;;want characteristic energy? You sure?
+        charE = ABS(eSpec.jee/eSpec.je)*6.242*1.0e11
+        these = WHERE((eSpec.broad EQ 1) OR (eSpec.broad EQ 2) AND $
+                      ( ( (charE LT 80 ) AND  (eSpec.mlt GE 9.5) AND (eSpec.mlt LE 14.5) ) OR $
+                        ( (charE LT 80 ) AND ((eSpec.mlt LT 9.5) OR  (eSpec.mlt GT 14.5) )    )),nNonsense)
+        IF nNonsense GT 0 THEN BEGIN
+           PRINT,"There are " + STRCOMPRESS(nNonsense) + ' inds that cannot be broad, and yet are, Spence. Figure it out.'
+           eSpec.broad[TEMPORARY(these)] = 255-10-2
+        ENDIF
+        IF KEYWORD_SET(load_charE) THEN BEGIN
+           STR_ELEMENT,eSpec,'charE',TEMPORARY(charE),/ADD_REPLACE
+        ENDIF
+
+     ENDIF ELSE BEGIN
+
+        eSpec = TEMPORARY(ephem)
+
+     ENDELSE
 
      NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                                   DB_DIR=NewellDBDir, $
@@ -272,6 +308,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      eSpec.info.has_charE     = BYTE(KEYWORD_SET(load_charE))
 
      eSpec.info.is_gigante    = KEYWORD_SET(gigante)
+     eSpec.info.is_final2018  = KEYWORD_SET(finalDB)
      IF KEYWORD_SET(upgoing) THEN BEGIN
         eSpec.info.is_upgoing = 1B
      ENDIF

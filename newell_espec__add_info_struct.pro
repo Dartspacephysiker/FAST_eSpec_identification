@@ -43,6 +43,7 @@ PRO NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                  is_AlfNewell     : BYTE(KEYWORD_SET(is_AlfNewell)), $
                  is_mapped        : 0B, $
                  is_gigante       : 0B, $
+                 is_final2018     : 0B, $
                  is_upgoing       : 0B, $
                  dILAT_not_dt     : 0B, $
                  dAngle_not_dt    : 0B, $
