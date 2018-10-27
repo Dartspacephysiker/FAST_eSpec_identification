@@ -5,11 +5,15 @@ PRO JOURNAL__20181015__INITIAL_ATTEMPT_AT_PARSING_NYE_DB, $
    MAKE_LC_ERRS=make_LC_errs, $
    MAKE_ALL_ERRS=make_all_errs, $
    MAKE_EPHEMERIS=make_ephemeris, $
-   MAKE_EXTRA=make_extra
+   MAKE_EXTRA=make_extra, $
+   FOR_KARLSON=karlson
 
   COMPILE_OPT IDL2,STRICTARRSUBS
 
   inDir        = '/thelonious_data1/FAST_electrons_2018/'
+  IF KEYWORD_SET(karlson) THEN BEGIN
+     inDir     = '/media/spencerh/data/FAST_electrons/'
+  ENDIF
   outDir       = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/v2018/'
 
   inFile_pref  = 'electron_moments_and_spectral_identification__Orbit_'
@@ -23,7 +27,7 @@ PRO JOURNAL__20181015__INITIAL_ATTEMPT_AT_PARSING_NYE_DB, $
   RESTORE,inDir+tmpFile
 
   startOrb     = 1000
-  stopOrb      = 11776
+  stopOrb      = 25445
 
   todayStr = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
   outPref = STRING(FORMAT='("eMomDB_",A0,"-",I0,"-",I0)', $
@@ -32,7 +36,7 @@ PRO JOURNAL__20181015__INITIAL_ATTEMPT_AT_PARSING_NYE_DB, $
                    stopOrb)
 
   ;; Assume ~ 1500 elements per orbit
-  nPerOrb = 1200L
+  nPerOrb = 1500L
   n_elem = nPerOrb * (stopOrb-startOrb)
 
   ;; Have three copies of mapratio--eTron.moments.lc.mapRatio, eTron.moments.all.mapRatio, and extra.mapRatio.

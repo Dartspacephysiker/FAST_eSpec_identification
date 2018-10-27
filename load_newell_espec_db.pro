@@ -115,7 +115,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
      KEYWORD_SET(finalDB): BEGIN
 
         IF KEYWORD_SET(use_unsorted_file) THEN BEGIN
-           PRINT,"Can't use unsorted with gigante eSpec DB!"
+           PRINT,"Can't use unsorted with final eSpec DB!"
            use_unsorted_file = 0
         ENDIF
 
@@ -123,8 +123,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         defCoordDir            = defNewellDBDir
 
         defNewellDBFile        = 'eMomDB_20181015-1000-11776-ephem.sav' 
-        defNewellDBMomsFile    = 'eMomDB_20181015-1000-11776-LCangle_moms.sav'
-        defNewellDBExtraFile   = 'eMomDB_20181015-1000-11776-extra.sav'
+        defNewellDBMomsFile    = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
+        defNewellDBExtraFile   = 'eMomDB_20181026-1000-25445-extra.sav'
 
         DB_date                = '20181015'
         DB_version             = 'v0.0'
