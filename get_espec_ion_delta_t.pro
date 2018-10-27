@@ -7,6 +7,14 @@ FUNCTION GET_ESPEC_ION_DELTA_T,elOrIon, $
 
   IF N_ELEMENTS(dbName) EQ 0 THEN dbname = 'ElOrIon'
 
+  ;; Check if this is the final electron DB
+  val = !NULL
+  STR_ELEMENT,elOrIon,"tDiffs",val
+  IF SIZE(val,/TYPE) NE 0 THEN BEGIN
+     PRINT,"finalDB already has tDiffs! Here you go."
+     RETURN,val
+  ENDIF
+
   elOrIon_delta_t          = [FLOAT(elOrIon.x[1:-1]-elOrIon.x[0:-2]),-1.0]
 
   worst_i                = WHERE(( elOrIon_delta_t LT 0   ) OR $

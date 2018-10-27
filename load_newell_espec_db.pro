@@ -4,6 +4,8 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
                          UPGOING=upgoing, $
                          GIGANTE=gigante, $
                          FINALDB=finalDB, $
+                         FINAL__LCMOMS=final__LCMoms, $
+                         FINAL__ALLANGLEMOMS=final__allAngleMoms, $
                          FAILCODES=failCode, $
                          USE_UNSORTED_FILE=use_unsorted_file, $
                          NEWELLDBDIR=NewellDBDir, $
@@ -122,14 +124,23 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/v2018/'
         defCoordDir            = defNewellDBDir
 
-        defNewellDBFile        = 'eMomDB_20181015-1000-11776-ephem.sav' 
-        defNewellDBMomsFile    = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
+        ;; defNewellDBFile        = 'eMomDB_20181015-1000-11776-ephem.sav' 
+        defNewellDBFile        = 'eMomDB_20181026-1000-25445-ephem.sav' 
+        IF KEYWORD_SET(final__allAngleMoms) THEN BEGIN
+           PRINT,"NO!"
+           STOP
+           ;; defNewellDBMomsFile = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
+        ENDIF ELSE BEGIN
+           defNewellDBMomsFile = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
+        ENDELSE
         defNewellDBExtraFile   = 'eMomDB_20181026-1000-25445-extra.sav'
 
-        DB_date                = '20181015'
+        DB_date                = '20181026'
         DB_version             = 'v0.0'
         DB_extras              = 'finalDB/with_alternate_coords/with_mapping_factors'
 
+        dont_perform_SH_correction = 1B
+        
         defSortNewellDBFile    =  defNewellDBFile
 
         ;; GEI_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-GEI.sav'
@@ -250,7 +261,65 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         IF ~quiet THEN PRINTF,lun,"Forced loading of " + specType + " eSpec database ..."
      ENDIF
      IF ~quiet THEN PRINTF,lun,'Loading ' + specType + ' eSpec DB: ' + NewellDBFile + '...'
-     RESTORE,NewellDBDir+NewellDBFile
+
+     IF KEYWORD_SET(finalDB) THEN BEGIN
+        PRINT,"Cobbling together the final DB ..."
+
+        ;; First, get what we need from each
+        RESTORE,NewellDBDir+NewellDBFile
+
+        ;; Stuff from ephem
+        x       =  ephem.time
+        orbit   =  ephem.orbit
+        mlt     =  ephem.mlt
+        ilat    =  ephem.ilat
+        alt     =  ephem.alt
+        mono    =  ephem.mono
+        broad   =  ephem.broad
+        diffuse = ephem.diffuse
+
+        nbad_espec = ~ephem.valid
+
+        ephem = !NULL
+
+        ;; Stuff from moment file
+        defNewellDBMomsFile    = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
+
+        RESTORE,NewellDBDir+defNewellDBMomsFile
+        je      = LCangle_moms.j
+        jee     = LCangle_moms.je
+
+        LCangle_moms = !NULL
+
+        ;; Stuff from extra file
+        RESTORE,NewellDBDir+defNewellDBExtraFile
+
+        nbad_espec = nbad_espec OR extra.eSpec_bad_time
+        mapfactor  = extra.mapRatio
+
+        tDiffs     = extra.tDiffs
+
+        extra = !NULL
+
+        PRINT,"STITCH!"
+        eSpec = { $
+		x           : TEMPORARY(x          ), $         
+		orbit       : TEMPORARY(orbit      ), $     
+		mlt         : TEMPORARY(mlt        ), $       
+		ilat        : TEMPORARY(ilat       ), $      
+		alt         : TEMPORARY(alt        ), $       
+		mono        : TEMPORARY(mono       ), $      
+		broad       : TEMPORARY(broad      ), $     
+		diffuse     : TEMPORARY(diffuse    ), $   
+		je          : TEMPORARY(je         ), $        
+		jee         : TEMPORARY(jee        ), $       
+		nbad_espec  : TEMPORARY(nbad_espec ), $
+                mapfactor   : TEMPORARY(mapfactor  ), $
+                tDiffs      : TEMPORARY(tDiffs     )}
+
+     ENDIF ELSE BEGIN
+        RESTORE,NewellDBDir+NewellDBFile
+     ENDELSE
 
      IF KEYWORD_SET(use_2000km_file) THEN BEGIN
         eSpec    = {x          : eSpec.x                , $
@@ -278,7 +347,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
      ENDIF
      
-     IF ~KEYWORD_SET(finalDB) THEN BEGIN
+     ;; IF ~KEYWORD_SET(finalDB) THEN BEGIN
         ;;want characteristic energy? You sure?
         charE = ABS(eSpec.jee/eSpec.je)*6.242*1.0e11
         these = WHERE((eSpec.broad EQ 1) OR (eSpec.broad EQ 2) AND $
@@ -292,11 +361,11 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
            STR_ELEMENT,eSpec,'charE',TEMPORARY(charE),/ADD_REPLACE
         ENDIF
 
-     ENDIF ELSE BEGIN
+     ;; ENDIF ELSE BEGIN
 
-        eSpec = TEMPORARY(ephem)
+     ;;    eSpec = TEMPORARY(ephem)
 
-     ENDELSE
+     ;; ENDELSE
 
      NEWELL_ESPEC__ADD_INFO_STRUCT,eSpec, $
                                   DB_DIR=NewellDBDir, $
