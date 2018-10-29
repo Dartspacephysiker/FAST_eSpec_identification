@@ -391,7 +391,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                                   FOR_ESPEC_DB=~is_ion, $
                                                   FOR_ION_DB=is_ion, $
                                                   /STOP_IF_NOEXIST)
-     RESTORE,killGap_file
+     IF ~STRMATCH(STRUPCASE(killGap_file),"*SKIP*") THEN RESTORE,killGap_file ELSE keep_i = region_i
 
      nGood       = N_ELEMENTS(region_i)
      region_i    = CGSETINTERSECTION(region_i,TEMPORARY(keep_i),COUNT=nKept)
@@ -740,7 +740,7 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
                                                           NEWELLDBDIR=dbDir, $
                                                           /STOP_IF_NOEXIST)
 
-        IF STRUPCASE(safed_eSpecIndsFile) NE STRUPCASE('DontNeedItBro') THEN BEGIN
+        IF ~STRMATCH(STRUPCASE(safed_eSpecIndsFile),STRUPCASE('*DontNeedItBro*')) THEN BEGIN
            RESTORE,safed_eSpecIndsFile
 
            IF N_ELEMENTS(dbStruct.orbit) NE eSpec_clean_info.totChecked THEN BEGIN
@@ -751,7 +751,17 @@ FUNCTION GET_ESPEC_ION_DB_IND,dbStruct,lun, $
            good_i      = CGSETINTERSECTION(good_i,TEMPORARY(cleaned_eSpec_i),COUNT=nKept)
            PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to the safety ind thing ...'
 
-        ENDIF
+        ENDIF ELSE IF STRUPCASE(safed_eSpecIndsFile) EQ STRUPCASE('DontNeedItBro-useDB!') THEN BEGIN
+           nGood = N_ELEMENTS(good_i)
+           cleaned_eSpec_i = WHERE(~dbStruct.nBad_eSpec,nBugger)
+           IF nBugger GT 0 THEN BEGIN
+              good_i = CGSETINTERSECTION(good_i,TEMPORARY(cleaned_eSpec_i),COUNT=nKept)
+              PRINT,"Lost " + STRCOMPRESS(nGood - nKept,/REMOVE_ALL) + ' inds to not-validness, etc. ...'
+           ENDIF ELSE BEGIN
+              PRINT,"Hvorfor ingen akseptable indekser?"
+              STOP
+           ENDELSE
+        ENDIF 
 
         ;;Now kill dat
         ;; killGap_file = GET_NEWELL_ESPEC_KILLGAP_FILE(dbStruct, $

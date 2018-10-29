@@ -124,24 +124,15 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/v2018/'
         defCoordDir            = defNewellDBDir
 
-        ;; defNewellDBFile        = 'eMomDB_20181015-1000-11776-ephem.sav' 
-        defNewellDBFile        = 'eMomDB_20181026-1000-25445-ephem.sav' 
-        IF KEYWORD_SET(final__allAngleMoms) THEN BEGIN
-           PRINT,"NO!"
-           STOP
-           ;; defNewellDBMomsFile = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
-        ENDIF ELSE BEGIN
-           defNewellDBMomsFile = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
-        ENDELSE
-        defNewellDBExtraFile   = 'eMomDB_20181026-1000-25445-extra.sav'
-
-        DB_date                = '20181026'
-        DB_version             = 'v0.0'
-        DB_extras              = 'finalDB/with_alternate_coords/with_mapping_factors'
-
-        dont_perform_SH_correction = 1B
-        
-        defSortNewellDBFile    =  defNewellDBFile
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;; 20181026 DB
+        ephemFile        = 'eMomDB_20181026-1000-25445-ephem.sav' 
+        allAngleFile     = 'eMomDB_20181026-1000-25445-ALLangle_moms.sav'
+        LCAngleFile      = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
+        extraFile        = 'eMomDB_20181026-1000-25445-extra.sav'
+        DB_date          = '20181026'
+        DB_version       = 'v0.0'
+        DB_extras        = 'finalDB/with_alternate_coords/with_mapping_factors'
 
         ;; GEI_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-GEI.sav'
         ;; GEO_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-GEO.sav'
@@ -149,6 +140,30 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         ;; SDT_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-SDT.sav'
 
         ;; AACGM_file           = 'Dartdb_20151222--500-16361_inc_lower_lats--maximus--AACGM_coords.sav'
+
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;; 20181029 DB
+        ephemFile        = 'eMomDB_20181029-1000-29236-ephem.sav' 
+        allAngleFile     = 'eMomDB_20181029-1000-29236-ALLangle_moms.sav'
+        LCAngleFile      = 'eMomDB_20181029-1000-29236-LCangle_moms.sav'
+        extraFile        = 'eMomDB_20181029-1000-29236-extra.sav'
+        DB_date          = '20181029'
+        DB_version       = 'v0.1'
+        DB_extras        = 'finalDB/with_alternate_coords/with_mapping_factors'
+
+
+        ;; Do 'em
+        defNewellDBFile  = ephemFile
+        IF KEYWORD_SET(final__allAngleMoms) THEN BEGIN
+           defNewellDBMomsFile = allAngleFile
+        ENDIF ELSE BEGIN
+           defNewellDBMomsFile = LCAngleFile
+        ENDELSE
+        defNewellDBExtraFile   = extraFile
+
+        dont_perform_SH_correction = 1B
+        
+        defSortNewellDBFile    =  defNewellDBFile
 
      END
      ELSE: BEGIN
@@ -268,6 +283,7 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
         ;; First, get what we need from each
         RESTORE,NewellDBDir+NewellDBFile
 
+        ;;;;;;;;;;
         ;; Stuff from ephem
         x       =  ephem.time
         orbit   =  ephem.orbit
@@ -282,15 +298,22 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
         ephem = !NULL
 
-        ;; Stuff from moment file
-        defNewellDBMomsFile    = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
-
+        ;;;;;;;;;;
+        ;; Stuff from moment file(s?)
         RESTORE,NewellDBDir+defNewellDBMomsFile
-        je      = LCangle_moms.j
-        jee     = LCangle_moms.je
+        IF KEYWORD_SET(final__allAngleMoms) THEN BEGIN
+           je      = ALLangle_moms.j
+           jee     = ALLangle_moms.je
+           ALLangle_moms = !NULL
+           DB_extras = DB_extras + '/ALLangleMoms'
+        ENDIF ELSE BEGIN
+           je      = LCangle_moms.j
+           jee     = LCangle_moms.je
+           LCangle_moms = !NULL
+           DB_extras = DB_extras + '/LCangleMoms'
+        ENDELSE
 
-        LCangle_moms = !NULL
-
+        ;;;;;;;;;;
         ;; Stuff from extra file
         RESTORE,NewellDBDir+defNewellDBExtraFile
 
@@ -301,21 +324,24 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
         extra = !NULL
 
+        ;; Junk good-fer-nuthins
+        keep = WHERE(~nbad_espec)
+
         PRINT,"STITCH!"
         eSpec = { $
-		x           : TEMPORARY(x          ), $         
-		orbit       : TEMPORARY(orbit      ), $     
-		mlt         : TEMPORARY(mlt        ), $       
-		ilat        : TEMPORARY(ilat       ), $      
-		alt         : TEMPORARY(alt        ), $       
-		mono        : TEMPORARY(mono       ), $      
-		broad       : TEMPORARY(broad      ), $     
-		diffuse     : TEMPORARY(diffuse    ), $   
-		je          : TEMPORARY(je         ), $        
-		jee         : TEMPORARY(jee        ), $       
-		nbad_espec  : TEMPORARY(nbad_espec ), $
-                mapfactor   : TEMPORARY(mapfactor  ), $
-                tDiffs      : TEMPORARY(tDiffs     )}
+		x           : (TEMPORARY(x          ))[keep], $         
+		orbit       : (TEMPORARY(orbit      ))[keep], $     
+		mlt         : (TEMPORARY(mlt        ))[keep], $       
+		ilat        : (TEMPORARY(ilat       ))[keep], $      
+		alt         : (TEMPORARY(alt        ))[keep], $       
+		mono        : (TEMPORARY(mono       ))[keep], $      
+		broad       : (TEMPORARY(broad      ))[keep], $     
+		diffuse     : (TEMPORARY(diffuse    ))[keep], $   
+		je          : (TEMPORARY(je         ))[keep], $        
+		jee         : (TEMPORARY(jee        ))[keep], $       
+		nbad_espec  : (TEMPORARY(nbad_espec ))[keep], $
+                mapfactor   : (TEMPORARY(mapfactor  ))[keep], $
+                tDiffs      : (TEMPORARY(tDiffs     ))[keep]}
 
      ENDIF ELSE BEGIN
         RESTORE,NewellDBDir+NewellDBFile

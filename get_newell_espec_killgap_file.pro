@@ -40,6 +40,9 @@ FUNCTION GET_NEWELL_ESPEC_KILLGAP_FILE,DBStruct, $
               KEYWORD_SET(file20170203): BEGIN
                  killGapFileSuff = '--killedGap_inds--500-24634--20170208.sav'
               END
+              KEYWORD_SET(DBStruct.info.is_final2018): BEGIN
+                 killGapFileSuff = "SKIP" & skip = 1
+              END
            ENDCASE
            
         END
@@ -65,7 +68,7 @@ FUNCTION GET_NEWELL_ESPEC_KILLGAP_FILE,DBStruct, $
   ENDELSE
 
   IF KEYWORD_SET(stop_if_noExist) THEN BEGIN
-     IF ~FILE_TEST(killGapFile) THEN BEGIN
+     IF ~FILE_TEST(killGapFile) AND ~KEYWORD_SET(skip) THEN BEGIN
         PRINT,"File doesn't exist: " + killGapFile
         PRINT,"What to do?"
         PRINT,"You know, if you visited JOURNAL__20170118__LOOK_FOR_GAPS_AND_REMOVE.PRO, you could probably get it handled."

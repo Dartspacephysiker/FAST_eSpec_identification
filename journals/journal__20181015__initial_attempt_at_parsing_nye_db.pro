@@ -27,7 +27,7 @@ PRO JOURNAL__20181015__INITIAL_ATTEMPT_AT_PARSING_NYE_DB, $
   RESTORE,inDir+tmpFile
 
   startOrb     = 1000
-  stopOrb      = 25445
+  stopOrb      = 29236
 
   todayStr = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
   outPref = STRING(FORMAT='("eMomDB_",A0,"-",I0,"-",I0)', $
@@ -36,7 +36,7 @@ PRO JOURNAL__20181015__INITIAL_ATTEMPT_AT_PARSING_NYE_DB, $
                    stopOrb)
 
   ;; Assume ~ 1500 elements per orbit
-  nPerOrb = 1500L
+  nPerOrb = 1000L
   n_elem = nPerOrb * (stopOrb-startOrb)
 
   ;; Have three copies of mapratio--eTron.moments.lc.mapRatio, eTron.moments.all.mapRatio, and extra.mapRatio.
