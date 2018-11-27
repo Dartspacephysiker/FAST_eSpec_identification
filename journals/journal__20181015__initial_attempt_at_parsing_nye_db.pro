@@ -27,7 +27,8 @@ PRO JOURNAL__20181015__INITIAL_ATTEMPT_AT_PARSING_NYE_DB, $
   RESTORE,inDir+tmpFile
 
   startOrb     = 1000
-  stopOrb      = 29236
+  stopOrb      = 51315
+  ;; Last file is /media/spencerh/data/FAST_electrons/electron_moments_and_spectral_identification__Orbit_51315.sav, tror jeg
 
   todayStr = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
   outPref = STRING(FORMAT='("eMomDB_",A0,"-",I0,"-",I0)', $
@@ -122,6 +123,7 @@ PRO JOURNAL__20181015__INITIAL_ATTEMPT_AT_PARSING_NYE_DB, $
                charE    : MAKE_ARRAY(   n_elem,TYPE=floatType), $
                nErr     : MAKE_ARRAY(   n_elem,TYPE=floatType), $
                jErr     : MAKE_ARRAY(   n_elem,TYPE=floatType), $
+               jeErr    : MAKE_ARRAY(   n_elem,TYPE=floatType), $
                TErr     : MAKE_ARRAY(4, n_elem,TYPE=floatType), $
                charEErr : MAKE_ARRAY(   n_elem,TYPE=floatType)}
 
@@ -276,6 +278,7 @@ PRO JOURNAL__20181015__INITIAL_ATTEMPT_AT_PARSING_NYE_DB, $
                moms.charE    [   tmpInds] = eTron.moments.(momInd).charE   
                moms.nErr     [   tmpInds] = eTron.moments.(momInd).nErr    
                moms.jErr     [   tmpInds] = eTron.moments.(momInd).jErr    
+               moms.jeErr    [   tmpInds] = eTron.moments.(momInd).jeErr    
                moms.TErr     [*, tmpInds] = eTron.moments.(momInd).TErr    
                moms.charEErr [   tmpInds] = eTron.moments.(momInd).charEErr
 
@@ -334,6 +337,7 @@ PRO JOURNAL__20181015__INITIAL_ATTEMPT_AT_PARSING_NYE_DB, $
                charE    : moms.charE   [   finalInds], $
                nErr     : moms.nErr    [   finalInds], $
                jErr     : moms.jErr    [   finalInds], $
+               jeErr    : moms.jeErr   [   finalInds], $
                TErr     : moms.TErr    [*, finalInds], $
                charEErr : moms.charEErr[   finalInds]}
 
