@@ -3,7 +3,8 @@ PRO JOURNAL__20181015__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
 
   COMPILE_OPT IDL2,STRICTARRSUBS
   
-  outFile_pref            = 'eMomDB_20181015-1000-11776'
+  ;; outFile_pref            = 'eMomDB_20181015-1000-11776'
+  outFile_pref            = 'eMomDB_20181127-1000-51315'
   dry_run                 = 0
 
   ;; nCPUsToRun              = 7
