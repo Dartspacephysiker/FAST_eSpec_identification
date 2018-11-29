@@ -126,13 +126,13 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         ;; 20181026 DB
-        ephemFile        = 'eMomDB_20181026-1000-25445-ephem.sav' 
-        allAngleFile     = 'eMomDB_20181026-1000-25445-ALLangle_moms.sav'
-        LCAngleFile      = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
-        extraFile        = 'eMomDB_20181026-1000-25445-extra.sav'
-        DB_date          = '20181026'
-        DB_version       = 'v0.0'
-        DB_extras        = 'finalDB/with_alternate_coords/with_mapping_factors'
+        ;; ephemFile        = 'eMomDB_20181026-1000-25445-ephem.sav' 
+        ;; allAngleFile     = 'eMomDB_20181026-1000-25445-ALLangle_moms.sav'
+        ;; LCAngleFile      = 'eMomDB_20181026-1000-25445-LCangle_moms.sav'
+        ;; extraFile        = 'eMomDB_20181026-1000-25445-extra.sav'
+        ;; DB_date          = '20181026'
+        ;; DB_version       = 'v0.0'
+        ;; DB_extras        = 'finalDB/with_alternate_coords/with_mapping_factors'
 
         ;; GEI_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-GEI.sav'
         ;; GEO_file             = 'eSpecDB_20170203_v0_0--gigante--with_alternate_coords--with_mapping_factors-GEO.sav'
@@ -143,14 +143,24 @@ PRO LOAD_NEWELL_ESPEC_DB,eSpec,eSpec__times,eSpec__delta_t, $
 
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         ;; 20181029 DB
-        ephemFile        = 'eMomDB_20181029-1000-29236-ephem.sav' 
-        allAngleFile     = 'eMomDB_20181029-1000-29236-ALLangle_moms.sav'
-        LCAngleFile      = 'eMomDB_20181029-1000-29236-LCangle_moms.sav'
-        extraFile        = 'eMomDB_20181029-1000-29236-extra.sav'
-        DB_date          = '20181029'
+        ;; ephemFile        = 'eMomDB_20181029-1000-29236-ephem.sav' 
+        ;; allAngleFile     = 'eMomDB_20181029-1000-29236-ALLangle_moms.sav'
+        ;; LCAngleFile      = 'eMomDB_20181029-1000-29236-LCangle_moms.sav'
+        ;; extraFile        = 'eMomDB_20181029-1000-29236-extra.sav'
+        ;; DB_date          = '20181029'
+        ;; DB_version       = 'v0.1'
+        ;; DB_extras        = 'finalDB/with_alternate_coords/with_mapping_factors'
+
+
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;; 20181127 DB
+        ephemFile        = 'eMomDB_20181127-1000-51315-ephem.sav' 
+        allAngleFile     = 'eMomDB_20181127-1000-51315-ALLangle_moms.sav'
+        LCAngleFile      = 'eMomDB_20181127-1000-51315-LCangle_moms.sav'
+        extraFile        = 'eMomDB_20181127-1000-51315-extra.sav'
+        DB_date          = '20181127'
         DB_version       = 'v0.1'
         DB_extras        = 'finalDB/with_alternate_coords/with_mapping_factors'
-
 
         ;; Do 'em
         defNewellDBFile  = ephemFile
