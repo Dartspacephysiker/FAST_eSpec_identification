@@ -7,22 +7,28 @@ PRO JOURNAL__20181015__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
   outFile_pref            = 'eMomDB_20181127-1000-51315'
   dry_run                 = 0
 
-  ;; nCPUsToRun              = 7
-  ;; startCPU                = 0
-  ;; stopCPU                 = 6
+  ;; nCPUsToRun              = 4
+  startCPU                = 4
+  stopCPU                 = 6
 
   diag                    = 0 ;diagnostic mode
 
   check_if_exists         = 1
 
   ;;Alle
-  create_timeStampsArr      = [1,0,0,0,0]
-  get_GEI_coordsArr         = [0,0,1,0,0]
-  do_GEO_MAG_conversionsArr = [0,0,0,1,0]
-  do_AACGM_conversionsArr   = [0,0,0,0,0]
-  get_dipoleTilt_dataArr    = [0,1,0,0,0]
-  stitch_filesArr           = [0,0,0,0,1]
+  ;; create_timeStampsArr      = [1,0,0,0,0]
+  ;; get_GEI_coordsArr         = [0,0,1,0,0]
+  ;; do_GEO_MAG_conversionsArr = [0,0,0,1,0]
+  ;; do_AACGM_conversionsArr   = [0,0,0,0,0]
+  ;; get_dipoleTilt_dataArr    = [0,1,0,0,0]
+  ;; stitch_filesArr           = [0,0,0,0,1]
 
+  create_timeStampsArr      = [0]
+  get_GEI_coordsArr         = [0]
+  do_GEO_MAG_conversionsArr = [0]
+  do_AACGM_conversionsArr   = [0]
+  get_dipoleTilt_dataArr    = [0]
+  stitch_filesArr           = [1]
 
   ;; test_single             = 0
 
@@ -31,14 +37,22 @@ PRO JOURNAL__20181015__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PAR
   coordDir                = DBDir 
   orig_routineName        = 'JOURNAL__20181015__ESPEC_GEI_GEO_MAG_CONV__FASTDB_COORDINATE_CONVERSION__PARALLEL'
 
-  LOAD_NEWELL_ESPEC_DB,eSpec, $
-                       /NO_MEMORY_LOAD, $
-                       /FINALDB, $
-                       /DONT_CONVERT_TO_STRICT_NEWELL, $
-                       /DONT_MAP_TO_100KM, $
-                       /DONT_PERFORM_CORRECTION
+  ;; LOAD_NEWELL_ESPEC_DB,eSpec, $
+  ;;                      /NO_MEMORY_LOAD, $
+  ;;                      /FINALDB, $
+  ;;                      /DONT_CONVERT_TO_STRICT_NEWELL, $
+  ;;                      /DONT_MAP_TO_100KM, $
+  ;;                      /DONT_PERFORM_CORRECTION
 
-  times = (TEMPORARY(eSpec)).time
+  ;; times = (TEMPORARY(eSpec)).x
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Just get times, silly
+  defNewellDBDir         = '/SPENCEdata/Research/database/FAST/dartdb/electron_Newell_db/v2018/'
+  ephemFile        = 'eMomDB_20181127-1000-51315-ephem.sav' 
+
+  RESTORE,defNewellDBDir+ephemFile
+  times = (TEMPORARY(ephem)).time
 
   ;; nThang = N_ELEMENTS(create_timeStampsArr)
   nThang = N_ELEMENTS(create_timeStampsArr)
