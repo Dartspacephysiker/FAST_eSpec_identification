@@ -6,6 +6,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
    IND_SC_POT=ind_sc_pot, $
    IS_ION=is_ion, $
    ION_HALFRANGE_SPEC=ion_HR_spec, $
+   BEAMHALFRATIO=beamHalfRatio, $
    ORBSTR=orbStr, $
    PRODUCE_FAILCODE_OUTPUT=produce_failCodes, $
    OUT_FAILCODES=failCodes, $
@@ -19,6 +20,10 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
    ERRORLOGFILE=errorLogFile
    
   COMPILE_OPT IDL2,STRICTARRSUBS
+
+  IF N_ELEMENTS(errorLogFile) EQ 0 THEN BEGIN
+     errorLogFile = '/home/spencerh/software/sdt/batch_jobs/ISSI_Team_438/errorLogFile.txt'
+  ENDIF
 
   IF N_ELEMENTS(chunk_save_interval) EQ 0 THEN chunk_save_interval = 0
   ;; IF KEYWORD_SET(batch_mode) THEN BEGIN
@@ -55,6 +60,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
         ;; elecs are attracted to pos potential, so use       potential as threshold
         IF KEYWORD_SET(is_ion) THEN BEGIN
            potFac = (-1.)
+           IF N_ELEMENTS(beamHalfRatio) EQ 0 THEN beamHalfRatio = 3
         ENDIF ELSE BEGIN
            potFac = 1.
         ENDELSE
@@ -131,6 +137,7 @@ PRO IDENTIFY_DIFF_EFLUXES_AND_CREATE_STRUCT,eSpec,Jee,Je, $
                                                              QUIET=quiet, $
                                                              IS_ION=is_ion, $
                                                              ION_HALFRANGE_SPEC=tempHRSpec, $
+                                                             BEAMHALFRATIO=beamHalfRatio, $
                                                              BATCH_MODE=batch_mode, $
                                                              ERRORMSG=errorMsg) ;, $
      ENDELSE

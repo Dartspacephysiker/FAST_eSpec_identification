@@ -20,6 +20,7 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
    QUIET=quiet, $
    IS_ION=is_ion, $
    ION_HALFRANGE_SPEC=ion_HR_spec, $
+   BEAMHALFRATIO=beamHalfRatio, $
    ERRORMSG=errorMsg                ;, $
    ;; ORBSTR=orbStr, $
    ;; INCLUDE_IONS=include_ions
@@ -243,7 +244,7 @@ FUNCTION DIFF_ENERGY_FLUX_SPECTRAL_TYPE__FAST_ADJ,eSpec,Je,Jee, $
   ;;        spectrum three times that of the peak flux of the ion spectrum over
   ;;        the range of anti-earthward angles?
   IF KEYWORD_SET(is_ion) AND cont THEN BEGIN
-     cont                     = (spec_e[peakFlux_ind]/ion_HR_spec.y[peakFlux_ind]) GE 3
+     cont                     = (spec_e[peakFlux_ind]/ion_HR_spec.y[peakFlux_ind]) GE beamHalfRatio
      IF ~cont THEN mono       = -1
   ENDIF
 

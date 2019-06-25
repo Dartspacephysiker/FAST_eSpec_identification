@@ -10,7 +10,9 @@ PRO JOURNAL__20181127__MAKE_KALLE_DB
   stopOrb      = 51315
   ;; Last file is /media/spencerh/data/FAST_electrons/electron_moments_and_spectral_identification__Orbit_51315.sav, tror jeg
 
-  todayStr = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
+  ;; todayStr = GET_TODAY_STRING(/DO_YYYYMMDD_FMT)
+  todayStr = '20181127'
+
   outPref = STRING(FORMAT='("eMomDB_",A0,"-",I0,"-",I0)', $
                    todayStr, $
                    startOrb, $
